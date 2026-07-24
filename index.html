@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#006241">
+  <meta name="description" content="Starbucks Hub: información, prioridades y recursos para líderes de operación.">
+  <title>Starbucks Hub</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./assets/icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+  <link rel="stylesheet" href="./styles.css">
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Saltar al contenido</a>
+
+  <header class="mobile-header">
+    <a class="brand compact" href="#inicio" data-route-link="inicio" aria-label="Ir al inicio">
+      <img src="./assets/icons/icon-192.png" alt="">
+      <span>Starbucks Hub</span>
+    </a>
+    <button id="menu-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Abrir navegación">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+
+  <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
+    <a class="brand" href="#inicio" data-route-link="inicio">
+      <img src="./assets/icons/icon-192.png" alt="">
+      <span><strong>Starbucks Hub</strong><small>Liderazgo y conexión</small></span>
+    </a>
+    <button id="sidebar-close" class="sidebar-close" type="button" aria-label="Cerrar navegación">×</button>
+
+    <nav class="nav-groups">
+      <section>
+        <p>Principal</p>
+        <a href="#inicio" data-route-link="inicio" data-icon="home">Inicio</a>
+        <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart">Vista ejecutiva</a>
+        <a href="#informativo" data-route-link="informativo" data-icon="info">Informativo</a>
+        <a href="#agenda" data-route-link="agenda" data-icon="calendar">Agenda</a>
+      </section>
+      <section>
+        <p>Operación</p>
+        <a class="nav-secondary" href="#vista-ops" data-route-link="vista-ops" data-icon="pulse">Vista Ops</a>
+        <a href="#wfm" data-route-link="wfm" data-icon="users">WFM</a>
+        <a href="#semanales" data-route-link="semanales" data-icon="week">Actividades semanales</a>
+        <a href="#diaria" data-route-link="diaria" data-icon="check">Actividad diaria</a>
+        <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass">Duty Roster</a>
+      </section>
+      <section>
+        <p>Recursos</p>
+        <a href="#enlaces" data-route-link="enlaces" data-icon="link">Enlaces</a>
+        <a href="https://wa.me/message/ENKDSAHYHIGAN1" target="_blank" rel="noopener noreferrer" data-icon="message">Sugerencias</a>
+        <a href="#acerca" data-route-link="acerca" data-icon="about">Acerca de</a>
+      </section>
+    </nav>
+
+    <div class="sidebar-footer">
+      <span class="service-mark">#GreenApronService</span>
+      <small>Experiencia Starbucks</small>
+    </div>
+  </aside>
+
+  <div id="scrim" class="scrim" hidden></div>
+
+  <main id="main" class="main" tabindex="-1">
+    <div id="offline-banner" class="status-banner" role="status" hidden>Sin conexión. Se muestra la última información disponible.</div>
+    <div id="error-banner" class="status-banner error" role="alert" hidden></div>
+
+    <section id="inicio" class="view" data-view="inicio" aria-labelledby="inicio-title">
+      <div class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Conexión que inspira</p>
+          <h1 id="inicio-title"><span id="greeting">Bienvenido</span><br>Starbucks Hub</h1>
+          <p>Una lectura clara de prioridades, agenda y recursos para tomar decisiones con confianza.</p>
+          <div class="hero-actions">
+            <a class="button primary" href="#vista-ejecutiva" data-route-link="vista-ejecutiva">Abrir vista ejecutiva</a>
+            <a class="button secondary" href="#vista-ops" data-route-link="vista-ops">Consultar Vista Ops</a>
+          </div>
+        </div>
+        <div class="campaign-panel" aria-label="Campaña">
+          <span>Comunidad Starbucks</span>
+          <strong id="campaign-display">JUNTÉMONOS MÁS</strong>
+          <p>Prioridades que nos conectan.</p>
+        </div>
+      </div>
+
+      <div class="section-heading">
+        <div><p class="eyebrow">Hoy</p><h2>Lo esencial, en un vistazo</h2></div>
+        <span id="today-label" class="date-chip"></span>
+      </div>
+      <div id="home-summary" class="summary-grid" aria-live="polite"></div>
+      <div class="two-column">
+        <article class="panel">
+          <div class="panel-heading"><div><span class="kicker">Prioridades</span><h2>Resultados que construimos juntos</h2></div></div>
+          <div id="home-priorities" class="compact-list"></div>
+        </article>
+        <article class="panel">
+          <div class="panel-heading"><div><span class="kicker">Agenda</span><h2>Próximos eventos</h2></div><a href="#agenda" data-route-link="agenda">Ver agenda</a></div>
+          <div id="home-events" class="compact-list"></div>
+        </article>
+      </div>
+    </section>
+
+    <section id="vista-ejecutiva" class="view" data-view="vista-ejecutiva" hidden aria-labelledby="executive-title">
+      <div class="page-heading">
+        <div><p class="eyebrow">Experiencia principal</p><h1 id="executive-title">Vista ejecutiva</h1><p>Información vigente y priorizada desde el CMS.</p></div>
+        <span id="executive-count" class="count-chip"></span>
+      </div>
+      <form id="executive-filters" class="filter-bar" aria-label="Filtros de vista ejecutiva">
+        <div id="dynamic-filters" class="filter-fields"></div>
+        <button id="clear-filters" class="button ghost" type="button">Limpiar filtros</button>
+      </form>
+      <div id="executive-grid" class="executive-grid" aria-live="polite"></div>
+    </section>
+
+    <section id="informativo" class="view" data-view="informativo" hidden aria-labelledby="informativo-title">
+      <div class="page-heading"><div><p class="eyebrow">Comunicaciones</p><h1 id="informativo-title">Informativo</h1><p>Información vigente para una consulta rápida.</p></div></div>
+      <div id="informativo-grid" class="card-grid"></div>
+    </section>
+
+    <section id="agenda" class="view" data-view="agenda" hidden aria-labelledby="agenda-title">
+      <div class="page-heading"><div><p class="eyebrow">JUNTÉMONOS MÁS</p><h1 id="agenda-title">Agenda y eventos</h1><p>Eventos actuales y próximos, ordenados por fecha.</p></div></div>
+      <div class="toolbar">
+        <label>Periodo
+          <select id="event-period">
+            <option value="upcoming">Próximos</option>
+            <option value="month">Mes actual</option>
+            <option value="all">Todos los publicados</option>
+          </select>
+        </label>
+        <span id="event-period-label" class="date-chip"></span>
+      </div>
+      <div id="events-timeline" class="timeline"></div>
+    </section>
+
+    <section id="vista-ops" class="view" data-view="vista-ops" hidden aria-labelledby="ops-title">
+      <div class="page-heading"><div><p class="eyebrow">Consulta operativa</p><h1 id="ops-title">Vista Ops</h1><p>Pendientes, actividades y cobertura sin duplicar información.</p></div></div>
+      <div id="ops-summary" class="summary-grid"></div>
+      <div id="ops-content" class="two-column"></div>
+    </section>
+
+    <section id="wfm" class="view" data-view="wfm" hidden aria-labelledby="wfm-title">
+      <div class="page-heading"><div><p class="eyebrow">Planeación inteligente</p><h1 id="wfm-title">WFM</h1><p>Rutina de planeación basada en el contenido vigente del CMS.</p></div></div>
+      <div id="wfm-content" class="wfm-layout"></div>
+    </section>
+
+    <section id="semanales" class="view" data-view="semanales" hidden aria-labelledby="weekly-title">
+      <div class="page-heading"><div><p class="eyebrow">Creciendo juntos</p><h1 id="weekly-title">Actividades semanales</h1><p>Consulta la actividad por día de la semana.</p></div></div>
+      <div id="week-tabs" class="day-tabs" role="tablist" aria-label="Días de la semana"></div>
+      <div id="weekly-grid" class="card-grid"></div>
+    </section>
+
+    <section id="diaria" class="view" data-view="diaria" hidden aria-labelledby="daily-title">
+      <div class="page-heading"><div><p class="eyebrow">Consistencia diaria</p><h1 id="daily-title">Actividad diaria</h1><p>Rutinas y seguimientos que fortalecen la experiencia.</p></div></div>
+      <div id="daily-grid" class="card-grid"></div>
+    </section>
+
+    <section id="duty-roster" class="view" data-view="duty-roster" hidden aria-labelledby="duty-title">
+      <div class="page-heading"><div><p class="eyebrow">Cobertura operativa</p><h1 id="duty-title">Duty Roster</h1><p>Enfoque y estaciones por día.</p></div></div>
+      <div id="duty-tabs" class="day-tabs" role="tablist" aria-label="Días de Duty Roster"></div>
+      <div id="duty-content"></div>
+    </section>
+
+    <section id="enlaces" class="view" data-view="enlaces" hidden aria-labelledby="links-title">
+      <div class="page-heading"><div><p class="eyebrow">Accesos ejecutivos</p><h1 id="links-title">Enlaces y recursos</h1><p>Accesos frecuentes y recursos disponibles desde el CMS.</p></div></div>
+      <div id="favorite-links" class="favorite-links"></div>
+      <div id="links-list" class="links-list"></div>
+    </section>
+
+    <section id="acerca" class="view" data-view="acerca" hidden aria-labelledby="about-title">
+      <div class="about-card">
+        <div>
+          <p class="eyebrow">Starbucks Hub</p>
+          <h1 id="about-title">Liderazgo y conexión</h1>
+          <p>Una herramienta ligera para consultar información, prioridades, actividades, WFM y recursos operativos desde una fuente central.</p>
+          <div class="about-tags"><span>#GreenApronService</span><span>JUNTÉMONOS MÁS</span></div>
+        </div>
+        <div class="about-actions">
+          <a class="button primary" href="https://wa.me/message/ENKDSAHYHIGAN1" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sugerencias y comentarios en WhatsApp">Sugerencias y/o comentarios</a>
+          <p>Diseñado: Jorge Alcantar Aguiar &amp; Enrique César Flores</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="Navegación móvil">
+    <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
+    <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart"><span>Ejecutiva</span></a>
+    <a href="#agenda" data-route-link="agenda" data-icon="calendar"><span>Agenda</span></a>
+    <a href="#vista-ops" data-route-link="vista-ops" data-icon="pulse"><span>Ops</span></a>
+    <button id="mobile-more" type="button" data-icon="menu"><span>Más</span></button>
+  </nav>
+
+  <footer class="footer">
+    <span>Starbucks Hub</span>
+    <span>Diseñado: Jorge Alcantar Aguiar &amp; Enrique César Flores</span>
+  </footer>
+</body>
+</html>

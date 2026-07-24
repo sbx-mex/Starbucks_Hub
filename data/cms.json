@@ -1,0 +1,812 @@
+{
+  "schemaVersion": 1,
+  "source": "Starbucks_Hub_CMS.xlsx",
+  "generatedAt": "2026-07-23T23:57:26-07:00",
+  "sheets": {
+    "Informativo": [
+      {
+        "ID": 1,
+        "Actividad": "Maquila",
+        "Descripción": "Valida tus ingresos de maquila con el costo mas actual (Abril-26)",
+        "Link /Imagen": "maquila_abril.png",
+        "Frecuencia": "Diario",
+        "Prioridad": 1,
+        "Categoría": "Operación",
+        "Icono": "☕",
+        "Color": "Marrón",
+        "Visible": "TRUE"
+      }
+    ],
+    "WFM": [
+      {
+        "Regla WFM": "📅 WFM | Planeación Inteligente\n\nLa programación de horarios se realiza con 15 días de anticipación respecto a la semana de operación.\n\n━━━━━━━━━━━━━━━━━━━━\n\n📆 Hoy\n{DIA_ACTUAL}, {FECHA_ACTUAL}\n\n🎯 Semana en Planeación\nSemana {SEMANA}\n\n📅 {FECHA_INICIO} al {FECHA_FIN}\n\n━━━━━━━━━━━━━━━━━━━━\n\n✅ Actividad de hoy\n\n{ICONO} {ACTIVIDAD}\n\n{DESCRIPCION}\n\n━━━━━━━━━━━━━━━━━━━━\n\n⏭️ Siguiente paso\n\n{ICONO_SIGUIENTE} {ACTIVIDAD_SIGUIENTE}\n\n━━━━━━━━━━━━━━━━━━━━\n\n💡 La información se actualiza automáticamente con base en la fecha actual, mostrando siempre la semana que se encuentra en planeación."
+      }
+    ],
+    "Links": [
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "💯",
+        "Nombre": "Ranking",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/CeNtro-Partner/",
+        "Notas": "Consulta indicadores, ranking y desempeño operativo del distrito.",
+        "Favorito": "Si",
+        "Orden": 1
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🚗",
+        "Nombre": "Tasa de Éxito DT",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Tasa_ExitoDT/",
+        "Notas": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See",
+        "Favorito": "Si",
+        "Orden": 2
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "⏱️",
+        "Nombre": "Calculadora de Ritmo",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Calculadora_Ritmo/",
+        "Notas": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
+        "Favorito": "Si",
+        "Orden": 3
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "⇄",
+        "Nombre": "Transferencias",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Transferencia/",
+        "Notas": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
+        "Favorito": "Si",
+        "Orden": 4
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "💚",
+        "Nombre": "Partner Hub",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Partner_Hub/",
+        "Notas": "Consulta aniversarios, cumpleaños e información de Partners.",
+        "Favorito": "Si",
+        "Orden": 5
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "📦",
+        "Nombre": "Max & Min",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Max-Min/",
+        "Notas": "Consulta máximos y mínimos para optimizar inventarios y disponibilidad de productos.",
+        "Favorito": "No",
+        "Orden": 6
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🏗️",
+        "Nombre": "Layout",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/layout/",
+        "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
+        "Favorito": "Si",
+        "Orden": 7
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🔎",
+        "Nombre": "Code Brew",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/CodeBrew_Merch/",
+        "Notas": "Busca artículos, códigos y mercancía de forma rápida.",
+        "Favorito": "Si",
+        "Orden": 8
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "↔️",
+        "Nombre": "Evidencia Antes / Después",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Estandar_Max-Min/",
+        "Notas": "Documenta y compara evidencias operativas antes y después de cada intervención.",
+        "Favorito": "No",
+        "Orden": 9
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🧹",
+        "Nombre": "RSA 2.0",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/checklist-rsa-semaforo/",
+        "Notas": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
+        "Favorito": "Si",
+        "Orden": 10
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🎯",
+        "Nombre": "Foco 2026",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Foco2026/",
+        "Notas": "Da seguimiento semanal a compromisos, avances y planes de acción.",
+        "Favorito": "No",
+        "Orden": 11
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "📅",
+        "Nombre": "PBT Web 2.0",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/pbt2.0_web/",
+        "Notas": "Consulta tu plan en tiempo real y mantén actualizado tu tablero de trabajo.",
+        "Favorito": "No",
+        "Orden": 12
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🧮",
+        "Nombre": "PBT Planes",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/pbt_motor_exact/",
+        "Notas": "Consulta e imprime planes por WeekPart y DayPart del Q",
+        "Favorito": "No",
+        "Orden": 13
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🏪",
+        "Nombre": "Perfil Tienda",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Perfil_Tienda_DM/",
+        "Notas": "Consulta indicadores, históricos, tendencias y oportunidades por tienda.",
+        "Favorito": "No",
+        "Orden": 14
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "Portal",
+        "Vista": "General",
+        "Icono": "☕",
+        "Nombre": "Espresso Hub",
+        "Tipo": "Web",
+        "URL": "https://grupovips.sharepoint.com/sites/espressohub/SitePages/CollabHome.aspx?CT=1783694337488&OR=OWA-NT-Mail&CID=10b10932-84a0-a90e-58c4-5e79588d125c&SI=NonSentItems&SLSync=F",
+        "Notas": "Biblioteca Espresso Hub",
+        "Favorito": "No",
+        "Orden": 15
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "CN",
+        "Icono": "💵",
+        "Nombre": "Boost CN",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Boost_CN/",
+        "Notas": "Seguimiento a Impulso items Centro Norte",
+        "Favorito": "No",
+        "Orden": 16
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "CN",
+        "Icono": "📍",
+        "Nombre": "CN Connect",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/CentroNorteConnect/",
+        "Notas": "Centraliza información, comunicación y recursos del Centro Norte.",
+        "Favorito": "No",
+        "Orden": 17
+      }
+    ],
+    "Eventos": [
+      {
+        "ID": "EVT-001",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de julio.",
+        "Fecha Inicio": "2026-07-15",
+        "Fecha Fin": "2026-07-16",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-002",
+        "Nombre Evento": "📚 Mujeres que Inspiran - Club de Lectura",
+        "Descripción": "Sesión de desarrollo y reflexión.",
+        "Fecha Inicio": "2026-07-28",
+        "Fecha Fin": "2026-07-28",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": null,
+        "Imagen": "📚"
+      },
+      {
+        "ID": "EVT-003",
+        "Nombre Evento": "🛡️ AutoICA",
+        "Descripción": "Ejecutar AutoICA de todas las tiendas. Validar evidencias, corregir hallazgos...",
+        "Fecha Inicio": "2026-08-01",
+        "Fecha Fin": "2026-08-05",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Imagen": "🛡️"
+      },
+      {
+        "ID": "EVT-004",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 16 al 31 de julio.",
+        "Fecha Inicio": "2026-08-02",
+        "Fecha Fin": "2026-08-03",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-005",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de agosto.",
+        "Fecha Inicio": "2026-08-16",
+        "Fecha Fin": "2026-08-17",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-006",
+        "Nombre Evento": "🚀 Mujeres que Inspiran - Abriendo Camino",
+        "Descripción": "Sesión de capacitación formal.",
+        "Fecha Inicio": "2026-08-25",
+        "Fecha Fin": "2026-08-25",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": null,
+        "Imagen": "🚀"
+      },
+      {
+        "ID": "EVT-007",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 16 al 31 de agosto.",
+        "Fecha Inicio": "2026-08-31",
+        "Fecha Fin": "2026-09-01",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-008",
+        "Nombre Evento": "🛡️ AutoICA",
+        "Descripción": "Ejecutar AutoICA de todas las tiendas. Validar evidencias, corregir hallazgos...",
+        "Fecha Inicio": "2026-09-01",
+        "Fecha Fin": "2026-09-05",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Imagen": "🛡️"
+      },
+      {
+        "ID": "EVT-009",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de septiembre.",
+        "Fecha Inicio": "2026-09-16",
+        "Fecha Fin": "2026-09-17",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-010",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 16 al 30 de septiembre.",
+        "Fecha Inicio": "2026-09-30",
+        "Fecha Fin": "2026-10-01",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-011",
+        "Nombre Evento": "💳 Inventario Pin Pad y TPV Q4",
+        "Descripción": "Realiza en WOE la actualización de Pin Pad y TPVs.",
+        "Fecha Inicio": "2026-10-01",
+        "Fecha Fin": "2026-10-10",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "pinpad-atb-cambios.png",
+        "Imagen": "💳"
+      },
+      {
+        "ID": "EVT-012",
+        "Nombre Evento": "🛡️ AutoICA",
+        "Descripción": "Ejecutar AutoICA de todas las tiendas. Validar evidencias, corregir hallazgos...",
+        "Fecha Inicio": "2026-10-01",
+        "Fecha Fin": "2026-10-05",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Imagen": "🛡️"
+      },
+      {
+        "ID": "EVT-013",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de octubre.",
+        "Fecha Inicio": "2026-10-15",
+        "Fecha Fin": "2026-10-16",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-014",
+        "Nombre Evento": "📖 Mujeres que Inspiran - Entre Páginas",
+        "Descripción": "Club de lectura y aprendizaje compartido.",
+        "Fecha Inicio": "2026-10-27",
+        "Fecha Fin": "2026-10-27",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": null,
+        "Imagen": "📖"
+      },
+      {
+        "ID": "EVT-015",
+        "Nombre Evento": "🛡️ AutoICA",
+        "Descripción": "Ejecutar AutoICA de todas las tiendas. Validar evidencias, corregir hallazgos...",
+        "Fecha Inicio": "2026-11-01",
+        "Fecha Fin": "2026-11-05",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Imagen": "🛡️"
+      },
+      {
+        "ID": "EVT-016",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 16 al 31 de octubre.",
+        "Fecha Inicio": "2026-11-02",
+        "Fecha Fin": "2026-11-03",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-017",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de noviembre.",
+        "Fecha Inicio": "2026-11-16",
+        "Fecha Fin": "2026-11-17",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-018",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 16 al 30 de noviembre.",
+        "Fecha Inicio": "2026-11-30",
+        "Fecha Fin": "2026-12-01",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      },
+      {
+        "ID": "EVT-019",
+        "Nombre Evento": "🛡️ AutoICA",
+        "Descripción": "Ejecutar AutoICA de todas las tiendas. Validar evidencias, corregir hallazgos...",
+        "Fecha Inicio": "2026-12-01",
+        "Fecha Fin": "2026-12-05",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Imagen": "🛡️"
+      },
+      {
+        "ID": "EVT-020",
+        "Nombre Evento": "📅 Corte de Nómina",
+        "Descripción": "Ejecutar y validar incidencias del periodo del 1 al 15 de diciembre.",
+        "Fecha Inicio": "2026-12-15",
+        "Fecha Fin": "2026-12-16",
+        "Región": "Centro Norte",
+        "Distrito": "Enrique Cesar Flores",
+        "Tienda": "Todas",
+        "Publicar": true,
+        "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
+        "Imagen": "📅"
+      }
+    ],
+    "Actividades_Semanales": [
+      {
+        "ID": 1,
+        "Actividad": "WFM - Pronóstico",
+        "Descripción": "Revisa y ajusta el pronóstico de volumen de la semana que se planificará dentro de 15 días.",
+        "Día": "Lunes",
+        "Hora / Corte": null,
+        "Icono": "📈",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 2,
+        "Actividad": "Workvivo",
+        "Descripción": "Realiza la publicación semanal en Workvivo.",
+        "Día": "Lunes",
+        "Hora / Corte": null,
+        "Icono": "📱",
+        "Color": "Azul",
+        "Link": "https://alsea.workvivo.us/login"
+      },
+      {
+        "ID": 3,
+        "Actividad": "Starbucks College",
+        "Descripción": "Valida el avance de cursos en Ubits.",
+        "Día": "Martes",
+        "Hora / Corte": null,
+        "Icono": "🎓",
+        "Color": "Morado",
+        "Link": "https://login.ubitslearning.com/login"
+      },
+      {
+        "ID": 4,
+        "Actividad": "Coffee Martes",
+        "Descripción": "Participa con los clientes en degustaciones y genera una experiencia memorable.",
+        "Día": "Martes",
+        "Hora / Corte": null,
+        "Icono": "☕",
+        "Color": "Verde",
+        "Link": null
+      },
+      {
+        "ID": 5,
+        "Actividad": "WFM - Carga Inicial",
+        "Descripción": "Realiza la carga inicial de horarios de la semana que se planificará dentro de 15 días.",
+        "Día": "Martes",
+        "Hora / Corte": null,
+        "Icono": "📅",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 6,
+        "Actividad": "WFM - Disponibilidades",
+        "Descripción": "Actualiza disponibilidades, vacaciones, permisos y restricciones de partners.",
+        "Día": "Miércoles",
+        "Hora / Corte": null,
+        "Icono": "👥",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 7,
+        "Actividad": "WFM - Ajustes",
+        "Descripción": "Revisa los horarios generados por Kronos, realiza ajustes operativos y agrega actividades Non-Coverage.",
+        "Día": "Jueves",
+        "Hora / Corte": null,
+        "Icono": "⚙️",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 8,
+        "Actividad": "Comunicado Semanal",
+        "Descripción": "Revisa el comunicado semanal y comparte los puntos relevantes con el equipo.",
+        "Día": "Viernes",
+        "Hora / Corte": null,
+        "Icono": "📢",
+        "Color": "Naranja",
+        "Link": "https://capacitacion.alsea.net/course/view.php?id=29227"
+      },
+      {
+        "ID": 9,
+        "Actividad": "WFM - Revisión DM",
+        "Descripción": "El DM revisa los horarios y comunica observaciones o ajustes requeridos.",
+        "Día": "Viernes",
+        "Hora / Corte": null,
+        "Icono": "✅",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 10,
+        "Actividad": "WFM - Publicación",
+        "Descripción": "Realiza las correcciones finales y publica los horarios en Humanet antes del domingo.",
+        "Día": "Sábado",
+        "Hora / Corte": null,
+        "Icono": "🚀",
+        "Color": "Azul",
+        "Link": null
+      },
+      {
+        "ID": 11,
+        "Actividad": "WFM - Validación Final",
+        "Descripción": "Verifica que los horarios publicados sean correctos y listos para iniciar la semana.",
+        "Día": "Domingo",
+        "Hora / Corte": null,
+        "Icono": "📤",
+        "Color": "Azul",
+        "Link": null
+      }
+    ],
+    "Actividades_Diaria": [
+      {
+        "ID": 1,
+        "Actividad": "Verificación Espresso y Calidad del Café",
+        "Descripción": "Valida las verificaciones de Espresso y Calidad del Café, registra resultados y comentarios en cada turno.",
+        "Link / Imagen": "verificacion-cafe-espresso.png",
+        "Frecuencia": "Diario",
+        "Prioridad": 1,
+        "Categoría": "Calidad",
+        "Icono": "☕",
+        "Color": "Marrón",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 2,
+        "Actividad": "RSA Checklist",
+        "Descripción": "Completa el RSA Checklist antes de las 10:00 a.m. y comparte evidencia de las correcciones realizadas.",
+        "Link / Imagen": "https://sbx-mx.github.io/checklist-rsa-semaforo/",
+        "Frecuencia": "Diario",
+        "Prioridad": 1,
+        "Categoría": "Seguridad Alimentaria",
+        "Icono": "🛡️",
+        "Color": "Rojo",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 3,
+        "Actividad": "Store Walk",
+        "Descripción": "Realiza el recorrido diario de los 4 Estándares, identifica oportunidades y documenta acciones en el Daily Record Book.",
+        "Link / Imagen": "store-walk.png",
+        "Frecuencia": "Diario",
+        "Prioridad": 2,
+        "Categoría": "Experiencia",
+        "Icono": "🚶",
+        "Color": "Verde",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 4,
+        "Actividad": "Protocolo de Apertura",
+        "Descripción": "Antes de las 09:00 a.m. envía al equipo de Excelencia únicamente incidencias o desviaciones detectadas.",
+        "Link / Imagen": "Rutina_apertura.jpeg",
+        "Frecuencia": "Diario",
+        "Prioridad": 1,
+        "Categoría": "Operación",
+        "Icono": "🌅",
+        "Color": "Azul",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 5,
+        "Actividad": "10 Pasos para un Turno Exitoso",
+        "Descripción": "Revisa y ejecuta los 10 Pasos para un Turno Exitoso antes de iniciar la operación.",
+        "Link / Imagen": "10-pasos-turno.png",
+        "Frecuencia": "Diario",
+        "Prioridad": 2,
+        "Categoría": "Liderazgo",
+        "Icono": "🔟",
+        "Color": "Naranja",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 6,
+        "Actividad": "Menu Core",
+        "Descripción": "Verifica la disponibilidad de productos, horarios y estatus operativo antes del inicio del turno.",
+        "Link / Imagen": "http://consulta.delivery.alsea.net/",
+        "Frecuencia": "Diario",
+        "Prioridad": 2,
+        "Categoría": "Operación",
+        "Icono": "📋",
+        "Color": "Morado",
+        "Visible": "TRUE"
+      },
+      {
+        "ID": 7,
+        "Actividad": "Corte de Leche",
+        "Descripción": "Verifica que las estaciones CBS y Espresso cuenten con tijeras asignadas y que el corte de bolsas sea el correcto para evitar contaminación, desperdicio y asegurar la calidad del producto.",
+        "Link / Imagen": "cortado_leche.jpeg",
+        "Frecuencia": "Diario",
+        "Prioridad": 1,
+        "Categoría": "Operación",
+        "Icono": "🥛",
+        "Color": "Celeste",
+        "Visible": "TRUE"
+      }
+    ],
+    "Duty_Roster": [
+      {
+        "Orden": 1,
+        "Día": "Lunes",
+        "Estaciones": "Food, Show Case",
+        "Imágenes": "lunes_food.png",
+        "Color": "Naranja",
+        "Enfoque": "Seguridad alimentaria, caducidades, refrigeración y preparación de alimentos."
+      },
+      {
+        "Orden": 2,
+        "Día": "Martes",
+        "Estaciones": "PIC, Lobby",
+        "Imágenes": "martes_pic.png, martes_lobby.png",
+        "Color": "Rojo / Verde",
+        "Enfoque": "Cumplimiento, seguridad alimentaria, limpieza y experiencia del cliente."
+      },
+      {
+        "Orden": 3,
+        "Día": "Miércoles",
+        "Estaciones": "BOH",
+        "Imágenes": "miercoles_boh.png",
+        "Color": "Azul",
+        "Enfoque": "Orden, limpieza profunda y seguridad alimentaria BOH."
+      },
+      {
+        "Orden": 4,
+        "Día": "Jueves",
+        "Estaciones": "Espresso, Lobby",
+        "Imágenes": "jueves_espresso.png, jueves_lobby.png",
+        "Color": "Café / Verde",
+        "Enfoque": "Calidad de bebidas, ejecución de barra y experiencia del cliente."
+      },
+      {
+        "Orden": 5,
+        "Día": "Viernes",
+        "Estaciones": "Café Filtrado",
+        "Imágenes": "viernes_cafe_filtrado.png",
+        "Color": "Naranja",
+        "Enfoque": "Seguimiento a seguridad alimentaria y condiciones Food."
+      },
+      {
+        "Orden": 6,
+        "Día": "Sábado",
+        "Estaciones": "CBS",
+        "Imágenes": "sabado_cbs.png",
+        "Color": "Azul",
+        "Enfoque": "Equipos críticos, limpieza profunda y preparación operativa."
+      },
+      {
+        "Orden": 7,
+        "Día": "Domingo",
+        "Estaciones": "Lobby, Drive Thru",
+        "Imágenes": "domingo_lobby.png, domingo_drive_thru.png",
+        "Color": "Verde",
+        "Enfoque": "Experiencia del cliente y apariencia general de la tienda."
+      }
+    ],
+    "Identidad": [
+      {
+        "Identificador": "hero.greeting.morning",
+        "Sección": "Hero",
+        "Campo": "Saludo mañana",
+        "Valor": "Buenos días Partners.",
+        "Color": null,
+        "Estilo": "corporativo",
+        "Visible": "TRUE",
+        "Notas": "Saludo dinámico antes de las 12:00"
+      },
+      {
+        "Identificador": "hero.greeting.afternoon",
+        "Sección": "Hero",
+        "Campo": "Saludo tarde",
+        "Valor": "Buenas tardes Partners.",
+        "Color": null,
+        "Estilo": "corporativo",
+        "Visible": "TRUE",
+        "Notas": "Saludo dinámico de 12:00 a 18:59"
+      },
+      {
+        "Identificador": "hero.greeting.evening",
+        "Sección": "Hero",
+        "Campo": "Saludo noche",
+        "Valor": "Buenas noches Partners.",
+        "Color": null,
+        "Estilo": "corporativo",
+        "Visible": "TRUE",
+        "Notas": "Saludo dinámico desde las 19:00"
+      },
+      {
+        "Identificador": "hero.campaign.primary",
+        "Sección": "Hero",
+        "Campo": "Campaña principal",
+        "Valor": "JUNTÉMONOS",
+        "Color": "#006241",
+        "Estilo": "corporativo-sólido",
+        "Visible": "TRUE",
+        "Notas": "Identidad principal"
+      },
+      {
+        "Identificador": "hero.campaign.accent",
+        "Sección": "Hero",
+        "Campo": "Campaña acento",
+        "Valor": "más",
+        "Color": "#111111",
+        "Estilo": "expresivo",
+        "Visible": "TRUE",
+        "Notas": "Acento visual"
+      },
+      {
+        "Identificador": "hero.campaign.display",
+        "Sección": "Hero",
+        "Campo": "Campaña visible",
+        "Valor": "JUNTÉMONOS MÁS",
+        "Color": null,
+        "Estilo": "corporativo-expresivo",
+        "Visible": "TRUE",
+        "Notas": "Texto compuesto de referencia"
+      }
+    ]
+  }
+}

@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v2";
+const CACHE_NAME = "starbucks-hub-v3";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -7,6 +7,8 @@ const CORE_ASSETS = [
   "./manifest.webmanifest",
   "./data/cms.json",
   "./assets/icons/starbucks_hub.png",
+  "./assets/about/Kike_pbt.jpeg",
+  "./assets/about/George_pbt.jpeg",
   "./assets/duty-roster/lunes_food.png",
   "./assets/duty-roster/lunes_showcase.png",
   "./assets/duty-roster/martes_lobby.png",

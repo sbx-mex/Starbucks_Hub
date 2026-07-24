@@ -39,20 +39,9 @@
       <section>
         <p>Principal</p>
         <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-        <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart"><span>Vista ejecutiva</span></a>
-        <a href="#informativo" data-route-link="informativo" data-icon="info"><span>Informativo</span></a>
-        <a href="#agenda" data-route-link="agenda" data-icon="calendar"><span>Agenda</span></a>
-      </section>
-      <section>
-        <p>Operación</p>
-        <a href="#wfm" data-route-link="wfm" data-icon="users"><span>WFM</span></a>
-        <a href="#semanales" data-route-link="semanales" data-icon="week"><span>Actividades semanales</span></a>
-        <a href="#diaria" data-route-link="diaria" data-icon="check"><span>Actividad diaria</span></a>
-        <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass"><span>Duty Roster</span></a>
-      </section>
-      <section>
-        <p>Recursos</p>
-        <a href="#enlaces" data-route-link="enlaces" data-icon="link"><span>Enlaces</span></a>
+        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Recordatorio</span></a>
+        <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
+        <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
         <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
       </section>
     </nav>
@@ -76,7 +65,7 @@
           <h1 id="inicio-title"><span id="greeting">Bienvenido</span><br>Starbucks Hub</h1>
           <p>Herramientas clave para acompañar la operación, el desarrollo de Partners y la toma de decisiones.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#vista-ejecutiva" data-route-link="vista-ejecutiva">Abrir vista ejecutiva</a>
+            <a class="button primary" href="#resumen-ops" data-route-link="resumen-ops">Consultar lo de hoy</a>
           </div>
         </div>
         <div class="campaign-panel" aria-label="Campaña">
@@ -92,21 +81,8 @@
       <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>
 
-    <section id="vista-ejecutiva" class="view" data-view="vista-ejecutiva" hidden aria-labelledby="executive-title">
-      <div class="page-heading">
-        <div><p class="eyebrow">Experiencia principal</p><h1 id="executive-title">Vista ejecutiva</h1><p>Información vigente y priorizada desde el CMS.</p></div>
-        <span id="executive-count" class="count-chip"></span>
-      </div>
-      <div id="executive-grid" class="executive-grid" aria-live="polite"></div>
-    </section>
-
-    <section id="informativo" class="view" data-view="informativo" hidden aria-labelledby="informativo-title">
-      <div class="page-heading"><div><p class="eyebrow">Comunicaciones</p><h1 id="informativo-title">Informativo</h1><p>Información vigente para una consulta rápida.</p></div></div>
-      <div id="informativo-grid" class="card-grid"></div>
-    </section>
-
-    <section id="agenda" class="view" data-view="agenda" hidden aria-labelledby="agenda-title">
-      <div class="page-heading"><div><p class="eyebrow">JUNTÉMONOS MÁS</p><h1 id="agenda-title">Agenda y eventos</h1><p>Eventos actuales y próximos, ordenados por fecha.</p></div></div>
+    <section id="recordatorio" class="view" data-view="recordatorio" hidden aria-labelledby="recordatorio-title">
+      <div class="page-heading"><div><p class="eyebrow">JUNTÉMONOS MÁS</p><h1 id="recordatorio-title">Recordatorio</h1><p>Eventos actuales y próximos, ordenados por fecha.</p></div></div>
       <div class="toolbar">
         <label>Periodo
           <select id="event-period">
@@ -120,30 +96,21 @@
       <div id="events-timeline" class="timeline"></div>
     </section>
 
-    <section id="wfm" class="view" data-view="wfm" hidden aria-labelledby="wfm-title">
-      <div class="page-heading"><div><p class="eyebrow">Planeación inteligente</p><h1 id="wfm-title">WFM</h1><p>Rutina de planeación basada en el contenido vigente del CMS.</p></div></div>
-      <div id="wfm-content" class="wfm-layout"></div>
+    <section id="resumen-ops" class="view" data-view="resumen-ops" hidden aria-labelledby="ops-title">
+      <div class="ops-heading">
+        <div>
+          <p class="eyebrow">Prioridad del día</p>
+          <h1 id="ops-title">Resumen Ops</h1>
+          <p id="ops-date" class="ops-date"></p>
+        </div>
+        <span id="ops-day-badge" class="ops-day-badge"></span>
+      </div>
+      <div id="ops-day-tabs" class="day-tabs ops-day-tabs" role="tablist" aria-label="Consultar Resumen Ops por día"></div>
+      <div id="ops-content" class="ops-sections" aria-live="polite"></div>
     </section>
 
-    <section id="semanales" class="view" data-view="semanales" hidden aria-labelledby="weekly-title">
-      <div class="page-heading"><div><p class="eyebrow">Creciendo juntos</p><h1 id="weekly-title">Actividades semanales</h1><p>Consulta la actividad por día de la semana.</p></div></div>
-      <div id="week-tabs" class="day-tabs" role="tablist" aria-label="Días de la semana"></div>
-      <div id="weekly-grid" class="card-grid"></div>
-    </section>
-
-    <section id="diaria" class="view" data-view="diaria" hidden aria-labelledby="daily-title">
-      <div class="page-heading"><div><p class="eyebrow">Consistencia diaria</p><h1 id="daily-title">Actividad diaria</h1><p>Rutinas y seguimientos que fortalecen la experiencia.</p></div></div>
-      <div id="daily-grid" class="card-grid"></div>
-    </section>
-
-    <section id="duty-roster" class="view" data-view="duty-roster" hidden aria-labelledby="duty-title">
-      <div class="page-heading"><div><p class="eyebrow">Cobertura operativa</p><h1 id="duty-title">Duty Roster</h1><p>Enfoque y estaciones por día.</p></div></div>
-      <div id="duty-tabs" class="day-tabs" role="tablist" aria-label="Días de Duty Roster"></div>
-      <div id="duty-content"></div>
-    </section>
-
-    <section id="enlaces" class="view" data-view="enlaces" hidden aria-labelledby="links-title">
-      <div class="page-heading"><div><p class="eyebrow">Accesos ejecutivos</p><h1 id="links-title">Enlaces y recursos</h1><p>Accesos frecuentes y recursos disponibles desde el CMS.</p></div></div>
+    <section id="herramientas" class="view" data-view="herramientas" hidden aria-labelledby="tools-title">
+      <div class="page-heading"><div><p class="eyebrow">Accesos ejecutivos</p><h1 id="tools-title">Herramientas</h1><p>Accesos frecuentes y recursos disponibles desde el CMS.</p></div></div>
       <div id="favorite-links" class="favorite-links"></div>
       <div id="links-list" class="links-list"></div>
     </section>
@@ -160,6 +127,22 @@
           <a class="button primary" href="https://wa.me/message/ENKDSAHYHIGAN1" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sugerencias y comentarios en WhatsApp">Sugerencias y/o comentarios</a>
           <p>Diseñado: Jorge Alcantar Aguiar &amp; Enrique César Flores</p>
         </div>
+        <section class="designers" aria-labelledby="designers-title">
+          <div class="designers-heading">
+            <p class="eyebrow">Diseño y desarrollo</p>
+            <h2 id="designers-title">Creado con cercanía para la operación</h2>
+          </div>
+          <div class="designers-grid">
+            <figure class="designer-card">
+              <img src="./assets/about/Kike_pbt.jpeg" alt="Enrique César Flores" loading="lazy" decoding="async">
+              <figcaption>Enrique César Flores</figcaption>
+            </figure>
+            <figure class="designer-card">
+              <img src="./assets/about/George_pbt.jpeg" alt="Jorge Alcantar Aguiar" loading="lazy" decoding="async">
+              <figcaption>Jorge Alcantar Aguiar</figcaption>
+            </figure>
+          </div>
+        </section>
       </div>
     </section>
   </main>
@@ -180,10 +163,10 @@
 
   <nav class="bottom-nav" aria-label="Navegación móvil">
     <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-    <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart"><span>Ejecutiva</span></a>
-    <a href="#agenda" data-route-link="agenda" data-icon="calendar"><span>Agenda</span></a>
-    <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass"><span>Duty</span></a>
-    <button id="mobile-more" type="button" data-icon="menu"><span>Más</span></button>
+    <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Recordatorio</span></a>
+    <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Ops</span></a>
+    <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
+    <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca</span></a>
   </nav>
 
   <footer class="footer">

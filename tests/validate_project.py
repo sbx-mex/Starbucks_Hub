@@ -15,6 +15,8 @@ REQUIRED = [
     "manifest.webmanifest",
     "sw.js",
     "assets/icons/starbucks_hub.png",
+    "assets/about/Kike_pbt.jpeg",
+    "assets/about/George_pbt.jpeg",
     "assets/duty-roster/lunes_food.png",
     "assets/duty-roster/lunes_showcase.png",
     "assets/duty-roster/martes_lobby.png",
@@ -58,11 +60,18 @@ for term in FORBIDDEN_VISIBLE:
     if term.lower() in html.lower():
         fail(f"Referencia visible prohibida: {term}")
 
-for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Vista ejecutiva", "Herramientas de mayor uso", "Sugerencias y/o comentarios"]:
+for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Herramientas de mayor uso", "Sugerencias y/o comentarios"]:
     if term not in html:
         fail(f"Falta contenido requerido: {term}")
 
 for term in [
+    "Vista ejecutiva",
+    'data-view="informativo"',
+    'data-view="wfm"',
+    'data-view="semanales"',
+    'data-view="diaria"',
+    'data-view="duty-roster"',
+    'data-view="enlaces"',
     "Vista Ops",
     "Consulta operativa",
     ">Sugerencias<",
@@ -118,14 +127,32 @@ for relative in REQUIRED[6:]:
     if expected not in service_worker:
         fail(f"Falta recurso en caché PWA: {expected}")
 
-if "starbucks-hub-v2" not in service_worker:
+if "starbucks-hub-v3" not in service_worker:
     fail("No se incrementó la versión de caché")
 
-if not all(fragment in javascript for fragment in ["renderExecutive", "renderEvents", "renderWfm", "renderDuty", "renderLinks"]):
+if not all(fragment in javascript for fragment in ["renderOps", "renderEvents", "renderDutyForDay", "renderLinks"]):
     fail("Faltan vistas funcionales")
 
-if "renderOps" in javascript or "renderExecutiveFilters" in javascript:
+if any(fragment in javascript for fragment in ["renderExecutive", "renderInformativo", "renderWeekly", "renderDaily", "renderWfm", "renderDuty()"]):
     fail("Permanece lógica exclusiva de vistas o filtros eliminados")
+
+for source in ["Informativo", "WFM", "Actividades_Semanales", "Actividades_Diaria", "Duty_Roster"]:
+    if source not in javascript:
+        fail(f"Resumen Ops no integra la fuente: {source}")
+
+sidebar = re.search(r'<nav class="nav-groups">(.*?)</nav>', html, re.S)
+if not sidebar:
+    fail("No se encontró el menú lateral")
+routes = re.findall(r'data-route-link="([^"]+)"', sidebar.group(1))
+if routes != ["inicio", "recordatorio", "resumen-ops", "herramientas", "acerca"]:
+    fail(f"Menú lateral inesperado: {routes}")
+
+for name, path in [
+    ("Enrique César Flores", "assets/about/Kike_pbt.jpeg"),
+    ("Jorge Alcantar Aguiar", "assets/about/George_pbt.jpeg"),
+]:
+    if name not in html or f"./{path}" not in html:
+        fail(f"Falta correspondencia de fotografía: {name}")
 
 for tool_name in [
     "Ranking",

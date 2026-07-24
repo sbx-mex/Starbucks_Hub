@@ -1,8 +1,7 @@
 const state = {
   data: null,
   route: "inicio",
-  selectedWeeklyDay: null,
-  selectedDutyDay: null,
+  selectedOpsDay: null,
   sidebarCollapsed: false,
   imageModalTrigger: null,
 };
@@ -288,71 +287,6 @@ function renderHome() {
   }).join("");
 }
 
-function executiveRecords() {
-  const today = startOfDay();
-  const todayName = currentDayName();
-  const records = [];
-
-  visibleRecords("Informativo").forEach((record) => records.push({
-    id: `info-${record.ID}`, type: "Informativo", title: record.Actividad, description: record.Descripción,
-    icon: record.Icono || "i", category: record.Categoría || "Informativo", priority: String(record.Prioridad || ""),
-    date: null, link: record["Link /Imagen"],
-  }));
-  publishedEvents().filter((record) => record.end >= today).forEach((record) => records.push({
-    id: record.ID, type: "Evento", title: record["Nombre Evento"], description: record.Descripción,
-    icon: record.Imagen || "📅", category: "Agenda", priority: "", date: record.start,
-    link: record["Link/Imagen"], status: record.start <= today ? "Actual" : "Próximo",
-  }));
-  visibleRecords("Actividades_Diaria").forEach((record) => records.push({
-    id: `daily-${record.ID}`, type: "Actividad diaria", title: record.Actividad, description: record.Descripción,
-    icon: record.Icono || "✓", category: record.Categoría || "Operación", priority: String(record.Prioridad || ""),
-    date: today, link: record["Link / Imagen"],
-  }));
-  sheet("Actividades_Semanales").filter((record) => record.Día === todayName).forEach((record) => records.push({
-    id: `weekly-${record.ID}`, type: "Actividad semanal", title: record.Actividad, description: record.Descripción,
-    icon: record.Icono || "•", category: "Seguimiento", priority: "", date: today, link: record.Link,
-  }));
-
-  return records.sort((a, b) => {
-    const priorityA = Number(a.priority || 99);
-    const priorityB = Number(b.priority || 99);
-    if (priorityA !== priorityB) return priorityA - priorityB;
-    if (a.date && b.date) return a.date - b.date;
-    return a.type.localeCompare(b.type, "es");
-  });
-}
-
-function renderExecutive() {
-  const records = executiveRecords();
-  $("#executive-count").textContent = `${records.length} resultado${records.length === 1 ? "" : "s"}`;
-  $("#executive-grid").innerHTML = records.length ? records.map((record) => `
-    <article class="content-card">
-      <div class="card-top">
-        <span class="card-icon">${esc(record.icon)}</span>
-        <span class="badge ${record.priority === "1" ? "amber" : ""}">${esc(record.priority ? `Prioridad ${record.priority}` : record.status || record.type)}</span>
-      </div>
-      <h2>${esc(record.title)}</h2>
-      <p>${esc(record.description)}</p>
-      <footer>
-        <span class="badge neutral">${esc(record.type)}</span>
-        <span class="badge neutral">${esc(record.category)}</span>
-        ${record.date ? `<span class="badge neutral">${esc(formatDate(record.date, { day: "numeric", month: "short" }))}</span>` : ""}
-        ${linkMarkup(record.link, "Abrir recurso", record.title)}
-      </footer>
-    </article>`).join("") : emptyState("No hay información ejecutiva disponible.");
-}
-
-function renderInformativo() {
-  const records = visibleRecords("Informativo");
-  $("#informativo-grid").innerHTML = records.length ? records.map((record) => `
-    <article class="content-card">
-      <div class="card-top"><span class="card-icon">${esc(record.Icono || "i")}</span><span class="badge ${Number(record.Prioridad) === 1 ? "amber" : ""}">Prioridad ${esc(record.Prioridad || "—")}</span></div>
-      <h2>${esc(record.Actividad)}</h2>
-      <p>${esc(record.Descripción)}</p>
-      <footer><span class="badge neutral">${esc(record.Categoría || "Informativo")}</span><span class="badge neutral">${esc(record.Frecuencia || "")}</span>${linkMarkup(record["Link /Imagen"], "Abrir recurso", record.Actividad)}</footer>
-    </article>`).join("") : emptyState("No hay comunicaciones vigentes.");
-}
-
 function eventInMonth(event, date = new Date()) {
   const start = new Date(date.getFullYear(), date.getMonth(), 1, 12);
   const end = new Date(date.getFullYear(), date.getMonth() + 1, 0, 12);
@@ -394,85 +328,47 @@ function getWeeklyForDay(day) {
   return sheet("Actividades_Semanales").filter((record) => record.Día === day);
 }
 
-function renderWeekly() {
-  const availableDays = WEEK_ORDER.filter((day) => getWeeklyForDay(day).length);
-  state.selectedWeeklyDay = availableDays.includes(state.selectedWeeklyDay) ? state.selectedWeeklyDay : (availableDays.includes(currentDayName()) ? currentDayName() : availableDays[0]);
-  $("#week-tabs").innerHTML = availableDays.map((day) => `<button type="button" role="tab" aria-selected="${day === state.selectedWeeklyDay}" data-week-day="${esc(day)}">${esc(day)}</button>`).join("");
-  $$("[data-week-day]").forEach((button) => button.addEventListener("click", () => {
-    state.selectedWeeklyDay = button.dataset.weekDay;
-    renderWeekly();
-  }));
-  const records = getWeeklyForDay(state.selectedWeeklyDay);
-  $("#weekly-grid").innerHTML = records.length ? records.map((record) => `
-    <article class="content-card">
-      <div class="card-top"><span class="card-icon">${esc(record.Icono || "•")}</span><span class="badge neutral">${esc(record.Día)}</span></div>
-      <h2>${esc(record.Actividad)}</h2><p>${esc(record.Descripción)}</p>
-      <footer>${record["Hora / Corte"] ? `<span class="badge neutral">${esc(record["Hora / Corte"])}</span>` : ""}${linkMarkup(record.Link, "Abrir recurso", record.Actividad)}</footer>
-    </article>`).join("") : emptyState("No hay actividades semanales para el día seleccionado.");
+function dateForWeekDay(day) {
+  const date = mondayOf(new Date());
+  date.setDate(date.getDate() + Math.max(0, WEEK_ORDER.indexOf(day)));
+  return date;
 }
 
-function renderDaily() {
-  const records = visibleRecords("Actividades_Diaria");
-  $("#daily-grid").innerHTML = records.length ? records
-    .sort((a, b) => Number(a.Prioridad || 99) - Number(b.Prioridad || 99))
-    .map((record) => `
-      <article class="content-card">
-        <div class="card-top"><span class="card-icon">${esc(record.Icono || "✓")}</span><span class="badge ${Number(record.Prioridad) === 1 ? "amber" : ""}">Prioridad ${esc(record.Prioridad || "—")}</span></div>
-        <h2>${esc(record.Actividad)}</h2><p>${esc(record.Descripción)}</p>
-        <footer><span class="badge neutral">${esc(record.Categoría || "Operación")}</span>${linkMarkup(record["Link / Imagen"], "Abrir recurso", record.Actividad)}</footer>
-      </article>`).join("") : emptyState("No hay actividades diarias visibles.");
+function opsItem(record, type) {
+  const isDaily = type === "daily";
+  const link = isDaily ? record["Link / Imagen"] : type === "info" ? record["Link /Imagen"] : record.Link;
+  const meta = isDaily
+    ? record.Categoría || "Operación"
+    : type === "info"
+      ? record.Frecuencia || record.Categoría || "Vigente"
+      : record["Hora / Corte"] || "";
+  const priority = record.Prioridad ? `<span class="badge ${Number(record.Prioridad) === 1 ? "amber" : "neutral"}">Prioridad ${esc(record.Prioridad)}</span>` : "";
+  return `<article class="ops-item">
+    <span class="ops-item-icon" aria-hidden="true">${esc(record.Icono || (isDaily ? "✓" : "•"))}</span>
+    <div class="ops-item-copy">
+      <h3>${esc(record.Actividad)}</h3>
+      <p>${esc(record.Descripción)}</p>
+      <div class="ops-item-meta">${priority}${meta ? `<span class="badge neutral">${esc(meta)}</span>` : ""}${linkMarkup(link, "Abrir recurso", record.Actividad)}</div>
+    </div>
+  </article>`;
 }
 
-function nextWeeklyActivity(date = new Date()) {
-  for (let offset = 0; offset < 7; offset += 1) {
-    const candidate = new Date(date);
-    candidate.setDate(candidate.getDate() + offset);
-    const records = getWeeklyForDay(DAY_NAMES[candidate.getDay()]);
-    if (records.length) return { day: DAY_NAMES[candidate.getDay()], record: records[0], offset };
-  }
-  return null;
+function opsSection(id, title, description, content) {
+  return `<section class="ops-section" aria-labelledby="${id}-title">
+    <div class="ops-section-heading">
+      <div><p class="eyebrow">${esc(description)}</p><h2 id="${id}-title">${esc(title)}</h2></div>
+    </div>
+    <div class="ops-section-body">${content}</div>
+  </section>`;
 }
 
-function renderWfm() {
-  const today = startOfDay();
-  const planningDate = new Date(today);
-  planningDate.setDate(planningDate.getDate() + 15);
-  const weekStart = mondayOf(planningDate);
-  const weekEnd = sundayOf(planningDate);
-  const current = getWeeklyForDay(currentDayName()).find((record) => String(record.Actividad).startsWith("WFM")) || getWeeklyForDay(currentDayName())[0];
-  const next = nextWeeklyActivity(new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1));
-  const rule = sheet("WFM")[0]?.["Regla WFM"] || "";
-  $("#wfm-content").innerHTML = `
-    <article class="wfm-primary">
-      <p class="eyebrow">Semana en planeación</p>
-      <h2>${esc(dateRangeLabel(weekStart, weekEnd))}</h2>
-      <p>La programación se consulta con 15 días de anticipación respecto a la semana de operación.</p>
-      <div class="wfm-range"><strong>${esc(formatLongDate(today))}</strong><span>Información calculada con la fecha local</span></div>
-    </article>
-    <article class="wfm-side">
-      <div class="wfm-step"><span>Actividad de hoy</span><strong>${esc(current?.Actividad || "Sin actividad WFM programada")}</strong><p>${esc(current?.Descripción || "No hay una actividad disponible para hoy.")}</p></div>
-      <div class="wfm-step"><span>Siguiente paso</span><strong>${esc(next?.record.Actividad || "Sin siguiente actividad")}</strong><p>${esc(next ? `${next.day}: ${next.record.Descripción}` : "No hay otra actividad disponible en la semana.")}</p></div>
-      <div class="wfm-step"><span>Fuente</span><strong>Regla WFM del CMS</strong><p>${esc(rule.split("\n").filter(Boolean)[0] || "Planeación inteligente")}</p></div>
-    </article>`;
-}
-
-function renderDuty() {
+function renderDutyForDay(day) {
   const records = [...sheet("Duty_Roster")].sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
-  const days = records.map((record) => record.Día);
-  state.selectedDutyDay = days.includes(state.selectedDutyDay) ? state.selectedDutyDay : (days.includes(currentDayName()) ? currentDayName() : days[0]);
-  $("#duty-tabs").innerHTML = days.map((day) => `<button type="button" role="tab" aria-selected="${day === state.selectedDutyDay}" data-duty-day="${esc(day)}">${esc(day)}</button>`).join("");
-  $$("[data-duty-day]").forEach((button) => button.addEventListener("click", () => {
-    state.selectedDutyDay = button.dataset.dutyDay;
-    renderDuty();
-  }));
-  const record = records.find((item) => item.Día === state.selectedDutyDay);
-  if (!record) {
-    $("#duty-content").innerHTML = emptyState("No hay información de Duty Roster.");
-    return;
-  }
+  const record = records.find((item) => item.Día === day);
+  if (!record) return emptyState("No hay información de Duty Roster para este día.");
   const stations = String(record.Estaciones || "").split(",").map((item) => item.trim()).filter(Boolean);
   const dutyImages = DUTY_IMAGES_BY_DAY[record.Día] || [];
-  $("#duty-content").innerHTML = `<article class="duty-card">
+  return `<div class="duty-card">
     <div class="duty-copy"><p class="eyebrow">${esc(record.Día)} · Foco operativo</p><h2>${esc(record.Estaciones)}</h2><p>${esc(record.Enfoque)}</p><div class="duty-stations">${stations.map((station) => `<span class="badge">${esc(station)}</span>`).join("")}</div></div>
     <div class="duty-gallery">${dutyImages.map((fileName) => {
       const label = DUTY_IMAGE_LABELS[fileName] || fileName;
@@ -484,7 +380,54 @@ function renderDuty() {
         </button>
       </figure>`;
     }).join("")}</div>
-  </article>`;
+  </div>`;
+}
+
+function renderOps() {
+  const todayName = currentDayName();
+  state.selectedOpsDay = WEEK_ORDER.includes(state.selectedOpsDay) ? state.selectedOpsDay : todayName;
+  const selectedDate = dateForWeekDay(state.selectedOpsDay);
+  const isToday = state.selectedOpsDay === todayName;
+  $("#ops-date").textContent = formatLongDate(selectedDate);
+  $("#ops-day-badge").textContent = isToday ? "Hoy" : "Semana actual";
+  $("#ops-day-tabs").innerHTML = WEEK_ORDER.map((day) => `
+    <button type="button" role="tab" aria-selected="${day === state.selectedOpsDay}" data-ops-day="${esc(day)}" class="${day === todayName ? "is-today" : ""}">
+      ${esc(day)}${day === todayName ? "<small>Hoy</small>" : ""}
+    </button>`).join("");
+  $$("[data-ops-day]").forEach((button) => button.addEventListener("click", () => {
+    state.selectedOpsDay = button.dataset.opsDay;
+    renderOps();
+  }));
+
+  const weekly = getWeeklyForDay(state.selectedOpsDay);
+  const wfm = weekly.filter((record) => /^WFM\b/i.test(String(record.Actividad || "")));
+  const nonWfmWeekly = weekly.filter((record) => !/^WFM\b/i.test(String(record.Actividad || "")));
+  const daily = visibleRecords("Actividades_Diaria")
+    .sort((a, b) => Number(a.Prioridad || 99) - Number(b.Prioridad || 99));
+  const info = visibleRecords("Informativo")
+    .sort((a, b) => Number(a.Prioridad || 99) - Number(b.Prioridad || 99));
+  const planningDate = new Date(selectedDate);
+  planningDate.setDate(planningDate.getDate() + 15);
+  const planningLabel = dateRangeLabel(mondayOf(planningDate), sundayOf(planningDate));
+  const wfmContent = `<div class="ops-planning">
+      <span>Semana en planeación</span><strong>${esc(planningLabel)}</strong>
+      <small>Referencia calculada 15 días adelante</small>
+    </div>
+    <div class="ops-list">${wfm.length ? wfm.map((record) => opsItem(record, "weekly")).join("") : emptyState("No hay una acción WFM programada para este día.")}</div>`;
+
+  const focusLabel = isToday ? "Hoy" : state.selectedOpsDay;
+  $("#ops-content").innerHTML = `
+    <section class="ops-focus" aria-label="Resumen del día seleccionado">
+      <span>${esc(focusLabel)}</span>
+      <strong>${esc(state.selectedOpsDay)}</strong>
+      <p>Consulta en orden las acciones y apoyos disponibles para la operación.</p>
+    </section>
+    ${opsSection("ops-wfm", "WFM", "Planeación inteligente", wfmContent)}
+    ${opsSection("ops-daily", "Actividad del día", "Consistencia diaria", `<div class="ops-list">${daily.length ? daily.map((record) => opsItem(record, "daily")).join("") : emptyState("No hay actividades diarias visibles.")}</div>`)}
+    ${opsSection("ops-weekly", "Actividad semanal", "Acciones para el día", `<div class="ops-list">${nonWfmWeekly.length ? nonWfmWeekly.map((record) => opsItem(record, "weekly")).join("") : emptyState("No hay una actividad semanal adicional para este día.")}</div>`)}
+    ${opsSection("ops-duty", "Duty Roster", "Cobertura operativa", renderDutyForDay(state.selectedOpsDay))}
+    ${opsSection("ops-info", "Informativo", "Comunicados vigentes", `<div class="ops-list">${info.length ? info.map((record) => opsItem(record, "info")).join("") : emptyState("No hay comunicaciones vigentes.")}</div>`)}
+  `;
 }
 
 function renderLinks() {
@@ -497,19 +440,14 @@ function renderLinks() {
   $("#links-list").innerHTML = records.length ? records.map((record) => `
     <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer">
       <span>${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><p>${esc(record.Notas || "")}</p><span class="external">Abrir ↗</span>
-    </a>`).join("") : emptyState("No hay enlaces disponibles en el CMS.");
+    </a>`).join("") : emptyState("No hay herramientas disponibles en el CMS.");
 }
 
 function renderAll() {
   setGreeting();
   renderHome();
-  renderExecutive();
-  renderInformativo();
   renderEvents();
-  renderWeekly();
-  renderDaily();
-  renderWfm();
-  renderDuty();
+  renderOps();
   renderLinks();
 }
 
@@ -539,7 +477,6 @@ function bindEvents() {
   $("#sidebar-collapse").addEventListener("click", toggleSidebar);
   $("#sidebar-close").addEventListener("click", closeMenu);
   $("#scrim").addEventListener("click", closeMenu);
-  $("#mobile-more").addEventListener("click", openMenu);
   $("#image-modal-close").addEventListener("click", closeImageModal);
   $("#image-modal").addEventListener("click", (event) => {
     if (event.target === $("#image-modal")) closeImageModal();

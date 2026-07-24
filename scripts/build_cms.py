@@ -25,6 +25,9 @@ REQUIRED_SHEETS = {
     "Duty_Roster",
     "Identidad",
 }
+SHEET_ALIASES = {
+    "Herramientas": "Links",
+}
 
 
 def column_index(reference: str) -> int:
@@ -125,7 +128,7 @@ def build(source: Path, destination: Path) -> None:
     with zipfile.ZipFile(source) as archive:
         strings = shared_strings(archive)
         sheets = {
-            name: normalize_records(read_rows(archive, target, strings))
+            SHEET_ALIASES.get(name, name): normalize_records(read_rows(archive, target, strings))
             for name, target in workbook_sheets(archive)
         }
 

@@ -1,13 +1,56 @@
 const state = {
   data: null,
   route: "inicio",
-  filters: {},
   selectedWeeklyDay: null,
   selectedDutyDay: null,
+  sidebarCollapsed: false,
+  imageModalTrigger: null,
 };
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const WEEK_ORDER = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+const HOME_TOOL_NAMES = [
+  "Ranking",
+  "Tasa de Éxito DT",
+  "Calculadora de Ritmo",
+  "Transferencias",
+  "Partner Hub",
+  "Layout",
+  "Code Brew",
+  "RSA 2.0",
+];
+const HOME_TOOL_DESCRIPTIONS = {
+  "Ranking": "Consulta indicadores, ranking y desempeño operativo del distrito.",
+  "Tasa de Éxito DT": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See.",
+  "Calculadora de Ritmo": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
+  "Transferencias": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
+  "Partner Hub": "Consulta aniversarios, cumpleaños e información de Partners.",
+  "Layout": "Diseña, ajusta y valida layouts operativos de tienda.",
+  "Code Brew": "Busca artículos, códigos y mercancía de forma rápida.",
+  "RSA 2.0": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
+};
+const DUTY_IMAGES_BY_DAY = {
+  "Lunes": ["lunes_food.png", "lunes_showcase.png"],
+  "Martes": ["martes_lobby.png", "martes_pic.png"],
+  "Miércoles": ["miercoles_boh.png"],
+  "Jueves": ["jueves_espresso.png", "jueves_lobby.png"],
+  "Viernes": ["viernes_cafe_filtrado.png"],
+  "Sábado": ["sabado_cbs.png"],
+  "Domingo": ["domingo_drive_thru.png", "domingo_lobby.png"],
+};
+const DUTY_IMAGE_LABELS = {
+  "lunes_food.png": "Lunes · Food",
+  "lunes_showcase.png": "Lunes · Show Case",
+  "martes_lobby.png": "Martes · Lobby",
+  "martes_pic.png": "Martes · PIC",
+  "miercoles_boh.png": "Miércoles · BOH",
+  "jueves_espresso.png": "Jueves · Espresso",
+  "jueves_lobby.png": "Jueves · Lobby",
+  "viernes_cafe_filtrado.png": "Viernes · Café Filtrado",
+  "sabado_cbs.png": "Sábado · CBS",
+  "domingo_drive_thru.png": "Domingo · Drive Thru",
+  "domingo_lobby.png": "Domingo · Lobby",
+};
 const ICONS = {
   home: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10.5V20h13v-9.5"/><path d="M9.5 20v-6h5v6"/>',
   chart: '<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
@@ -112,13 +155,21 @@ function localAsset(value) {
   return name ? `./assets/content/${encodeURIComponent(name)}` : null;
 }
 
-function linkMarkup(value, label = "Abrir recurso") {
+function isImageUrl(value) {
+  return /\.(?:avif|gif|jpe?g|png|webp)(?:[?#].*)?$/i.test(String(value || ""));
+}
+
+function linkMarkup(value, label = "Abrir recurso", imageAlt = label) {
   if (!value) return "";
   const external = externalUrl(value);
   const text = String(value).trim();
   if (/^https?:\/\//i.test(text) && !external) return "";
   const href = external || localAsset(text);
   if (!href) return "";
+  if (!external || isImageUrl(href)) {
+    const imageLabel = label === "Abrir recurso" ? "Ver imagen" : label;
+    return `<button class="external-link image-link" type="button" data-image-src="${esc(href)}" data-image-alt="${esc(imageAlt)}">${esc(imageLabel)} ${icon("arrow")}</button>`;
+  }
   return `<a class="external-link" href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(label)} ${icon("arrow")}</a>`;
 }
 
@@ -129,6 +180,11 @@ function emptyState(message) {
 function installIcons() {
   $$("[data-icon]").forEach((element) => {
     const label = element.querySelector("span");
+    const accessibleLabel = element.textContent.trim();
+    if (accessibleLabel) {
+      element.dataset.tooltip = accessibleLabel;
+      if (!element.getAttribute("aria-label")) element.setAttribute("aria-label", accessibleLabel);
+    }
     element.insertAdjacentHTML("afterbegin", icon(element.dataset.icon));
     if (label && element.tagName === "A") label.setAttribute("aria-hidden", "false");
   });
@@ -167,16 +223,43 @@ function routeTo(route, focus = true) {
   }
 }
 
+function isCompactViewport() {
+  return window.matchMedia("(max-width: 820px)").matches;
+}
+
+function applySidebarState() {
+  const collapsed = state.sidebarCollapsed && !isCompactViewport();
+  document.body.classList.toggle("sidebar-collapsed", collapsed);
+  const button = $("#sidebar-collapse");
+  button.setAttribute("aria-expanded", String(!collapsed));
+  button.setAttribute("aria-label", collapsed ? "Expandir navegación" : "Contraer navegación");
+  button.querySelector("span").textContent = collapsed ? "›" : "‹";
+}
+
+function toggleSidebar() {
+  state.sidebarCollapsed = !state.sidebarCollapsed;
+  localStorage.setItem("starbucksHubSidebarCollapsed", String(state.sidebarCollapsed));
+  applySidebarState();
+}
+
 function openMenu() {
+  if (!isCompactViewport()) {
+    state.sidebarCollapsed = false;
+    localStorage.setItem("starbucksHubSidebarCollapsed", "false");
+    applySidebarState();
+    return;
+  }
   $("#sidebar").classList.add("is-open");
   $("#scrim").hidden = false;
   $("#menu-toggle").setAttribute("aria-expanded", "true");
+  document.body.classList.add("menu-open");
 }
 
 function closeMenu() {
   $("#sidebar").classList.remove("is-open");
   $("#scrim").hidden = true;
   $("#menu-toggle").setAttribute("aria-expanded", "false");
+  document.body.classList.remove("menu-open");
 }
 
 function currentDayName() {
@@ -184,48 +267,25 @@ function currentDayName() {
 }
 
 function renderHome() {
-  const today = startOfDay();
-  const todayName = currentDayName();
-  const currentEvents = publishedEvents().filter((event) => event.end >= today);
-  const weeklyToday = sheet("Actividades_Semanales").filter((record) => record.Día === todayName);
-  const daily = visibleRecords("Actividades_Diaria");
-  const favorites = sheet("Links").filter((record) => normalizeBool(record.Favorito));
-
-  $("#today-label").textContent = formatLongDate(today);
-  const metrics = [
-    { icon: "check", value: daily.length, label: "rutinas diarias" },
-    { icon: "week", value: weeklyToday.length, label: "acciones de hoy" },
-    { icon: "calendar", value: currentEvents.length, label: "eventos próximos" },
-    { icon: "link", value: favorites.length, label: "accesos frecuentes" },
-  ];
-  $("#home-summary").innerHTML = metrics.map((item) => `
-    <article class="metric-card">
-      <span class="metric-icon">${icon(item.icon)}</span>
-      <strong>${item.value}</strong>
-      <span>${esc(item.label)}</span>
-    </article>`).join("");
-
-  const priorities = [
-    ...daily.filter((record) => Number(record.Prioridad) === 1).slice(0, 3).map((record) => ({
-      icon: record.Icono || "✓", title: record.Actividad, meta: record.Categoría || "Actividad diaria",
-    })),
-    ...weeklyToday.slice(0, 2).map((record) => ({
-      icon: record.Icono || "•", title: record.Actividad, meta: "Actividad semanal",
-    })),
-  ].slice(0, 4);
-  $("#home-priorities").innerHTML = priorities.length ? priorities.map((item) => `
-    <div class="compact-item">
-      <span class="compact-icon">${esc(item.icon)}</span>
-      <span><strong>${esc(item.title)}</strong><small>${esc(item.meta)}</small></span>
-      <span class="meta">Hoy</span>
-    </div>`).join("") : emptyState("No hay prioridades para hoy.");
-
-  $("#home-events").innerHTML = currentEvents.length ? currentEvents.slice(0, 4).map((event) => `
-    <div class="compact-item">
-      <span class="compact-icon">${esc(event.Imagen || "📅")}</span>
-      <span><strong>${esc(event["Nombre Evento"])}</strong><small>${esc(event.Descripción)}</small></span>
-      <time datetime="${esc(event["Fecha Inicio"])}">${esc(formatDate(event.start))}</time>
-    </div>`).join("") : emptyState("No hay eventos próximos publicados.");
+  const linksByName = new Map(sheet("Links").map((record) => [record.Nombre, record]));
+  $("#home-tools-grid").innerHTML = HOME_TOOL_NAMES.map((name) => {
+    const record = linksByName.get(name);
+    const title = esc(name);
+    const iconText = esc(record?.Icono || "•");
+    const description = esc(HOME_TOOL_DESCRIPTIONS[name]);
+    if (!record || !externalUrl(record.URL)) {
+      return `<article class="home-tool-card is-disabled" aria-disabled="true">
+        <span class="home-tool-icon" aria-hidden="true">${iconText}</span>
+        <div><h3>${title}</h3><p>${description}</p></div>
+        <span class="home-tool-state">No disponible</span>
+      </article>`;
+    }
+    return `<a class="home-tool-card" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="${title}: abrir herramienta">
+      <span class="home-tool-icon" aria-hidden="true">${iconText}</span>
+      <div><h3>${title}</h3><p>${description}</p></div>
+      <span class="home-tool-arrow" aria-hidden="true">${icon("arrow")}</span>
+    </a>`;
+  }).join("");
 }
 
 function executiveRecords() {
@@ -262,37 +322,10 @@ function executiveRecords() {
   });
 }
 
-function renderExecutiveFilters(records) {
-  const definitions = [
-    { key: "type", label: "Tipo de contenido" },
-    { key: "category", label: "Categoría" },
-    { key: "priority", label: "Prioridad" },
-    { key: "status", label: "Estado" },
-  ];
-  $("#dynamic-filters").innerHTML = definitions.map(({ key, label }) => {
-    const options = [...new Set(records.map((record) => record[key]).filter(Boolean))].sort((a, b) => String(a).localeCompare(String(b), "es"));
-    if (options.length < 2) return "";
-    return `<label>${esc(label)}
-      <select data-filter="${key}" aria-label="${esc(label)}">
-        <option value="">Todos</option>
-        ${options.map((value) => `<option value="${esc(value)}"${state.filters[key] === String(value) ? " selected" : ""}>${esc(value)}</option>`).join("")}
-      </select>
-    </label>`;
-  }).join("");
-  $$("[data-filter]", $("#dynamic-filters")).forEach((select) => {
-    select.addEventListener("change", () => {
-      state.filters[select.dataset.filter] = select.value;
-      renderExecutive();
-    });
-  });
-}
-
 function renderExecutive() {
   const records = executiveRecords();
-  renderExecutiveFilters(records);
-  const filtered = records.filter((record) => Object.entries(state.filters).every(([key, value]) => !value || String(record[key] || "") === value));
-  $("#executive-count").textContent = `${filtered.length} resultado${filtered.length === 1 ? "" : "s"}`;
-  $("#executive-grid").innerHTML = filtered.length ? filtered.map((record) => `
+  $("#executive-count").textContent = `${records.length} resultado${records.length === 1 ? "" : "s"}`;
+  $("#executive-grid").innerHTML = records.length ? records.map((record) => `
     <article class="content-card">
       <div class="card-top">
         <span class="card-icon">${esc(record.icon)}</span>
@@ -304,9 +337,9 @@ function renderExecutive() {
         <span class="badge neutral">${esc(record.type)}</span>
         <span class="badge neutral">${esc(record.category)}</span>
         ${record.date ? `<span class="badge neutral">${esc(formatDate(record.date, { day: "numeric", month: "short" }))}</span>` : ""}
-        ${linkMarkup(record.link)}
+        ${linkMarkup(record.link, "Abrir recurso", record.title)}
       </footer>
-    </article>`).join("") : emptyState("No hay información que coincida con los filtros seleccionados.");
+    </article>`).join("") : emptyState("No hay información ejecutiva disponible.");
 }
 
 function renderInformativo() {
@@ -316,7 +349,7 @@ function renderInformativo() {
       <div class="card-top"><span class="card-icon">${esc(record.Icono || "i")}</span><span class="badge ${Number(record.Prioridad) === 1 ? "amber" : ""}">Prioridad ${esc(record.Prioridad || "—")}</span></div>
       <h2>${esc(record.Actividad)}</h2>
       <p>${esc(record.Descripción)}</p>
-      <footer><span class="badge neutral">${esc(record.Categoría || "Informativo")}</span><span class="badge neutral">${esc(record.Frecuencia || "")}</span>${linkMarkup(record["Link /Imagen"])}</footer>
+      <footer><span class="badge neutral">${esc(record.Categoría || "Informativo")}</span><span class="badge neutral">${esc(record.Frecuencia || "")}</span>${linkMarkup(record["Link /Imagen"], "Abrir recurso", record.Actividad)}</footer>
     </article>`).join("") : emptyState("No hay comunicaciones vigentes.");
 }
 
@@ -350,7 +383,7 @@ function renderEvents() {
         <div class="timeline-meta">
           <span class="badge ${status === "Actual" ? "" : "neutral"}">${status}</span>
           ${event.end > event.start ? `<span class="badge neutral">${esc(dateRangeLabel(event.start, event.end))}</span>` : ""}
-          ${linkMarkup(event["Link/Imagen"], "Abrir")}
+          ${linkMarkup(event["Link/Imagen"], "Abrir", event["Nombre Evento"])}
         </div>
       </div>
     </article>`;
@@ -374,7 +407,7 @@ function renderWeekly() {
     <article class="content-card">
       <div class="card-top"><span class="card-icon">${esc(record.Icono || "•")}</span><span class="badge neutral">${esc(record.Día)}</span></div>
       <h2>${esc(record.Actividad)}</h2><p>${esc(record.Descripción)}</p>
-      <footer>${record["Hora / Corte"] ? `<span class="badge neutral">${esc(record["Hora / Corte"])}</span>` : ""}${linkMarkup(record.Link)}</footer>
+      <footer>${record["Hora / Corte"] ? `<span class="badge neutral">${esc(record["Hora / Corte"])}</span>` : ""}${linkMarkup(record.Link, "Abrir recurso", record.Actividad)}</footer>
     </article>`).join("") : emptyState("No hay actividades semanales para el día seleccionado.");
 }
 
@@ -386,7 +419,7 @@ function renderDaily() {
       <article class="content-card">
         <div class="card-top"><span class="card-icon">${esc(record.Icono || "✓")}</span><span class="badge ${Number(record.Prioridad) === 1 ? "amber" : ""}">Prioridad ${esc(record.Prioridad || "—")}</span></div>
         <h2>${esc(record.Actividad)}</h2><p>${esc(record.Descripción)}</p>
-        <footer><span class="badge neutral">${esc(record.Categoría || "Operación")}</span>${linkMarkup(record["Link / Imagen"])}</footer>
+        <footer><span class="badge neutral">${esc(record.Categoría || "Operación")}</span>${linkMarkup(record["Link / Imagen"], "Abrir recurso", record.Actividad)}</footer>
       </article>`).join("") : emptyState("No hay actividades diarias visibles.");
 }
 
@@ -438,9 +471,19 @@ function renderDuty() {
     return;
   }
   const stations = String(record.Estaciones || "").split(",").map((item) => item.trim()).filter(Boolean);
+  const dutyImages = DUTY_IMAGES_BY_DAY[record.Día] || [];
   $("#duty-content").innerHTML = `<article class="duty-card">
-    <div class="duty-visual"><span class="duty-symbol">◎</span><strong>${esc(record.Día)}</strong><small>Foco operativo</small></div>
-    <div class="duty-copy"><p class="eyebrow">Enfoque del día</p><h2>${esc(record.Estaciones)}</h2><p>${esc(record.Enfoque)}</p><div class="duty-stations">${stations.map((station) => `<span class="badge">${esc(station)}</span>`).join("")}</div></div>
+    <div class="duty-copy"><p class="eyebrow">${esc(record.Día)} · Foco operativo</p><h2>${esc(record.Estaciones)}</h2><p>${esc(record.Enfoque)}</p><div class="duty-stations">${stations.map((station) => `<span class="badge">${esc(station)}</span>`).join("")}</div></div>
+    <div class="duty-gallery">${dutyImages.map((fileName) => {
+      const label = DUTY_IMAGE_LABELS[fileName] || fileName;
+      const src = `./assets/duty-roster/${encodeURIComponent(fileName)}`;
+      return `<figure class="duty-thumbnail">
+        <button type="button" data-image-src="${esc(src)}" data-image-alt="${esc(label)}" aria-label="Abrir ${esc(label)} en el visor">
+          <img src="${esc(src)}" alt="${esc(label)}" loading="lazy" decoding="async">
+          <span>${esc(label)}</span>
+        </button>
+      </figure>`;
+    }).join("")}</div>
   </article>`;
 }
 
@@ -457,24 +500,6 @@ function renderLinks() {
     </a>`).join("") : emptyState("No hay enlaces disponibles en el CMS.");
 }
 
-function renderOps() {
-  const today = currentDayName();
-  const daily = visibleRecords("Actividades_Diaria");
-  const weekly = getWeeklyForDay(today);
-  const duty = sheet("Duty_Roster").find((record) => record.Día === today);
-  const wfm = weekly.find((record) => String(record.Actividad).startsWith("WFM"));
-  const metrics = [
-    { icon: "check", value: daily.length, label: "rutinas disponibles" },
-    { icon: "week", value: weekly.length, label: "actividades de hoy" },
-    { icon: "compass", value: duty ? 1 : 0, label: "foco Duty Roster" },
-    { icon: "users", value: wfm ? 1 : 0, label: "acción WFM de hoy" },
-  ];
-  $("#ops-summary").innerHTML = metrics.map((item) => `<article class="metric-card"><span class="metric-icon">${icon(item.icon)}</span><strong>${item.value}</strong><span>${esc(item.label)}</span></article>`).join("");
-  $("#ops-content").innerHTML = `
-    <article class="panel"><div class="panel-heading"><div><span class="kicker">Pendientes</span><h2>Actividades de hoy</h2></div></div><div class="compact-list">${weekly.length ? weekly.map((record) => `<div class="compact-item"><span class="compact-icon">${esc(record.Icono || "•")}</span><span><strong>${esc(record.Actividad)}</strong><small>${esc(record.Descripción)}</small></span><span class="meta">${esc(record.Día)}</span></div>`).join("") : emptyState("No hay actividades semanales para hoy.")}</div></article>
-    <article class="panel"><div class="panel-heading"><div><span class="kicker">Cobertura</span><h2>${esc(duty?.Estaciones || "Sin foco publicado")}</h2></div></div><div class="compact-list">${duty ? `<div class="compact-item"><span class="compact-icon">◎</span><span><strong>${esc(duty.Día)}</strong><small>${esc(duty.Enfoque)}</small></span><span class="meta">Duty Roster</span></div>` : emptyState("No hay cobertura de Duty Roster para hoy.")}${wfm ? `<div class="compact-item"><span class="compact-icon">${esc(wfm.Icono || "📅")}</span><span><strong>${esc(wfm.Actividad)}</strong><small>${esc(wfm.Descripción)}</small></span><span class="meta">WFM</span></div>` : ""}</div></article>`;
-}
-
 function renderAll() {
   setGreeting();
   renderHome();
@@ -486,24 +511,61 @@ function renderAll() {
   renderWfm();
   renderDuty();
   renderLinks();
-  renderOps();
+}
+
+function openImageModal(src, alt, trigger) {
+  state.imageModalTrigger = trigger || document.activeElement;
+  $("#image-modal-content").src = src;
+  $("#image-modal-content").alt = alt || "Imagen ampliada";
+  $("#image-modal-title").textContent = alt || "Vista de imagen";
+  $("#image-modal").hidden = false;
+  document.body.classList.add("modal-open");
+  $("#image-modal-close").focus();
+}
+
+function closeImageModal() {
+  if ($("#image-modal").hidden) return;
+  $("#image-modal").hidden = true;
+  $("#image-modal-content").src = "";
+  document.body.classList.remove("modal-open");
+  state.imageModalTrigger?.focus?.();
+  state.imageModalTrigger = null;
 }
 
 function bindEvents() {
   window.addEventListener("hashchange", () => routeTo(location.hash.slice(1) || "inicio"));
+  $$("[data-route-link]").forEach((link) => link.addEventListener("click", closeMenu));
   $("#menu-toggle").addEventListener("click", () => $("#sidebar").classList.contains("is-open") ? closeMenu() : openMenu());
+  $("#sidebar-collapse").addEventListener("click", toggleSidebar);
   $("#sidebar-close").addEventListener("click", closeMenu);
   $("#scrim").addEventListener("click", closeMenu);
   $("#mobile-more").addEventListener("click", openMenu);
-  $("#clear-filters").addEventListener("click", () => {
-    state.filters = {};
-    renderExecutive();
+  $("#image-modal-close").addEventListener("click", closeImageModal);
+  $("#image-modal").addEventListener("click", (event) => {
+    if (event.target === $("#image-modal")) closeImageModal();
+  });
+  document.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-image-src]");
+    if (!trigger) return;
+    openImageModal(trigger.dataset.imageSrc, trigger.dataset.imageAlt, trigger);
   });
   $("#event-period").addEventListener("change", renderEvents);
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
+  window.addEventListener("resize", () => {
+    closeMenu();
+    applySidebarState();
+  });
   document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && !$("#image-modal").hidden) {
+      closeImageModal();
+      return;
+    }
     if (event.key === "Escape") closeMenu();
+    if (event.key === "Tab" && !$("#image-modal").hidden) {
+      event.preventDefault();
+      $("#image-modal-close").focus();
+    }
   });
 }
 
@@ -520,6 +582,8 @@ async function loadData() {
 }
 
 async function init() {
+  state.sidebarCollapsed = localStorage.getItem("starbucksHubSidebarCollapsed") === "true";
+  applySidebarState();
   installIcons();
   bindEvents();
   updateConnectionStatus();

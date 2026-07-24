@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v1";
+const CACHE_NAME = "starbucks-hub-v2";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -6,8 +6,18 @@ const CORE_ASSETS = [
   "./app.js",
   "./manifest.webmanifest",
   "./data/cms.json",
-  "./assets/icons/icon-192.png",
-  "./assets/icons/icon-512.png"
+  "./assets/icons/starbucks_hub.png",
+  "./assets/duty-roster/lunes_food.png",
+  "./assets/duty-roster/lunes_showcase.png",
+  "./assets/duty-roster/martes_lobby.png",
+  "./assets/duty-roster/martes_pic.png",
+  "./assets/duty-roster/miercoles_boh.png",
+  "./assets/duty-roster/jueves_espresso.png",
+  "./assets/duty-roster/jueves_lobby.png",
+  "./assets/duty-roster/viernes_cafe_filtrado.png",
+  "./assets/duty-roster/sabado_cbs.png",
+  "./assets/duty-roster/domingo_drive_thru.png",
+  "./assets/duty-roster/domingo_lobby.png"
 ];
 
 self.addEventListener("install", (event) => {

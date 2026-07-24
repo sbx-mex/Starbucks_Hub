@@ -45,12 +45,13 @@ No requiere backend, tokens, credenciales, CDN ni dependencias de ejecución.
 - Vista ejecutiva
 - Informativo
 - Agenda y Eventos
-- Vista Ops
 - WFM
 - Actividades semanales
 - Actividad diaria
 - Duty Roster
 - Enlaces
 - Acerca de
+
+Inicio concentra ocho herramientas de mayor uso. Duty Roster organiza once imágenes de lunes a domingo y las abre en un visor interno accesible. La navegación lateral puede contraerse en escritorio y funciona como panel superpuesto en móvil.
 
 Diseñado: Jorge Alcantar Aguiar & Enrique César Flores

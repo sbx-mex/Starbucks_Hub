@@ -7,8 +7,8 @@
   <meta name="description" content="Starbucks Hub: información, prioridades y recursos para líderes de operación.">
   <title>Starbucks Hub</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/icons/icon-192.png" sizes="192x192">
-  <link rel="apple-touch-icon" href="./assets/icons/icon-192.png">
+  <link rel="icon" href="./assets/icons/starbucks_hub.png" type="image/png">
+  <link rel="apple-touch-icon" href="./assets/icons/starbucks_hub.png">
   <link rel="stylesheet" href="./styles.css">
   <script src="./app.js" defer></script>
 </head>
@@ -17,7 +17,7 @@
 
   <header class="mobile-header">
     <a class="brand compact" href="#inicio" data-route-link="inicio" aria-label="Ir al inicio">
-      <img src="./assets/icons/icon-192.png" alt="">
+      <img src="./assets/icons/starbucks_hub.png" alt="Starbucks Hub">
       <span>Starbucks Hub</span>
     </a>
     <button id="menu-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Abrir navegación">
@@ -27,32 +27,33 @@
 
   <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
     <a class="brand" href="#inicio" data-route-link="inicio">
-      <img src="./assets/icons/icon-192.png" alt="">
+      <img src="./assets/icons/starbucks_hub.png" alt="Starbucks Hub">
       <span><strong>Starbucks Hub</strong><small>Liderazgo y conexión</small></span>
     </a>
+    <button id="sidebar-collapse" class="sidebar-collapse" type="button" aria-expanded="true" aria-label="Contraer navegación">
+      <span aria-hidden="true">‹</span>
+    </button>
     <button id="sidebar-close" class="sidebar-close" type="button" aria-label="Cerrar navegación">×</button>
 
     <nav class="nav-groups">
       <section>
         <p>Principal</p>
-        <a href="#inicio" data-route-link="inicio" data-icon="home">Inicio</a>
-        <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart">Vista ejecutiva</a>
-        <a href="#informativo" data-route-link="informativo" data-icon="info">Informativo</a>
-        <a href="#agenda" data-route-link="agenda" data-icon="calendar">Agenda</a>
+        <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
+        <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart"><span>Vista ejecutiva</span></a>
+        <a href="#informativo" data-route-link="informativo" data-icon="info"><span>Informativo</span></a>
+        <a href="#agenda" data-route-link="agenda" data-icon="calendar"><span>Agenda</span></a>
       </section>
       <section>
         <p>Operación</p>
-        <a class="nav-secondary" href="#vista-ops" data-route-link="vista-ops" data-icon="pulse">Vista Ops</a>
-        <a href="#wfm" data-route-link="wfm" data-icon="users">WFM</a>
-        <a href="#semanales" data-route-link="semanales" data-icon="week">Actividades semanales</a>
-        <a href="#diaria" data-route-link="diaria" data-icon="check">Actividad diaria</a>
-        <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass">Duty Roster</a>
+        <a href="#wfm" data-route-link="wfm" data-icon="users"><span>WFM</span></a>
+        <a href="#semanales" data-route-link="semanales" data-icon="week"><span>Actividades semanales</span></a>
+        <a href="#diaria" data-route-link="diaria" data-icon="check"><span>Actividad diaria</span></a>
+        <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass"><span>Duty Roster</span></a>
       </section>
       <section>
         <p>Recursos</p>
-        <a href="#enlaces" data-route-link="enlaces" data-icon="link">Enlaces</a>
-        <a href="https://wa.me/message/ENKDSAHYHIGAN1" target="_blank" rel="noopener noreferrer" data-icon="message">Sugerencias</a>
-        <a href="#acerca" data-route-link="acerca" data-icon="about">Acerca de</a>
+        <a href="#enlaces" data-route-link="enlaces" data-icon="link"><span>Enlaces</span></a>
+        <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
       </section>
     </nav>
 
@@ -73,34 +74,22 @@
         <div class="hero-copy">
           <p class="eyebrow">Conexión que inspira</p>
           <h1 id="inicio-title"><span id="greeting">Bienvenido</span><br>Starbucks Hub</h1>
-          <p>Una lectura clara de prioridades, agenda y recursos para tomar decisiones con confianza.</p>
+          <p>Herramientas clave para acompañar la operación, el desarrollo de Partners y la toma de decisiones.</p>
           <div class="hero-actions">
             <a class="button primary" href="#vista-ejecutiva" data-route-link="vista-ejecutiva">Abrir vista ejecutiva</a>
-            <a class="button secondary" href="#vista-ops" data-route-link="vista-ops">Consultar Vista Ops</a>
           </div>
         </div>
         <div class="campaign-panel" aria-label="Campaña">
           <span>Comunidad Starbucks</span>
           <strong id="campaign-display">JUNTÉMONOS MÁS</strong>
-          <p>Prioridades que nos conectan.</p>
+          <p>Herramientas que nos conectan.</p>
         </div>
       </div>
 
-      <div class="section-heading">
-        <div><p class="eyebrow">Hoy</p><h2>Lo esencial, en un vistazo</h2></div>
-        <span id="today-label" class="date-chip"></span>
+      <div id="home-tools" class="section-heading">
+        <div><p class="eyebrow">Accesos directos</p><h2>Herramientas de mayor uso</h2></div>
       </div>
-      <div id="home-summary" class="summary-grid" aria-live="polite"></div>
-      <div class="two-column">
-        <article class="panel">
-          <div class="panel-heading"><div><span class="kicker">Prioridades</span><h2>Resultados que construimos juntos</h2></div></div>
-          <div id="home-priorities" class="compact-list"></div>
-        </article>
-        <article class="panel">
-          <div class="panel-heading"><div><span class="kicker">Agenda</span><h2>Próximos eventos</h2></div><a href="#agenda" data-route-link="agenda">Ver agenda</a></div>
-          <div id="home-events" class="compact-list"></div>
-        </article>
-      </div>
+      <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>
 
     <section id="vista-ejecutiva" class="view" data-view="vista-ejecutiva" hidden aria-labelledby="executive-title">
@@ -108,10 +97,6 @@
         <div><p class="eyebrow">Experiencia principal</p><h1 id="executive-title">Vista ejecutiva</h1><p>Información vigente y priorizada desde el CMS.</p></div>
         <span id="executive-count" class="count-chip"></span>
       </div>
-      <form id="executive-filters" class="filter-bar" aria-label="Filtros de vista ejecutiva">
-        <div id="dynamic-filters" class="filter-fields"></div>
-        <button id="clear-filters" class="button ghost" type="button">Limpiar filtros</button>
-      </form>
       <div id="executive-grid" class="executive-grid" aria-live="polite"></div>
     </section>
 
@@ -133,12 +118,6 @@
         <span id="event-period-label" class="date-chip"></span>
       </div>
       <div id="events-timeline" class="timeline"></div>
-    </section>
-
-    <section id="vista-ops" class="view" data-view="vista-ops" hidden aria-labelledby="ops-title">
-      <div class="page-heading"><div><p class="eyebrow">Consulta operativa</p><h1 id="ops-title">Vista Ops</h1><p>Pendientes, actividades y cobertura sin duplicar información.</p></div></div>
-      <div id="ops-summary" class="summary-grid"></div>
-      <div id="ops-content" class="two-column"></div>
     </section>
 
     <section id="wfm" class="view" data-view="wfm" hidden aria-labelledby="wfm-title">
@@ -185,11 +164,25 @@
     </section>
   </main>
 
+  <div id="image-modal" class="image-modal" role="dialog" aria-modal="true" aria-labelledby="image-modal-title" hidden>
+    <div class="image-modal-panel">
+      <div class="image-modal-header">
+        <h2 id="image-modal-title">Vista de imagen</h2>
+        <button id="image-modal-close" class="image-modal-close" type="button" aria-label="Cerrar visor de imagen">
+          <span aria-hidden="true">×</span><span>Cerrar</span>
+        </button>
+      </div>
+      <div class="image-modal-scroll">
+        <img id="image-modal-content" src="" alt="">
+      </div>
+    </div>
+  </div>
+
   <nav class="bottom-nav" aria-label="Navegación móvil">
     <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
     <a href="#vista-ejecutiva" data-route-link="vista-ejecutiva" data-icon="chart"><span>Ejecutiva</span></a>
     <a href="#agenda" data-route-link="agenda" data-icon="calendar"><span>Agenda</span></a>
-    <a href="#vista-ops" data-route-link="vista-ops" data-icon="pulse"><span>Ops</span></a>
+    <a href="#duty-roster" data-route-link="duty-roster" data-icon="compass"><span>Duty</span></a>
     <button id="mobile-more" type="button" data-icon="menu"><span>Más</span></button>
   </nav>
 

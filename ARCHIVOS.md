@@ -9,7 +9,8 @@
 - `manifest.webmanifest`: configuración de la PWA.
 - `sw.js`: caché offline con rutas relativas.
 - `.nojekyll`: compatibilidad con GitHub Pages.
-- `assets/icons/*`: identidad técnica de la PWA.
+- `assets/icons/starbucks_hub.png`: identidad visual e ícono de la PWA.
+- `assets/duty-roster/*`: once imágenes operativas organizadas de lunes a domingo.
 - `assets/content/*`: únicamente recursos mencionados por el CMS.
 - `scripts/build_cms.py`: pipeline local Excel → JSON.
 - `tests/validate_project.py`: validación estática y de integridad.

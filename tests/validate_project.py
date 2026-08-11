@@ -35,6 +35,7 @@ FORBIDDEN_VISIBLE = ["#DistritoKike", "#OrgulloCN", "Distrito Goo", "Distrito Go
 REQUIRED_SHEETS = {
     "Informativo",
     "WFM",
+    "Herramientas",
     "Links",
     "Eventos",
     "Actividades_Semanales",
@@ -62,7 +63,7 @@ for term in FORBIDDEN_VISIBLE:
     if term.lower() in html.lower():
         fail(f"Referencia visible prohibida: {term}")
 
-for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Herramientas para decidir y actuar", "Sugerencias y/o comentarios"]:
+for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Links", "Herramientas para decidir y actuar", "Busca y abre en segundos", "Sugerencias y/o comentarios"]:
     if term not in html:
         fail(f"Falta contenido requerido: {term}")
 
@@ -110,9 +111,10 @@ for reference in local_references:
         if not target.is_file():
             fail(f"Falta recurso local del CMS: {target.name}")
 
-for link in cms["sheets"]["Links"]:
-    if not re.match(r"^https?://", str(link.get("URL", ""))):
-        fail(f"URL no válida: {link.get('URL')}")
+for source in ("Herramientas", "Links"):
+    for link in cms["sheets"][source]:
+        if not re.match(r"^https?://", str(link.get("URL", ""))):
+            fail(f"URL no válida en {source}: {link.get('URL')}")
 
 if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
     fail("Manifest no preparado para subruta")
@@ -129,13 +131,13 @@ for relative in (item for item in REQUIRED if item.startswith("assets/")):
     if expected not in service_worker:
         fail(f"Falta recurso en caché PWA: {expected}")
 
-if "starbucks-hub-v5" not in service_worker:
+if "starbucks-hub-v6" not in service_worker:
     fail("No se incrementó la versión de caché")
 
 if 'pathname.endsWith("/data/cms.json")' not in service_worker:
     fail("El CMS no utiliza actualización network-first")
 
-if not all(fragment in javascript for fragment in ["renderOps", "renderEvents", "renderDutyForDay", "renderLinks"]):
+if not all(fragment in javascript for fragment in ["renderOps", "renderEvents", "renderDutyForDay", "renderLinks", "renderQuickLinks", "renderHomeSearch", "searchCatalog"]):
     fail("Faltan vistas funcionales")
 
 if any(fragment in javascript for fragment in ["renderExecutive", "renderInformativo", "renderWeekly", "renderDaily", "renderWfm", "renderDuty()"]):
@@ -149,7 +151,7 @@ sidebar = re.search(r'<nav class="nav-groups">(.*?)</nav>', html, re.S)
 if not sidebar:
     fail("No se encontró el menú lateral")
 routes = re.findall(r'data-route-link="([^"]+)"', sidebar.group(1))
-if routes != ["inicio", "recordatorio", "resumen-ops", "herramientas", "acerca"]:
+if routes != ["inicio", "recordatorio", "resumen-ops", "herramientas", "links", "acerca"]:
     fail(f"Menú lateral inesperado: {routes}")
 
 for name, path in [
@@ -178,7 +180,7 @@ for feature in ["openImageModal", "closeImageModal", "sidebarCollapsed", "DUTY_I
     if feature not in javascript:
         fail(f"Falta función de interfaz: {feature}")
 
-links_by_name = {row.get("Nombre"): row for row in cms["sheets"]["Links"]}
+links_by_name = {row.get("Nombre"): row for row in cms["sheets"]["Herramientas"]}
 if "Evidencia Antes / Después" in links_by_name or "Evidencia Antes / Después" in html:
     fail("Permanece el acceso Evidencia Antes / Después")
 
@@ -199,7 +201,9 @@ obsolete_audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8"
 experience_checks = {
     "ruta rápida operativa": 'class="operational-shortcuts"' in html and html.count('class="operational-shortcuts"') == 1,
     "directorio sin filtros duplicados": html.count('data-tool-filter="favorites"') == 1,
-    "búsqueda con respuesta ágil": "toolSearchTimer" in javascript and "}, 120);" in javascript,
+    "búsqueda con respuesta ágil": "toolSearchTimer" in javascript and "homeSearchTimer" in javascript and "linkSearchTimer" in javascript,
+    "buscador inteligente global": 'id="home-search"' in html and "searchCatalog" in javascript and "normalizeSearchText" in javascript,
+    "links discretos por escritura": 'id="link-search-results"' in html and 'id="quick-links-directory"' in html and "linkDirectoryOpen" in javascript,
     "historial local de herramientas": 'id="recent-section"' in html and "rememberTool" in javascript,
     "navegación anunciada": 'id="route-status"' in html and '$("#route-status").textContent' in javascript,
     "foco accesible por vista": 'heading.focus({ preventScroll: true })' in javascript,
@@ -213,8 +217,9 @@ if failed_experience:
     fail(f"Mejoras de experiencia incompletas: {', '.join(failed_experience)}")
 
 print("Validación estática aprobada")
-print(f"Mejoras UX, estabilidad y accesibilidad: {sum(experience_checks.values())}/10")
+print(f"Mejoras UX, estabilidad y accesibilidad: {sum(experience_checks.values())}/{len(experience_checks)}")
 print(f"Hojas CMS: {len(cms['sheets'])}")
-print(f"Enlaces: {len(cms['sheets']['Links'])}")
+print(f"Herramientas: {len(cms['sheets']['Herramientas'])}")
+print(f"Links rápidos: {len(cms['sheets']['Links'])}")
 print(f"Eventos: {len(cms['sheets']['Eventos'])}")
 sys.exit(0)

@@ -42,6 +42,7 @@
         <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Recordatorio</span></a>
         <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
         <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
+        <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
         <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
       </section>
     </nav>
@@ -82,6 +83,21 @@
         <a href="#recordatorio" data-route-link="recordatorio"><span aria-hidden="true">◷</span><span><strong>Agenda</strong><small>Ubica próximos eventos</small></span><span aria-hidden="true">→</span></a>
         <a href="#herramientas" data-route-link="herramientas"><span aria-hidden="true">⌕</span><span><strong>Directorio</strong><small>Encuentra una herramienta</small></span><span aria-hidden="true">→</span></a>
       </nav>
+
+      <section class="home-smart-search" aria-labelledby="home-search-title">
+        <div class="home-smart-search-copy">
+          <p class="eyebrow">Acceso inmediato</p>
+          <h2 id="home-search-title">Busca y abre en segundos</h2>
+          <p>Escribe el nombre de una plataforma, herramienta o propósito. Los resultados aparecen solo cuando los necesitas.</p>
+        </div>
+        <label class="smart-search-field" for="home-search">
+          <span class="visually-hidden">Buscar en Starbucks Hub</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="home-search" type="search" autocomplete="off" placeholder="Ej. WFM, nómina, BI, Attensi…" aria-controls="home-search-results" aria-expanded="false">
+          <kbd>⌘K</kbd>
+        </label>
+        <div id="home-search-results" class="smart-search-results" role="list" aria-live="polite" hidden></div>
+      </section>
 
       <div id="home-tools" class="section-heading">
         <div><p class="eyebrow">Accesos directos</p><h2>Herramientas para decidir y actuar</h2></div>
@@ -132,6 +148,30 @@
       <section id="recent-section" aria-labelledby="recent-title" hidden><div class="tools-subheading"><div><p class="eyebrow">Continuar consulta</p><h2 id="recent-title">Usadas recientemente</h2></div></div><div id="recent-links" class="recent-links"></div></section>
       <section id="favorite-section" aria-labelledby="favorite-title"><div class="tools-subheading"><div><p class="eyebrow">Prioridad</p><h2 id="favorite-title">Accesos frecuentes</h2></div></div><div id="favorite-links" class="favorite-links"></div></section>
       <section aria-labelledby="directory-title"><div class="tools-subheading"><div><p class="eyebrow">Directorio</p><h2 id="directory-title">Todos los recursos</h2></div></div><div id="links-list" class="links-list"></div></section>
+    </section>
+
+    <section id="links" class="view" data-view="links" hidden aria-labelledby="links-title">
+      <div class="page-heading links-heading">
+        <div>
+          <p class="eyebrow">Accesos rápidos</p>
+          <h1 id="links-title">Links</h1>
+          <p>Un buscador discreto para abrir plataformas internas sin recorrer listas largas.</p>
+        </div>
+      </div>
+      <section class="link-finder" aria-label="Buscar links">
+        <label class="smart-search-field link-search-field" for="link-search">
+          <span class="visually-hidden">Buscar link</span>
+          <span aria-hidden="true">⌕</span>
+          <input id="link-search" type="search" autocomplete="off" placeholder="Escribe plataforma, dominio o palabra clave…" aria-controls="link-search-results" aria-expanded="false">
+        </label>
+        <p class="link-search-hint">El directorio permanece oculto; al escribir aparecen primero las coincidencias más útiles.</p>
+        <div id="link-search-results" class="smart-search-results link-search-results" role="list" aria-live="polite" hidden></div>
+      </section>
+      <div class="link-directory-bar">
+        <button id="toggle-link-directory" type="button" aria-expanded="false" aria-controls="quick-links-directory">Ver directorio completo</button>
+        <span id="quick-links-count" aria-live="polite"></span>
+      </div>
+      <div id="quick-links-directory" class="quick-links-directory" hidden></div>
     </section>
 
     <section id="acerca" class="view" data-view="acerca" hidden aria-labelledby="about-title">

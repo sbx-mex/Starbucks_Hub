@@ -6,11 +6,16 @@ const state = {
   imageModalTrigger: null,
   toolQuery: "",
   toolFilter: "all",
+  homeQuery: "",
+  linkQuery: "",
+  linkDirectoryOpen: false,
   refreshing: false,
   recentTools: [],
 };
 
 let toolSearchTimer = null;
+let homeSearchTimer = null;
+let linkSearchTimer = null;
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const WEEK_ORDER = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -71,6 +76,7 @@ const ICONS = {
   check: '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16.5 9"/>',
   compass: '<circle cx="12" cy="12" r="9"/><path d="m15 9-2 6-4 2 2-6 4-2Z"/>',
   link: '<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
   message: '<path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v8Z"/><path d="M8 9h8M8 13h5"/>',
   about: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.6 2.6 0 1 1 4.4 1.9c-1 .8-1.9 1.2-1.9 2.6M12 17h.01"/>',
   menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
@@ -176,6 +182,141 @@ function publishedEvents() {
 function externalUrl(value) {
   const text = String(value ?? "").trim();
   return /^https?:\/\//i.test(text) && !text.includes("...") ? text : null;
+}
+
+function normalizeSearchText(value) {
+  return String(value ?? "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-MX")
+    .trim();
+}
+
+function toolRecords() {
+  return [...sheet("Herramientas")]
+    .filter((record) => record.Nombre !== "Evidencia Antes / Después")
+    .filter((record) => externalUrl(record.URL))
+    .sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
+}
+
+function quickLinkRecords() {
+  return [...sheet("Links")]
+    .filter((record) => externalUrl(record.URL))
+    .sort((a, b) => Number(a.Orden || 999) - Number(b.Orden || 999));
+}
+
+function catalogEntries() {
+  const entries = [];
+  const seenUrls = new Set();
+  const append = (record, source) => {
+    const url = externalUrl(record.URL);
+    if (!url || seenUrls.has(url)) return;
+    seenUrls.add(url);
+    const isTool = source === "Herramienta";
+    const name = String(record.Nombre || record.Dominio || "Acceso").trim();
+    const subtitle = isTool
+      ? String(record.Grupo || record.Categoria || "Herramienta").trim()
+      : String(record.Dominio || record.Carpeta || "Link").trim();
+    const description = String(record.Notas || record.Categoria || "").trim();
+    const searchText = normalizeSearchText([name, subtitle, description, record.URL, record.Vista, record.Carpeta].join(" "));
+    entries.push({ record, source, name, subtitle, description, url, searchText });
+  };
+  toolRecords().forEach((record) => append(record, "Herramienta"));
+  quickLinkRecords().forEach((record) => append(record, "Link"));
+  return entries;
+}
+
+function searchCatalog(query, options = {}) {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) return [];
+  const tokens = normalized.split(/\s+/).filter(Boolean);
+  const source = options.source || null;
+  const limit = options.limit || 8;
+  return catalogEntries()
+    .filter((entry) => !source || entry.source === source)
+    .map((entry) => {
+      if (!tokens.every((token) => entry.searchText.includes(token))) return null;
+      const name = normalizeSearchText(entry.name);
+      const subtitle = normalizeSearchText(entry.subtitle);
+      const description = normalizeSearchText(entry.description);
+      let score = 0;
+      if (name === normalized) score += 120;
+      if (name.startsWith(normalized)) score += 90;
+      if (name.includes(normalized)) score += 60;
+      if (subtitle.includes(normalized)) score += 32;
+      if (description.includes(normalized)) score += 18;
+      tokens.forEach((token) => {
+        if (name.split(/\s+/).some((word) => word.startsWith(token))) score += 14;
+        if (subtitle.includes(token)) score += 5;
+      });
+      return { ...entry, score };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, "es-MX"))
+    .slice(0, limit);
+}
+
+function smartResultMarkup(entry) {
+  const iconText = entry.source === "Herramienta" ? (entry.record.Icono || "↗") : "↗";
+  const toolAttribute = entry.source === "Herramienta" ? ` data-tool-name="${esc(entry.name)}"` : "";
+  return `<a class="smart-result" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer" data-catalog-source="${esc(entry.source)}"${toolAttribute} aria-label="Abrir ${esc(entry.name)} en una pestaña nueva">
+    <span class="smart-result-icon" aria-hidden="true">${esc(iconText)}</span>
+    <span class="smart-result-copy"><strong>${esc(entry.name)}</strong><small>${esc(entry.subtitle || entry.source)}</small>${entry.description ? `<span>${esc(entry.description)}</span>` : ""}</span>
+    <span class="smart-result-type">${esc(entry.source)}</span>
+  </a>`;
+}
+
+function renderHomeSearch() {
+  const input = $("#home-search");
+  const container = $("#home-search-results");
+  if (!input || !container) return;
+  const query = state.homeQuery.trim();
+  if (!query) {
+    container.hidden = true;
+    container.innerHTML = "";
+    input.setAttribute("aria-expanded", "false");
+    return;
+  }
+  const results = searchCatalog(query, { limit: 8 });
+  container.innerHTML = results.length
+    ? results.map(smartResultMarkup).join("")
+    : emptyState(`No encontramos accesos para “${query}”.`);
+  container.hidden = false;
+  input.setAttribute("aria-expanded", "true");
+}
+
+function renderQuickLinks() {
+  const input = $("#link-search");
+  const resultsContainer = $("#link-search-results");
+  const directory = $("#quick-links-directory");
+  const count = $("#quick-links-count");
+  const toggle = $("#toggle-link-directory");
+  if (!input || !resultsContainer || !directory || !count || !toggle) return;
+
+  const records = quickLinkRecords();
+  const query = state.linkQuery.trim();
+  const results = query ? searchCatalog(query, { source: "Link", limit: 10 }) : [];
+  if (query) {
+    resultsContainer.innerHTML = results.length
+      ? results.map(smartResultMarkup).join("")
+      : emptyState(`No encontramos links para “${query}”.`);
+    resultsContainer.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+  } else {
+    resultsContainer.hidden = true;
+    resultsContainer.innerHTML = "";
+    input.setAttribute("aria-expanded", "false");
+  }
+
+  count.textContent = `${records.length} accesos disponibles`;
+  directory.hidden = !state.linkDirectoryOpen;
+  toggle.setAttribute("aria-expanded", String(state.linkDirectoryOpen));
+  toggle.textContent = state.linkDirectoryOpen ? "Ocultar directorio" : "Ver directorio completo";
+  directory.innerHTML = records.map((record) => `
+    <a class="quick-link-card" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre || record.Dominio || "link")} en una pestaña nueva">
+      <span class="quick-link-card-icon" aria-hidden="true">↗</span>
+      <span><strong>${esc(record.Nombre || record.Dominio || "Acceso")}</strong><small>${esc(record.Dominio || record.Carpeta || "Link")}</small></span>
+    </a>`).join("");
 }
 
 function localAsset(value) {
@@ -304,7 +445,7 @@ function currentDayName() {
 }
 
 function renderHome() {
-  const linksByName = new Map(sheet("Links").map((record) => [record.Nombre, record]));
+  const linksByName = new Map(sheet("Herramientas").map((record) => [record.Nombre, record]));
   $("#home-tools-grid").innerHTML = HOME_TOOL_NAMES.map((name) => {
     const record = linksByName.get(name);
     const title = esc(name);
@@ -471,10 +612,7 @@ function renderOps() {
 
 function renderLinks() {
   const query = state.toolQuery.trim().toLocaleLowerCase("es-MX");
-  const records = [...sheet("Links")]
-    .filter((record) => record.Nombre !== "Evidencia Antes / Después")
-    .filter((record) => externalUrl(record.URL))
-    .sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
+  const records = toolRecords();
   const favorites = records.filter((record) => normalizeBool(record.Favorito));
   const filtered = records.filter((record) => {
     const searchable = [record.Nombre, record.Notas, record.Categoria, record.Grupo, record.Vista]
@@ -519,9 +657,11 @@ function renderLinks() {
 function renderAll() {
   setGreeting();
   renderHome();
+  renderHomeSearch();
   renderEvents();
   renderOps();
   renderLinks();
+  renderQuickLinks();
 }
 
 function openImageModal(src, alt, trigger) {
@@ -560,6 +700,24 @@ function bindEvents() {
     openImageModal(trigger.dataset.imageSrc, trigger.dataset.imageAlt, trigger);
   });
   $("#event-period").addEventListener("change", renderEvents);
+  $("#home-search").addEventListener("input", (event) => {
+    window.clearTimeout(homeSearchTimer);
+    homeSearchTimer = window.setTimeout(() => {
+      state.homeQuery = event.target.value;
+      renderHomeSearch();
+    }, 90);
+  });
+  $("#link-search").addEventListener("input", (event) => {
+    window.clearTimeout(linkSearchTimer);
+    linkSearchTimer = window.setTimeout(() => {
+      state.linkQuery = event.target.value;
+      renderQuickLinks();
+    }, 90);
+  });
+  $("#toggle-link-directory").addEventListener("click", () => {
+    state.linkDirectoryOpen = !state.linkDirectoryOpen;
+    renderQuickLinks();
+  });
   $("#tool-search").addEventListener("input", (event) => {
     window.clearTimeout(toolSearchTimer);
     toolSearchTimer = window.setTimeout(() => {
@@ -594,6 +752,13 @@ function bindEvents() {
       window.setTimeout(renderLinks, 0);
     }
   });
+  $("#home-search-results").addEventListener("click", (event) => {
+    const link = event.target.closest('[data-catalog-source="Herramienta"][data-tool-name]');
+    if (link) {
+      rememberTool(link.dataset.toolName);
+      window.setTimeout(renderLinks, 0);
+    }
+  });
   $(".tool-filters").addEventListener("keydown", (event) => {
     if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
     event.preventDefault();
@@ -617,16 +782,38 @@ function bindEvents() {
     applySidebarState();
   });
   document.addEventListener("keydown", (event) => {
-    const searchFocused = document.activeElement === $("#tool-search");
-    if ((event.key === "/" && !/input|textarea|select/i.test(document.activeElement?.tagName)) || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k")) {
+    const toolSearchFocused = document.activeElement === $("#tool-search");
+    const homeSearchFocused = document.activeElement === $("#home-search");
+    const linkSearchFocused = document.activeElement === $("#link-search");
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k") {
+      event.preventDefault();
+      location.hash = "inicio";
+      window.setTimeout(() => $("#home-search").focus(), 0);
+      return;
+    }
+    if (event.key === "/" && !/input|textarea|select/i.test(document.activeElement?.tagName)) {
       event.preventDefault();
       location.hash = "herramientas";
       window.setTimeout(() => $("#tool-search").focus(), 0);
       return;
     }
-    if (event.key === "Escape" && searchFocused && (state.toolQuery || state.toolFilter !== "all")) {
+    if (event.key === "Escape" && toolSearchFocused && (state.toolQuery || state.toolFilter !== "all")) {
       event.preventDefault();
       $("#clear-tool-search").click();
+      return;
+    }
+    if (event.key === "Escape" && homeSearchFocused && state.homeQuery) {
+      event.preventDefault();
+      state.homeQuery = "";
+      $("#home-search").value = "";
+      renderHomeSearch();
+      return;
+    }
+    if (event.key === "Escape" && linkSearchFocused && state.linkQuery) {
+      event.preventDefault();
+      state.linkQuery = "";
+      $("#link-search").value = "";
+      renderQuickLinks();
       return;
     }
     if (event.key === "Escape" && !$("#image-modal").hidden) {

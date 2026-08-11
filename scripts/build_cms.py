@@ -18,6 +18,7 @@ DATE_HEADERS = {"Fecha", "Fecha Inicio", "Fecha Fin", "Vigencia Inicio", "Vigenc
 REQUIRED_SHEETS = {
     "Informativo",
     "WFM",
+    "Herramientas",
     "Links",
     "Eventos",
     "Actividades_Semanales",
@@ -25,11 +26,8 @@ REQUIRED_SHEETS = {
     "Duty_Roster",
     "Identidad",
 }
-SHEET_ALIASES = {
-    "Herramientas": "Links",
-}
-REMOVED_LINKS = {"Evidencia Antes / Después"}
-REQUIRED_LINKS = [
+REMOVED_TOOLS = {"Evidencia Antes / Después"}
+REQUIRED_TOOLS = [
     {
         "Categoria": "Operación", "Grupo": "App", "Vista": "CN", "Icono": "📍",
         "Nombre": "CN Connect", "Tipo": "Web", "URL": "https://sbx-mx.github.io/CentroNorteConnect/",
@@ -43,16 +41,33 @@ REQUIRED_LINKS = [
 ]
 
 
-def normalize_links(records: list[dict]) -> list[dict]:
-    """Aplica la navegación oficial aunque el Excel agregue o quite filas."""
-    current = [record for record in records if record.get("Nombre") not in REMOVED_LINKS]
+def normalize_tools(records: list[dict]) -> list[dict]:
+    """Aplica la navegación oficial de Herramientas sin mezclarla con Links."""
+    current = [record for record in records if record.get("Nombre") not in REMOVED_TOOLS]
     by_name = {record.get("Nombre"): record for record in current}
-    for required in REQUIRED_LINKS:
+    for required in REQUIRED_TOOLS:
         if required["Nombre"] in by_name:
             by_name[required["Nombre"]].update(required)
         else:
             current.append(dict(required))
     return sorted(current, key=lambda record: (float(record.get("Orden") or 999), str(record.get("Nombre") or "")))
+
+
+def normalize_quick_links(records: list[dict]) -> list[dict]:
+    """Publica únicamente links marcados para conservar y con URL web válida."""
+    result = []
+    for index, record in enumerate(records, start=1):
+        decision = str(record.get("Decisión") or record.get("Decision") or "Dejar").strip().lower()
+        if decision not in {"dejar", "si", "sí", "true", "1"}:
+            continue
+        url = str(record.get("URL") or "").strip()
+        if not re.match(r"^https?://", url, flags=re.IGNORECASE):
+            continue
+        clean = dict(record)
+        clean["URL"] = url
+        clean["Orden"] = index
+        result.append(clean)
+    return result
 
 
 def column_index(reference: str) -> int:
@@ -153,17 +168,18 @@ def build(source: Path, destination: Path) -> None:
     with zipfile.ZipFile(source) as archive:
         strings = shared_strings(archive)
         sheets = {
-            SHEET_ALIASES.get(name, name): normalize_records(read_rows(archive, target, strings))
+            name: normalize_records(read_rows(archive, target, strings))
             for name, target in workbook_sheets(archive)
         }
 
     missing = sorted(REQUIRED_SHEETS - set(sheets))
     if missing:
         raise SystemExit(f"Faltan hojas requeridas: {', '.join(missing)}")
-    sheets["Links"] = normalize_links(sheets["Links"])
+    sheets["Herramientas"] = normalize_tools(sheets["Herramientas"])
+    sheets["Links"] = normalize_quick_links(sheets["Links"])
 
     payload = {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "source": source.name,
         "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
         "sheets": {name: sheets[name] for name in sheets},

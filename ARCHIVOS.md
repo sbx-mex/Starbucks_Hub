@@ -12,7 +12,8 @@
 - `assets/icons/starbucks_hub.png`: identidad visual e ícono de la PWA.
 - `assets/duty-roster/*`: once imágenes operativas organizadas de lunes a domingo.
 - `assets/content/*`: únicamente recursos mencionados por el CMS.
-- `scripts/build_cms.py`: pipeline local Excel → JSON.
+- `scripts/build_cms.py`: pipeline local Excel → JSON; mantiene `Herramientas` y `Links` como módulos independientes.
+- `Starbucks_Hub_CMS.xlsx` (fuera de la carpeta publicada): motor local de actualización; `Links` puede estar oculto y usa `Decisión` para publicar accesos.
 - `tests/validate_project.py`: validación estática y de integridad.
 - `README.md`: actualización y publicación.
 

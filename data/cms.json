@@ -1,7 +1,7 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-11T21:51:51+00:00",
+  "generatedAt": "2026-08-11T23:39:50+00:00",
   "sheets": {
     "Informativo": [
       {
@@ -230,510 +230,292 @@
     ],
     "Links": [
       {
+        "ID": 1,
+        "Nombre": "Alsea College",
+        "URL": "https://capacitacion.alsea.net/auth/smartcup/",
+        "Notas": null
+      },
+      {
+        "ID": 2,
+        "Nombre": "Attensi | Dashboard",
+        "URL": "https://manager.attensi.com/starbucks_mexico/dashboard",
+        "Notas": null
+      },
+      {
+        "ID": 3,
+        "Nombre": "Attensi | Inicio",
+        "URL": "https://manager.attensi.com/starbucks_mexico/home",
+        "Notas": null
+      },
+      {
         "ID": 4,
-        "Carpeta": null,
-        "Nombre": "Frogmi_Dashboard",
-        "URL": "https://we.frogmi.com/home",
-        "Dominio": "we.frogmi.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1760113366",
-        "Orden": 1
+        "Nombre": "Beneflex | SGMM",
+        "URL": "https://www.beneflex.com.mx/MisOpcionales/ie/ieMisDatos.aspx",
+        "Notas": null
       },
       {
         "ID": 5,
-        "Carpeta": null,
-        "Nombre": "Frogmi_Dashboard",
-        "URL": "https://neo.frogmi.com/alsea-mexico/dashboard/gallery",
-        "Dominio": "neo.frogmi.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843986",
-        "Orden": 2
+        "Nombre": "BI",
+        "URL": "https://bi.alsea.com.mx/MicroStrategy/servlet/mstrWeb",
+        "Notas": null
       },
       {
         "ID": 6,
-        "Carpeta": null,
-        "Nombre": "BI",
-        "URL": "https://bi.alsea.com.mx/MicroStrategy/servlet/mstrWeb",
-        "Dominio": "bi.alsea.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1638486414",
-        "Orden": 3
+        "Nombre": "COG",
+        "URL": "https://centro.operaciones.alsea.net/Login",
+        "Notas": null
       },
       {
         "ID": 7,
-        "Carpeta": null,
-        "Nombre": "MicroStrategy",
-        "URL": "https://bi.alsea.com.mx/MicroStrategyLibrary/auth/ui/loginPage",
-        "Dominio": "bi.alsea.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843542",
-        "Orden": 4
+        "Nombre": "Consulta Ticket",
+        "URL": "http://consulta.delivery.alsea.net/",
+        "Notas": null
+      },
+      {
+        "ID": 8,
+        "Nombre": "Design Gallery",
+        "URL": "https://starbucks.goepower.com/Store/Default.aspx?CUR=b580e256bd274fd6b1c2c96677a1b37e",
+        "Notas": null
+      },
+      {
+        "ID": 9,
+        "Nombre": "Directorio | Unete",
+        "URL": "https://grupovips.sharepoint.com/:x:/s/PeopleExperience/IQDA8cQPXhVUT5CAmRw5HGyyAb9TXtRS73Qmgmbo1mCLp8k?wdExp=TEAMS-TREATMENT&web=1&isSPOFile=1&CID=af6c8c99-9450-2c13-0cee-9edfdb8ef1f8",
+        "Notas": null
+      },
+      {
+        "ID": 10,
+        "Nombre": "Facturacion  |Circuito Mexiquense",
+        "URL": "https://portalfacturacion.circuitoexterior.mx/PortalWEBCONMEX/",
+        "Notas": null
+      },
+      {
+        "ID": 11,
+        "Nombre": "Facturacion | Corsa",
+        "URL": "http://www.estacionamientoscorsa.com.mx/facturas/",
+        "Notas": null
+      },
+      {
+        "ID": 12,
+        "Nombre": "Facturacion | FUNO",
+        "URL": "https://estacionamientos.fibrauno.mx/facturar",
+        "Notas": null
       },
       {
         "ID": 13,
-        "Carpeta": null,
-        "Nombre": "HCM",
-        "URL": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3Dl3nkhYXbqUTKDp8Bf0uxGDPpBZWkMQF7j3HLyy4r8SvMjdao7m8UM%2BDTKwOcnx5sJLL9bMZOiz%2BCFKFydS%2FxmHFRXzmVqCRtilYx5MU6CokaAbqH%2FbzY5lEur%2F2BdsGt97iecodji%2FLcLrzXqC2kCfYjIxwLkLYTAYHBRkfRAnX9JohUD1hEtqWNroirzg9qJ363%2FW%2BUkx0tsWFTl0t%2FUtdP%2BaB329lgoJ3KXSD3DIrgKyhRuHr%2BypO63BIDb13HzbEm6kQ%2FK83eOZieuambuMw7nujUiZv33flaz%2F%2BsBIo8nv2yHypyfhVtjdrll%2BsdacmJuospuvjZ2XMnZZzQ4qla3iQC98%2BIDNvNHRif2HLWZwYUcRiu0Tf1rj2XjM3%2FjxAIN4JgyhtDarjvNUphjG7ie2pKXwAUdk7E2%2BNv5I6bycmGNiGsrCxloC3yQRd1%20agentid%3DOraFusionApp_11AG%20ver%3D1%20crmethod%3D2%26cksum%3Df2502d4131048a2deb7d8284fd47fd959a544229&ECID-Context=1.006FTSu0GtL4IvV6y3edMG009i4h00056_%3BkXjE",
-        "Dominio": "ejlw.login.us2.oraclecloud.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756844474",
-        "Orden": 5
+        "Nombre": "Facturacion | Parkimovil",
+        "URL": "https://facturas.parkimovil.com/",
+        "Notas": null
+      },
+      {
+        "ID": 14,
+        "Nombre": "Facturacion | Pinfra",
+        "URL": "https://www.pinfrafacturacion.com.mx/",
+        "Notas": null
       },
       {
         "ID": 15,
-        "Carpeta": null,
-        "Nombre": "Attensi",
-        "URL": "https://manager.attensi.com/starbucks_mexico/home",
-        "Dominio": "manager.attensi.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756845159",
-        "Orden": 6
+        "Nombre": "Finanzas | CN",
+        "URL": "https://grupovips-my.sharepoint.com/:f:/r/personal/zabdi_lopez_becario_alsea_net/Documents/P%26L/2026/Division%202/Centro%20Norte?d=w75ef89a99b8b41f18fb43f61a8aa2775&csf=1&web=1&e=g3i7IN",
+        "Notas": null
+      },
+      {
+        "ID": 16,
+        "Nombre": "Frogmi | Dashboard",
+        "URL": "https://neo.frogmi.com/alsea-mexico/dashboard/gallery",
+        "Notas": null
+      },
+      {
+        "ID": 17,
+        "Nombre": "Frogmi | System Check",
+        "URL": "https://we.frogmi.com/home",
+        "Notas": null
       },
       {
         "ID": 18,
-        "Carpeta": null,
-        "Nombre": "UBITS",
-        "URL": "https://login.ubitslearning.com/login?state=hKFo2SBUZ3pscjBsQzU4M0EwNW15Nm15bVlUbWgwZmVxVkZuSaFupWxvZ2luo3RpZNkga0pVd19hZklzeDE0Um5YSWxBNlp1eWpjbERIc3J3OXKjY2lk2SA1TkhqdG90dHl1OE5aRFFkYXRMdmtjRW5nd296VU9nNA&client=5NHjtottyu8NZDQdatLvkcEngwozUOg4&protocol=oauth2&scope=openid%20profile%20email&audience=https%3A%2F%2Fubits-api-authorization&redirect_uri=https%3A%2F%2Fwww.lxp.ubitslearning.com&response_type=code&response_mode=query&nonce=aEdBZy5OZ3B1LkU4SzZ3NzAwNUdQLWhIX2luWDZrUXZ4R1lWbi14VnZiSw%3D%3D&code_challenge=yHNygE3auWnTL27xCLDcWFxyvueza6UbUk8QuIZ824I&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtc3BhLWpzIiwidmVyc2lvbiI6IjIuMTkuMyJ9",
-        "Dominio": "login.ubitslearning.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843470",
-        "Orden": 7
+        "Nombre": "Gastos | Pago",
+        "URL": "https://sso.edenred.com.mx/ssov280/Account/LogOn#smodal",
+        "Notas": null
+      },
+      {
+        "ID": 19,
+        "Nombre": "Gastos |Concur",
+        "URL": "https://eu2.concursolutions.com/nui/expense",
+        "Notas": null
+      },
+      {
+        "ID": 20,
+        "Nombre": "Harmony | Musica",
+        "URL": "https://harmony.moodmedia.com/wpn/enter-mobile-key",
+        "Notas": null
       },
       {
         "ID": 21,
-        "Carpeta": null,
-        "Nombre": "Alsea College",
-        "URL": "https://capacitacion.alsea.net/auth/smartcup/",
-        "Dominio": "capacitacion.alsea.net",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1758563522",
-        "Orden": 8
+        "Nombre": "HCM",
+        "URL": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3Dl3nkhYXbqUTKDp8Bf0uxGDPpBZWkMQF7j3HLyy4r8SvMjdao7m8UM%2BDTKwOcnx5sJLL9bMZOiz%2BCFKFydS%2FxmHFRXzmVqCRtilYx5MU6CokaAbqH%2FbzY5lEur%2F2BdsGt97iecodji%2FLcLrzXqC2kCfYjIxwLkLYTAYHBRkfRAnX9JohUD1hEtqWNroirzg9qJ363%2FW%2BUkx0tsWFTl0t%2FUtdP%2BaB329lgoJ3KXSD3DIrgKyhRuHr%2BypO63BIDb13HzbEm6kQ%2FK83eOZieuambuMw7nujUiZv33flaz%2F%2BsBIo8nv2yHypyfhVtjdrll%2BsdacmJuospuvjZ2XMnZZzQ4qla3iQC98%2BIDNvNHRif2HLWZwYUcRiu0Tf1rj2XjM3%2FjxAIN4JgyhtDarjvNUphjG7ie2pKXwAUdk7E2%2BNv5I6bycmGNiGsrCxloC3yQRd1%20agentid%3DOraFusionApp_11AG%20ver%3D1%20crmethod%3D2%26cksum%3Df2502d4131048a2deb7d8284fd47fd959a544229&ECID-Context=1.006FTSu0GtL4IvV6y3edMG009i4h00056_%3BkXjE",
+        "Notas": null
+      },
+      {
+        "ID": 22,
+        "Nombre": "HHPOS_Tabletas",
+        "URL": "https://app.powerbi.com/groups/me/reports/76789f1a-7201-4c68-ad58-a16c0ee54329/403a21af6a31ee3bd600?ctid=fe51472c-6660-4ae5-995a-ac0f14ef2b07&experience=power-bi",
+        "Notas": null
+      },
+      {
+        "ID": 23,
+        "Nombre": "HME",
+        "URL": "https://hmecloud.com/?pg=Login",
+        "Notas": null
+      },
+      {
+        "ID": 24,
+        "Nombre": "Humanet V10",
+        "URL": "https://humanet10.alsea.com.mx/login",
+        "Notas": "VPN Activa"
       },
       {
         "ID": 25,
-        "Carpeta": null,
-        "Nombre": "Workvivo",
-        "URL": "https://alsea.workvivo.us/login",
-        "Dominio": "alsea.workvivo.us",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843744",
-        "Orden": 9
+        "Nombre": "Humanet V7 | Edge",
+        "URL": "http://humanet.alsea.com.mx/inicioCentral/login.aspx",
+        "Notas": "Solo abre en Microsoft Edge."
       },
       {
         "ID": 26,
-        "Carpeta": null,
-        "Nombre": "UKG_Horarios",
-        "URL": "https://dcus21-prd17-ath01.prd.mykronos.com/authn/XUI/?realm=/sistemaintegral_prd_01#login&goto=https%3A%2F%2Fsistemaintegral.prd.mykronos.com%3A443%2F",
-        "Dominio": "dcus21-prd17-ath01.prd.mykronos.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1769559331",
-        "Orden": 10
+        "Nombre": "ICA",
+        "URL": "https://ica-stage.bw-globalsolutions.com/Login.php",
+        "Notas": null
       },
       {
         "ID": 27,
-        "Carpeta": null,
-        "Nombre": "Promoplanner",
-        "URL": "https://www.promoplannermexico.com.mx/POP/administracion/LogIn.asp",
-        "Dominio": "www.promoplannermexico.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843507",
-        "Orden": 11
+        "Nombre": "Indicencias | Venta Perdida",
+        "URL": "https://grupovips-my.sharepoint.com/:x:/g/personal/laurae_lopez_starbucks_com_mx1/IQCBK24qxkaeQJz7kHJykly-AdggupBn5tZnpBASB6PIc6U?e=Ok0zYo&CID=4d887f14-f2d1-d122-40a5-aa3483bd4e68&SI=NonSentItems",
+        "Notas": null
       },
       {
         "ID": 28,
-        "Carpeta": null,
-        "Nombre": "Mesa de servicio",
-        "URL": "https://mds.alsea.com.mx/user/profile/public/id/140",
-        "Dominio": "mds.alsea.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843569",
-        "Orden": 12
+        "Nombre": "KPIS 2026 CN",
+        "URL": "https://grupovips-my.sharepoint.com/:x:/g/personal/jorge_alcantar_starbucks_com_mx/IQAyMdoeH7jwQYP-P2bwGeJ5AVvxUPM7UZ6huFsOlWyK5_w?e=lNlhEj",
+        "Notas": null
       },
       {
         "ID": 29,
-        "Carpeta": null,
-        "Nombre": "PDS",
-        "URL": "https://starbucks-pds.bw-globalsolutions.com/?mainMenu=v_desarrollo",
-        "Dominio": "starbucks-pds.bw-globalsolutions.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843595",
-        "Orden": 13
+        "Nombre": "Mapa CN | Google",
+        "URL": "https://www.google.com/maps/d/edit?mid=1qJtSehevuovcJfWayveTAnfQ9rFEdVM&ll=19.63025847561793%2C-99.1352144742164&z=17",
+        "Notas": null
       },
       {
         "ID": 30,
-        "Carpeta": null,
-        "Nombre": "HME",
-        "URL": "https://hmecloud.com/?pg=Login",
-        "Dominio": "hmecloud.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843305",
-        "Orden": 14
+        "Nombre": "Mesa de servicio",
+        "URL": "https://mds.alsea.com.mx/user/profile/public/id/140",
+        "Notas": null
       },
       {
         "ID": 31,
-        "Carpeta": null,
-        "Nombre": "Retain",
-        "URL": "https://alseamxres.retain.es//entrada.php",
-        "Dominio": "alseamxres.retain.es",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1769526732",
-        "Orden": 15
+        "Nombre": "META",
+        "URL": "https://meta.alsea.net/meta/login#/login",
+        "Notas": null
       },
       {
         "ID": 32,
-        "Carpeta": null,
-        "Nombre": "COG",
-        "URL": "https://centro.operaciones.alsea.net/Login",
-        "Dominio": "centro.operaciones.alsea.net",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843376",
-        "Orden": 16
+        "Nombre": "MicroStrategy",
+        "URL": "https://bi.alsea.com.mx/MicroStrategyLibrary/auth/ui/loginPage",
+        "Notas": null
       },
       {
         "ID": 33,
-        "Carpeta": null,
-        "Nombre": "META",
-        "URL": "https://meta.alsea.net/meta/login#/login",
-        "Dominio": "meta.alsea.net",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756876425",
-        "Orden": 17
+        "Nombre": "Network - Musica",
+        "URL": "https://player.apps.playnetwork.com/player/dashboard",
+        "Notas": null
       },
       {
         "ID": 34,
-        "Carpeta": null,
-        "Nombre": "Consulta Ticket",
-        "URL": "http://consulta.delivery.alsea.net/",
-        "Dominio": "consulta.delivery.alsea.net",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1601513534",
-        "Orden": 18
+        "Nombre": "Nube Region CN",
+        "URL": "https://outlook.cloud.microsoft/host/377c982d-9686-450e-9a7c-22aeaf1bc162/7211f19f-262a-42eb-a02e-289956491741",
+        "Notas": null
       },
       {
         "ID": 35,
-        "Carpeta": null,
-        "Nombre": "ICA",
-        "URL": "https://ica-stage.bw-globalsolutions.com/Login.php",
-        "Dominio": "ica-stage.bw-globalsolutions.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756845976",
-        "Orden": 19
+        "Nombre": "Okta",
+        "URL": "https://auth-als.okta.com/login/default",
+        "Notas": null
       },
       {
         "ID": 36,
-        "Carpeta": null,
-        "Nombre": "Recibo de Nomina",
-        "URL": "https://alsea.tureciboelectronico.com/TuRecibo_Alsea/Login.aspx",
-        "Dominio": "alsea.tureciboelectronico.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756876341",
-        "Orden": 20
+        "Nombre": "PDS",
+        "URL": "https://starbucks-pds.bw-globalsolutions.com/?mainMenu=v_desarrollo",
+        "Notas": null
       },
       {
         "ID": 37,
-        "Carpeta": null,
-        "Nombre": "Design Gallery",
-        "URL": "https://starbucks.goepower.com/Store/Default.aspx?CUR=b580e256bd274fd6b1c2c96677a1b37e",
-        "Dominio": "starbucks.goepower.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1756843585",
-        "Orden": 21
+        "Nombre": "Promoplanner",
+        "URL": "https://www.promoplannermexico.com.mx/POP/administracion/LogIn.asp",
+        "Notas": null
+      },
+      {
+        "ID": 38,
+        "Nombre": "Qualtrics",
+        "URL": "https://xmalsea.qualtrics.com/login?path=%2FControlPanel%2F%3FLoginAction%3DHomepage&product=home-page-settings",
+        "Notas": null
       },
       {
         "ID": 39,
-        "Carpeta": null,
-        "Nombre": "Okta",
-        "URL": "https://auth-als.okta.com/login/default",
-        "Dominio": "auth-als.okta.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1757235390",
-        "Orden": 22
+        "Nombre": "Recibo de Nomina",
+        "URL": "https://alsea.tureciboelectronico.com/TuRecibo_Alsea/Login.aspx",
+        "Notas": null
       },
       {
         "ID": 40,
-        "Carpeta": null,
-        "Nombre": "Va por mi cuenta",
-        "URL": "https://extranet.alsea.net/ex/vxmc/index.aspx?e=timeout",
-        "Dominio": "extranet.alsea.net",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1757236257",
-        "Orden": 23
+        "Nombre": "Retain",
+        "URL": "https://alseamxres.retain.es//entrada.php",
+        "Notas": null
       },
       {
         "ID": 41,
-        "Carpeta": null,
-        "Nombre": "Humanet V10",
-        "URL": "https://humanet10.alsea.com.mx/login",
-        "Dominio": "humanet10.alsea.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1759301090",
-        "Orden": 24
+        "Nombre": "S Fleet | Flotilla",
+        "URL": "https://auth.sfleet.mx/?redirect_to=https%3A%2F%2Fgo.sfleet.mx%2Fauth%2Fcognito%2Fcallback",
+        "Notas": null
       },
       {
         "ID": 42,
-        "Carpeta": null,
         "Nombre": "Sura | Fondo de Ahorro",
         "URL": "https://rk.suraim.com.mx/RkWebSite/Account/Login",
-        "Dominio": "rk.suraim.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1763847243",
-        "Orden": 25
+        "Notas": null
       },
       {
         "ID": 43,
-        "Carpeta": null,
-        "Nombre": "Attensi ",
-        "URL": "https://manager.attensi.com/starbucks_mexico/dashboard",
-        "Dominio": "manager.attensi.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1765317977",
-        "Orden": 26
+        "Nombre": "Televia",
+        "URL": "https://www.televia.com.mx/",
+        "Notas": null
       },
       {
         "ID": 44,
-        "Carpeta": null,
-        "Nombre": "Gastos |Pago",
-        "URL": "https://sso.edenred.com.mx/ssov280/Account/LogOn#smodal",
-        "Dominio": "sso.edenred.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1775155620",
-        "Orden": 27
+        "Nombre": "UBITS",
+        "URL": "https://login.ubitslearning.com/login?state=hKFo2SBUZ3pscjBsQzU4M0EwNW15Nm15bVlUbWgwZmVxVkZuSaFupWxvZ2luo3RpZNkga0pVd19hZklzeDE0Um5YSWxBNlp1eWpjbERIc3J3OXKjY2lk2SA1TkhqdG90dHl1OE5aRFFkYXRMdmtjRW5nd296VU9nNA&client=5NHjtottyu8NZDQdatLvkcEngwozUOg4&protocol=oauth2&scope=openid%20profile%20email&audience=https%3A%2F%2Fubits-api-authorization&redirect_uri=https%3A%2F%2Fwww.lxp.ubitslearning.com&response_type=code&response_mode=query&nonce=aEdBZy5OZ3B1LkU4SzZ3NzAwNUdQLWhIX2luWDZrUXZ4R1lWbi14VnZiSw%3D%3D&code_challenge=yHNygE3auWnTL27xCLDcWFxyvueza6UbUk8QuIZ824I&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtc3BhLWpzIiwidmVyc2lvbiI6IjIuMTkuMyJ9",
+        "Notas": null
       },
       {
         "ID": 45,
-        "Carpeta": null,
-        "Nombre": "Beneflex | SGMM",
-        "URL": "https://www.beneflex.com.mx/MisOpcionales/ie/ieMisDatos.aspx",
-        "Dominio": "www.beneflex.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1775702995",
-        "Orden": 28
+        "Nombre": "UKG | Horarios",
+        "URL": "https://dcus21-prd17-ath01.prd.mykronos.com/authn/XUI/?realm=/sistemaintegral_prd_01#login&goto=https%3A%2F%2Fsistemaintegral.prd.mykronos.com%3A443%2F",
+        "Notas": "WFM · acceso prioritario de martes a viernes."
       },
       {
         "ID": 46,
-        "Carpeta": null,
-        "Nombre": "Harmony",
-        "URL": "https://harmony.moodmedia.com/wpn/enter-mobile-key",
-        "Dominio": "harmony.moodmedia.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1776304495",
-        "Orden": 29
+        "Nombre": "Va por mi cuenta",
+        "URL": "https://extranet.alsea.net/ex/vxmc/index.aspx?e=timeout",
+        "Notas": null
       },
       {
         "ID": 47,
-        "Carpeta": null,
-        "Nombre": "Network - Musica",
-        "URL": "https://player.apps.playnetwork.com/player/dashboard",
-        "Dominio": "player.apps.playnetwork.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1776363009",
-        "Orden": 30
+        "Nombre": "WOE Web",
+        "URL": "https://woe2.alsea.es/woe/login",
+        "Notas": "Requiere VPN encendida."
       },
       {
         "ID": 48,
-        "Carpeta": null,
-        "Nombre": "S.Fleet",
-        "URL": "https://auth.sfleet.mx/?redirect_to=https%3A%2F%2Fgo.sfleet.mx%2Fauth%2Fcognito%2Fcallback",
-        "Dominio": "auth.sfleet.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1777317629",
-        "Orden": 31
-      },
-      {
-        "ID": 49,
-        "Carpeta": null,
-        "Nombre": "Qualtrics",
-        "URL": "https://xmalsea.qualtrics.com/login?path=%2FControlPanel%2F%3FLoginAction%3DHomepage&product=home-page-settings",
-        "Dominio": "xmalsea.qualtrics.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1780986232",
-        "Orden": 32
-      },
-      {
-        "ID": 50,
-        "Carpeta": null,
-        "Nombre": "Gastos |Concur",
-        "URL": "https://eu2.concursolutions.com/nui/expense",
-        "Dominio": "eu2.concursolutions.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1784606319",
-        "Orden": 33
-      },
-      {
-        "ID": 56,
-        "Carpeta": null,
-        "Nombre": "Televia",
-        "URL": "https://www.televia.com.mx/",
-        "Dominio": "www.televia.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1758123846",
-        "Orden": 34
-      },
-      {
-        "ID": 57,
-        "Carpeta": null,
-        "Nombre": "Facturacion_Pinfra",
-        "URL": "https://www.pinfrafacturacion.com.mx/",
-        "Dominio": "www.pinfrafacturacion.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1761975691",
-        "Orden": 35
-      },
-      {
-        "ID": 58,
-        "Carpeta": null,
-        "Nombre": "Facturacion_Corsa",
-        "URL": "http://www.estacionamientoscorsa.com.mx/facturas/",
-        "Dominio": "www.estacionamientoscorsa.com.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1761975708",
-        "Orden": 36
-      },
-      {
-        "ID": 59,
-        "Carpeta": null,
-        "Nombre": "Facturacion | Parkimovil",
-        "URL": "https://facturas.parkimovil.com/",
-        "Dominio": "facturas.parkimovil.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1761976423",
-        "Orden": 37
-      },
-      {
-        "ID": 60,
-        "Carpeta": null,
-        "Nombre": "Facturacion  |Circuito Mexiquense",
-        "URL": "https://portalfacturacion.circuitoexterior.mx/PortalWEBCONMEX/",
-        "Dominio": "portalfacturacion.circuitoexterior.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1763943622",
-        "Orden": 38
-      },
-      {
-        "ID": 62,
-        "Carpeta": null,
-        "Nombre": "Facturacion Funo",
-        "URL": "https://estacionamientos.fibrauno.mx/facturar",
-        "Dominio": "estacionamientos.fibrauno.mx",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1775010246",
-        "Orden": 39
-      },
-      {
-        "ID": 63,
-        "Carpeta": null,
-        "Nombre": "HHPOS_Tabletas",
-        "URL": "https://app.powerbi.com/groups/me/reports/76789f1a-7201-4c68-ad58-a16c0ee54329/403a21af6a31ee3bd600?ctid=fe51472c-6660-4ae5-995a-ac0f14ef2b07&experience=power-bi",
-        "Dominio": "app.powerbi.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1778620072",
-        "Orden": 40
-      },
-      {
-        "ID": 65,
-        "Carpeta": null,
-        "Nombre": "KPIS 2026 CN",
-        "URL": "https://grupovips-my.sharepoint.com/:x:/g/personal/jorge_alcantar_starbucks_com_mx/IQAyMdoeH7jwQYP-P2bwGeJ5AVvxUPM7UZ6huFsOlWyK5_w?e=lNlhEj",
-        "Dominio": "grupovips-my.sharepoint.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1779825883",
-        "Orden": 41
-      },
-      {
-        "ID": 67,
-        "Carpeta": null,
-        "Nombre": "Mapa CN | Google",
-        "URL": "https://www.google.com/maps/d/edit?mid=1qJtSehevuovcJfWayveTAnfQ9rFEdVM&ll=19.63025847561793%2C-99.1352144742164&z=17",
-        "Dominio": "www.google.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1780209978",
-        "Orden": 42
-      },
-      {
-        "ID": 70,
-        "Carpeta": null,
-        "Nombre": "Indicencias | Venta Perdida",
-        "URL": "https://grupovips-my.sharepoint.com/:x:/g/personal/laurae_lopez_starbucks_com_mx1/IQCBK24qxkaeQJz7kHJykly-AdggupBn5tZnpBASB6PIc6U?e=Ok0zYo&CID=4d887f14-f2d1-d122-40a5-aa3483bd4e68&SI=NonSentItems",
-        "Dominio": "grupovips-my.sharepoint.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1781735942",
-        "Orden": 43
-      },
-      {
-        "ID": 77,
-        "Carpeta": null,
-        "Nombre": "Directorio | Unete",
-        "URL": "https://grupovips.sharepoint.com/:x:/s/PeopleExperience/IQDA8cQPXhVUT5CAmRw5HGyyAb9TXtRS73Qmgmbo1mCLp8k?wdExp=TEAMS-TREATMENT&web=1&isSPOFile=1&CID=af6c8c99-9450-2c13-0cee-9edfdb8ef1f8",
-        "Dominio": "grupovips.sharepoint.com",
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": "1786234943",
-        "Orden": 44
-      },
-      {
-        "ID": null,
-        "Carpeta": null,
-        "Nombre": "Humanet V7_Edge",
-        "URL": "http://humanet.alsea.com.mx/inicioCentral/login.aspx",
-        "Dominio": null,
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": null,
-        "Orden": 45
-      },
-      {
-        "ID": null,
-        "Carpeta": null,
-        "Nombre": "WOE Web",
-        "URL": "https://woe2.alsea.es/woe/login",
-        "Dominio": null,
-        "Decisión": "Dejar",
-        "Notas": null,
-        "ADD_DATE (Unix)": null,
-        "Orden": 46
+        "Nombre": "Workvivo",
+        "URL": "https://alsea.workvivo.us/login",
+        "Notas": null
       }
     ],
     "Eventos": [
@@ -1077,7 +859,7 @@
         "Hora / Corte": null,
         "Icono": "📢",
         "Color": "Naranja",
-        "Link": "https://capacitacion.alsea.net/course/view.php?id=29227"
+        "Link": "https://grupovips.sharepoint.com/sites/espressohub/SitePages/CollabHome.aspx?CT=1783694337488&OR=OWA-NT-Mail&CID=10b10932-84a0-a90e-58c4-5e79588d125c&SI=NonSentItems&SLSync=F"
       },
       {
         "ID": 9,

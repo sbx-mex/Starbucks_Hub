@@ -12,6 +12,7 @@ const state = {
   linkQuery: "",
   refreshing: false,
   recentTools: [],
+  catalog: [],
 };
 
 let toolSearchTimer = null;
@@ -25,11 +26,7 @@ const HOME_TOOL_NAMES = [
   "Esfuerzo Operativo",
   "Ranking",
   "Tasa de Éxito DT",
-  "Calculadora de Ritmo",
-  "Transferencias",
   "Partner Hub",
-  "Layout",
-  "Code Brew",
   "RSA 2.0",
 ];
 const HOME_TOOL_DESCRIPTIONS = {
@@ -209,7 +206,15 @@ function toolRecords() {
 function quickLinkRecords() {
   return [...sheet("Links")]
     .filter((record) => externalUrl(record.URL))
-    .sort((a, b) => Number(a.Orden || 999) - Number(b.Orden || 999));
+    .sort((a, b) => String(a.Nombre || "").localeCompare(String(b.Nombre || ""), "es-MX", { sensitivity: "base" }));
+}
+
+function hostnameForUrl(value) {
+  try {
+    return new URL(String(value || "")).hostname.replace(/^www\./, "");
+  } catch {
+    return "Link";
+  }
 }
 
 function accessRuleForName(name) {
@@ -234,7 +239,7 @@ function getUkgHorariosRecord() {
     || null;
 }
 
-function catalogEntries() {
+function buildCatalogIndex() {
   const entries = [];
   const seenUrls = new Set();
   const append = (record, source) => {
@@ -242,13 +247,21 @@ function catalogEntries() {
     if (!url || seenUrls.has(url)) return;
     seenUrls.add(url);
     const isTool = source === "Herramienta";
-    const name = String(record.Nombre || record.Dominio || "Acceso").trim();
+    const name = String(record.Nombre || "Acceso").trim();
     const subtitle = isTool
       ? String(record.Grupo || record.Categoria || "Herramienta").trim()
-      : String(record.Dominio || record.Carpeta || "Link").trim();
-    const description = String(record.Notas || record.Categoria || "").trim();
-    const searchText = normalizeSearchText([name, subtitle, description, record.URL, record.Vista, record.Carpeta].join(" "));
-    entries.push({ record, source, name, subtitle, description, url, searchText });
+      : hostnameForUrl(url);
+    const description = String(record.Notas || (isTool ? record.Categoria : "") || "").trim();
+    const searchableParts = isTool
+      ? [name, subtitle, description, url, record.Vista, record.Categoria, record.Grupo]
+      : [name, description, url, subtitle];
+    entries.push({
+      record, source, name, subtitle, description, url,
+      normalizedName: normalizeSearchText(name),
+      normalizedSubtitle: normalizeSearchText(subtitle),
+      normalizedDescription: normalizeSearchText(description),
+      searchText: normalizeSearchText(searchableParts.join(" ")),
+    });
   };
   toolRecords().forEach((record) => append(record, "Herramienta"));
   quickLinkRecords().forEach((record) => append(record, "Link"));
@@ -261,13 +274,14 @@ function searchCatalog(query, options = {}) {
   const tokens = normalized.split(/\s+/).filter(Boolean);
   const source = options.source || null;
   const limit = options.limit || 8;
-  return catalogEntries()
+  const catalog = state.catalog.length ? state.catalog : buildCatalogIndex();
+  return catalog
     .filter((entry) => !source || entry.source === source)
     .map((entry) => {
       if (!tokens.every((token) => entry.searchText.includes(token))) return null;
-      const name = normalizeSearchText(entry.name);
-      const subtitle = normalizeSearchText(entry.subtitle);
-      const description = normalizeSearchText(entry.description);
+      const name = entry.normalizedName;
+      const subtitle = entry.normalizedSubtitle;
+      const description = entry.normalizedDescription;
       let score = 0;
       if (name === normalized) score += 120;
       if (name.startsWith(normalized)) score += 90;
@@ -302,7 +316,7 @@ function renderHomeSearch() {
   const container = $("#home-search-results");
   if (!input || !container) return;
   const query = state.homeQuery.trim();
-  if (!query) {
+  if (query.length < 2) {
     container.hidden = true;
     container.innerHTML = "";
     input.setAttribute("aria-expanded", "false");
@@ -320,24 +334,28 @@ function renderQuickLinks() {
   const input = $("#link-search");
   const resultsContainer = $("#link-search-results");
   const count = $("#quick-links-count");
-  if (!input || !resultsContainer || !count) return;
+  const clear = $("#clear-link-search");
+  if (!input || !resultsContainer || !count || !clear) return;
 
-  const records = quickLinkRecords();
   const query = state.linkQuery.trim();
-  const results = query ? searchCatalog(query, { source: "Link", limit: 10 }) : [];
-  if (query) {
-    resultsContainer.innerHTML = results.length
-      ? results.map(smartResultMarkup).join("")
-      : emptyState(`No encontramos links para “${query}”.`);
-    resultsContainer.hidden = false;
-    input.setAttribute("aria-expanded", "true");
-  } else {
+  clear.hidden = !query;
+  if (query.length < 2) {
     resultsContainer.hidden = true;
     resultsContainer.innerHTML = "";
+    count.hidden = true;
+    count.textContent = "";
     input.setAttribute("aria-expanded", "false");
+    return;
   }
 
-  count.textContent = `${records.length} accesos indexados · escribe para buscar`;
+  const results = searchCatalog(query, { source: "Link", limit: 10 });
+  resultsContainer.innerHTML = results.length
+    ? results.map(smartResultMarkup).join("")
+    : emptyState(`No encontramos links para “${query}”.`);
+  resultsContainer.hidden = false;
+  count.hidden = false;
+  count.textContent = `${results.length} ${results.length === 1 ? "resultado" : "resultados"}`;
+  input.setAttribute("aria-expanded", "true");
 }
 
 function localAsset(value) {
@@ -834,11 +852,13 @@ function bindSmartSearchKeyboard(input, container) {
     }
   });
   container.addEventListener("keydown", (event) => {
-    if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+    if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
     const results = $$("a.smart-result", container);
     const current = results.indexOf(document.activeElement);
-    if (current < 0) return;
+    if (current < 0 || !results.length) return;
     event.preventDefault();
+    if (event.key === "Home") return results[0].focus();
+    if (event.key === "End") return results[results.length - 1].focus();
     const next = event.key === "ArrowDown" ? current + 1 : current - 1;
     if (next < 0) input.focus();
     else results[Math.min(next, results.length - 1)].focus();
@@ -929,6 +949,13 @@ function bindEvents() {
       state.linkQuery = event.target.value;
       renderQuickLinks();
     }, 90);
+  });
+  $("#clear-link-search").addEventListener("click", () => {
+    window.clearTimeout(linkSearchTimer);
+    state.linkQuery = "";
+    $("#link-search").value = "";
+    renderQuickLinks();
+    $("#link-search").focus();
   });
   $("#tool-search").addEventListener("input", (event) => {
     window.clearTimeout(toolSearchTimer);
@@ -1025,9 +1052,7 @@ function bindEvents() {
     }
     if (event.key === "Escape" && linkSearchFocused && state.linkQuery) {
       event.preventDefault();
-      state.linkQuery = "";
-      $("#link-search").value = "";
-      renderQuickLinks();
+      $("#clear-link-search").click();
       return;
     }
     if (event.key === "Escape" && !$("#action-modal").hidden) {
@@ -1067,6 +1092,7 @@ async function refreshData(announce = true) {
   button.setAttribute("aria-busy", "true");
   try {
     state.data = await loadData();
+    state.catalog = buildCatalogIndex();
     renderAll();
     $("#error-banner").hidden = true;
     if (announce) {

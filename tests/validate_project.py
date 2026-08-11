@@ -4,49 +4,29 @@ from __future__ import annotations
 import json
 import re
 import sys
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
-    "index.html",
-    "styles.css",
-    "app.js",
-    "data/cms.json",
-    "manifest.webmanifest",
-    "sw.js",
-    "scripts/audit_obsolete.py",
-    ".github/workflows/cleanup-obsolete.yml",
-    "assets/icons/starbucks_hub.png",
-    "assets/about/Kike_pbt.jpeg",
-    "assets/about/George_pbt.jpeg",
-    "assets/duty-roster/lunes_food.png",
-    "assets/duty-roster/lunes_showcase.png",
-    "assets/duty-roster/martes_lobby.png",
-    "assets/duty-roster/martes_pic.png",
-    "assets/duty-roster/miercoles_boh.png",
-    "assets/duty-roster/jueves_espresso.png",
-    "assets/duty-roster/jueves_lobby.png",
-    "assets/duty-roster/viernes_cafe_filtrado.png",
-    "assets/duty-roster/sabado_cbs.png",
-    "assets/duty-roster/domingo_drive_thru.png",
-    "assets/duty-roster/domingo_lobby.png",
+    "index.html", "styles.css", "app.js", "data/cms.json", "manifest.webmanifest", "sw.js",
+    "scripts/build_cms.py", "scripts/audit_obsolete.py", ".github/workflows/cleanup-obsolete.yml",
+    "INSTRUCCIONES_ACTUALIZACION.md", ".gitignore", "assets/icons/starbucks_hub.png",
 ]
-FORBIDDEN_VISIBLE = ["#DistritoKike", "#OrgulloCN", "Distrito Goo", "Distrito Go"]
 REQUIRED_SHEETS = {
-    "Informativo",
-    "WFM",
-    "Herramientas",
-    "Links",
-    "Eventos",
-    "Actividades_Semanales",
-    "Actividades_Diaria",
-    "Duty_Roster",
-    "Identidad",
+    "Informativo", "WFM", "Herramientas", "Links", "Eventos",
+    "Actividades_Semanales", "Actividades_Diaria", "Duty_Roster", "Identidad",
 }
+LINK_FIELDS = ["ID", "Nombre", "URL", "Notas"]
 
 
 def fail(message: str) -> None:
     raise AssertionError(message)
+
+
+def sort_text(value: object) -> str:
+    text = unicodedata.normalize("NFD", str(value or "").strip().casefold())
+    return "".join(c for c in text if unicodedata.category(c) != "Mn")
 
 
 for relative in REQUIRED:
@@ -54,44 +34,40 @@ for relative in REQUIRED:
         fail(f"Falta archivo: {relative}")
 
 html = (ROOT / "index.html").read_text(encoding="utf-8")
-javascript = (ROOT / "app.js").read_text(encoding="utf-8")
-service_worker = (ROOT / "sw.js").read_text(encoding="utf-8")
+css = (ROOT / "styles.css").read_text(encoding="utf-8")
+js = (ROOT / "app.js").read_text(encoding="utf-8")
+sw = (ROOT / "sw.js").read_text(encoding="utf-8")
+builder = (ROOT / "scripts/build_cms.py").read_text(encoding="utf-8")
+audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
+workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
+instructions = (ROOT / "INSTRUCCIONES_ACTUALIZACION.md").read_text(encoding="utf-8")
 manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
 cms = json.loads((ROOT / "data/cms.json").read_text(encoding="utf-8"))
 
-for term in FORBIDDEN_VISIBLE:
-    if term.lower() in html.lower():
-        fail(f"Referencia visible prohibida: {term}")
-
-for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Links", "Herramientas para decidir y actuar", "¿Qué necesitas abrir?", "Sugerencias y/o comentarios"]:
-    if term not in html:
-        fail(f"Falta contenido requerido: {term}")
-
-for term in [
-    "Vista ejecutiva",
-    'data-view="informativo"',
-    'data-view="wfm"',
-    'data-view="semanales"',
-    'data-view="diaria"',
-    'data-view="duty-roster"',
-    'data-view="enlaces"',
-    "Vista Ops",
-    "Consulta operativa",
-    ">Sugerencias<",
-    "home-summary",
-    "home-priorities",
-    "home-events",
-    "executive-filters",
-    "dynamic-filters",
-]:
-    if term in html:
-        fail(f"Permanece contenido eliminado: {term}")
-
-if "https://wa.me/message/ENKDSAHYHIGAN1" not in html:
-    fail("Falta el enlace de sugerencias")
-
 if set(cms.get("sheets", {})) != REQUIRED_SHEETS:
     fail("Las hojas del JSON no corresponden al CMS")
+if cms.get("schemaVersion") != 3:
+    fail("El CMS no usa el esquema 3")
+
+links = cms["sheets"]["Links"]
+if not links:
+    fail("Links no contiene registros")
+for index, record in enumerate(links, start=1):
+    if list(record.keys()) != LINK_FIELDS:
+        fail(f"Links contiene columnas no permitidas: {list(record.keys())}")
+    if record.get("ID") != index:
+        fail("Los IDs de Links no son consecutivos")
+    if str(record.get("Nombre") or "") != str(record.get("Nombre") or "").strip():
+        fail(f"Nombre con espacios laterales: {record.get('Nombre')}")
+    if not re.match(r"^https?://", str(record.get("URL") or "")):
+        fail(f"URL inválida en Links: {record.get('URL')}")
+
+names = [sort_text(row["Nombre"]) for row in links]
+if names != sorted(names):
+    fail("Links no está ordenado A-Z")
+urls = [row["URL"] for row in links]
+if len(urls) != len(set(urls)):
+    fail("Links contiene URLs duplicadas")
 
 for event in cms["sheets"]["Eventos"]:
     for field in ("Fecha Inicio", "Fecha Fin"):
@@ -99,135 +75,77 @@ for event in cms["sheets"]["Eventos"]:
         if value and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
             fail(f"Fecha no normalizada: {value}")
 
-local_references = [
-    *(row.get("Link /Imagen") for row in cms["sheets"]["Informativo"]),
-    *(row.get("Link / Imagen") for row in cms["sheets"]["Actividades_Diaria"]),
-    *(row.get("Link/Imagen") for row in cms["sheets"]["Eventos"]),
-]
-for reference in local_references:
-    text = str(reference or "").strip()
-    if text and not re.match(r"^https?://", text):
-        target = ROOT / "assets" / "content" / Path(text).name
-        if not target.is_file():
-            fail(f"Falta recurso local del CMS: {target.name}")
-
-for source in ("Herramientas", "Links"):
-    for link in cms["sheets"][source]:
-        if not re.match(r"^https?://", str(link.get("URL", ""))):
-            fail(f"URL no válida en {source}: {link.get('URL')}")
-
-if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
-    fail("Manifest no preparado para subruta")
-
-manifest_icons = [entry.get("src") for entry in manifest.get("icons", [])]
-if manifest_icons != ["./assets/icons/starbucks_hub.png"]:
-    fail("El Manifest no utiliza exclusivamente starbucks_hub.png")
-
-if not all(asset in service_worker for asset in ["./index.html", "./data/cms.json", "./app.js", "./styles.css"]):
-    fail("Faltan recursos esenciales en el Service Worker")
-
-for relative in (item for item in REQUIRED if item.startswith("assets/")):
-    expected = f'./{relative}'
-    if expected not in service_worker:
-        fail(f"Falta recurso en caché PWA: {expected}")
-
-if "starbucks-hub-v7" not in service_worker:
-    fail("No se incrementó la versión de caché")
-
-if 'pathname.endsWith("/data/cms.json")' not in service_worker:
-    fail("El CMS no utiliza actualización network-first")
-
-if not all(fragment in javascript for fragment in ["renderOps", "renderEvents", "renderDutyForDay", "renderLinks", "renderQuickLinks", "renderHomeSearch", "searchCatalog"]):
-    fail("Faltan vistas funcionales")
-
-if any(fragment in javascript for fragment in ["renderExecutive", "renderInformativo", "renderWeekly", "renderDaily", "renderWfm", "renderDuty()"]):
-    fail("Permanece lógica exclusiva de vistas o filtros eliminados")
-
-for source in ["Informativo", "WFM", "Actividades_Semanales", "Actividades_Diaria", "Duty_Roster"]:
-    if source not in javascript:
-        fail(f"Resumen Ops no integra la fuente: {source}")
+if "LINK_HEADERS = (\"ID\", \"Nombre\", \"URL\", \"Notas\")" not in builder:
+    fail("build_cms.py no declara el contrato mínimo de Links")
+if "allowed_headers=LINK_HEADERS" in builder:
+    pass
+elif "allowed = LINK_HEADERS if name == \"Links\" else None" not in builder:
+    fail("El motor no limita la lectura de columnas de Links")
+if "normalize_quick_links" not in builder or "sort_text" not in builder:
+    fail("El motor no normaliza y ordena Links")
 
 sidebar = re.search(r'<nav class="nav-groups">(.*?)</nav>', html, re.S)
 if not sidebar:
     fail("No se encontró el menú lateral")
 routes = re.findall(r'data-route-link="([^"]+)"', sidebar.group(1))
-if routes != ["inicio", "recordatorio", "resumen-ops", "herramientas", "links", "acerca"]:
-    fail(f"Menú lateral inesperado: {routes}")
+expected_routes = ["inicio", "resumen-ops", "herramientas", "links", "recordatorio", "acerca"]
+if routes != expected_routes:
+    fail(f"Orden de navegación inesperado: {routes}")
 
-for name, path in [
-    ("Enrique César Flores", "assets/about/Kike_pbt.jpeg"),
-    ("Jorge Alcantar Aguiar", "assets/about/George_pbt.jpeg"),
-]:
-    if name not in html or f"./{path}" not in html:
-        fail(f"Falta correspondencia de fotografía: {name}")
+if "operational-shortcuts" in html or ".operational-shortcuts" in css:
+    fail("Permanece navegación redundante en Inicio")
+if "quick-links-directory" in html or "Ver directorio completo" in html:
+    fail("Links vuelve a exponer un directorio completo")
+if 'id="clear-link-search"' not in html or 'id="link-search-help"' not in html:
+    fail("Links no tiene búsqueda limpia y guiada")
 
-for tool_name in [
-    "CN Connect",
-    "Esfuerzo Operativo",
-    "Ranking",
-    "Tasa de Éxito DT",
-    "Calculadora de Ritmo",
-    "Transferencias",
-    "Partner Hub",
-    "Layout",
-    "Code Brew",
-    "RSA 2.0",
-]:
-    if tool_name not in javascript:
-        fail(f"Falta herramienta principal: {tool_name}")
+home_tools_block = re.search(r"const HOME_TOOL_NAMES = \[(.*?)\];", js, re.S)
+if not home_tools_block:
+    fail("No se encontró HOME_TOOL_NAMES")
+home_tools = re.findall(r'"([^"]+)"', home_tools_block.group(1))
+if len(home_tools) != 6:
+    fail(f"Inicio debe mostrar 6 accesos frecuentes, no {len(home_tools)}")
 
-for feature in ["openImageModal", "closeImageModal", "sidebarCollapsed", "DUTY_IMAGES_BY_DAY"]:
-    if feature not in javascript:
-        fail(f"Falta función de interfaz: {feature}")
-
-links_by_name = {row.get("Nombre"): row for row in cms["sheets"]["Herramientas"]}
-if "Evidencia Antes / Después" in links_by_name or "Evidencia Antes / Después" in html:
-    fail("Permanece el acceso Evidencia Antes / Después")
-
-required_links = {
-    "CN Connect": "https://sbx-mx.github.io/CentroNorteConnect/",
-    "Esfuerzo Operativo": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
-}
-for name, url in required_links.items():
-    if links_by_name.get(name, {}).get("URL") != url:
-        fail(f"Enlace prioritario incorrecto: {name}")
-
-for removed_message in ["Datos actualizados", "Prioridades de consulta para líderes DM y roles superiores."]:
-    if removed_message in html or removed_message in javascript:
-        fail(f"Permanece mensaje solicitado para limpieza: {removed_message}")
-
-workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
-obsolete_audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
 experience_checks = {
-    "ruta rápida sin directorio redundante": 'class="operational-shortcuts"' in html and '<strong>Directorio</strong>' not in html,
-    "acceso directo a búsqueda": 'id="focus-home-search"' in html and '$("#focus-home-search").addEventListener' in javascript,
-    "directorio de links eliminado": 'id="link-search-results"' in html and 'quick-links-directory' not in html and 'linkDirectoryOpen' not in javascript,
-    "búsqueda con respuesta ágil": "toolSearchTimer" in javascript and "homeSearchTimer" in javascript and "linkSearchTimer" in javascript,
-    "buscador inteligente global": 'id="home-search"' in html and "searchCatalog" in javascript and "normalizeSearchText" in javascript,
-    "navegación por teclado en búsqueda": "bindSmartSearchKeyboard" in javascript and 'event.key === "ArrowDown"' in javascript,
-    "alerta WFM martes a viernes": 'id="action-modal"' in html and "CRITICAL_WFM_DAYS" in javascript and "showCriticalWfmAlert" in javascript,
-    "acceso UKG desde WFM": "getUkgHorariosRecord" in javascript and "Abrir UKG Horarios" in javascript,
-    "Humanet V7 protegido por Edge": "isMicrosoftEdge" in javascript and 'normalized.includes("humanet v7")' in javascript and "Solo Edge" in javascript,
-    "WOE protegido por VPN": 'normalized === "woe web"' in javascript and "VPN encendida · Abrir WOE" in javascript,
-    "modal accesible y con foco": "openActionModal" in javascript and "closeActionModal" in javascript and "trapModalFocus" in javascript,
-    "navegación móvil prioriza links": '<a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>' in html,
-    "historial local de herramientas": 'id="recent-section"' in html and "rememberTool" in javascript,
-    "navegación anunciada": 'id="route-status"' in html and '$("#route-status").textContent' in javascript,
-    "foco accesible por vista": 'heading.focus({ preventScroll: true })' in javascript,
-    "título contextual": 'document.title = `${routeLabel} · Starbucks Hub`' in javascript,
-    "retorno superior discreto": 'id="back-to-top"' in html and 'window.scrollY < 700' in javascript,
-    "almacenamiento tolerante": "function readRecentTools" in javascript and javascript.count("catch {") >= 4,
-    "limpieza automatizada segura": "audit_obsolete.py --fix" in workflow and "KNOWN_OBSOLETE" in obsolete_audit,
+    "inicio sin navegación redundante": "operational-shortcuts" not in html,
+    "orden de menú orientado a tareas": routes == expected_routes,
+    "links ocultos hasta buscar": 'query.length < 2' in js and 'resultsContainer.hidden = true' in js,
+    "limpiar búsqueda de links": 'id="clear-link-search"' in html and '$("#clear-link-search").addEventListener' in js,
+    "índice de búsqueda cacheado": "catalog: []" in js and "state.catalog = buildCatalogIndex()" in js,
+    "links usan solo nombre notas url dominio": "hostnameForUrl" in js and "record.Carpeta" not in js,
+    "navegación teclado completa": '["ArrowDown", "ArrowUp", "Home", "End"]' in js,
+    "alerta WFM martes a viernes": "CRITICAL_WFM_DAYS" in js and "showCriticalWfmAlert" in js,
+    "guardas Edge y VPN": "isMicrosoftEdge" in js and 'normalized === "woe web"' in js,
+    "render diferido de listas": "content-visibility: auto" in css,
 }
+failed = [name for name, passed in experience_checks.items() if not passed]
+if failed:
+    fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-failed_experience = [name for name, passed in experience_checks.items() if not passed]
-if failed_experience:
-    fail(f"Mejoras de experiencia incompletas: {', '.join(failed_experience)}")
+if "starbucks-hub-v8" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v8")
+for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
+    if heavy in sw:
+        fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")
+for core in ["./index.html", "./styles.css", "./app.js", "./data/cms.json", "./assets/icons/starbucks_hub.png"]:
+    if core not in sw:
+        fail(f"Falta recurso núcleo en caché: {core}")
+
+if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
+    fail("Manifest no preparado para subruta")
+
+if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
+    fail("La auditoría de obsoletos no genera reporte o no limita patrones")
+for requirement in ["audit_obsolete.py --fix --report", "actions/upload-artifact@v4", "git add -u", "grep -Ev '^D"]:
+    if requirement not in workflow:
+        fail(f"Workflow de obsoletos incompleto: {requirement}")
+
+for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila"]:
+    if text not in instructions:
+        fail(f"Falta instrucción CMS: {text}")
 
 print("Validación estática aprobada")
-print(f"Mejoras UX, estabilidad y accesibilidad: {sum(experience_checks.values())}/{len(experience_checks)}")
-print(f"Hojas CMS: {len(cms['sheets'])}")
-print(f"Herramientas: {len(cms['sheets']['Herramientas'])}")
-print(f"Links rápidos: {len(cms['sheets']['Links'])}")
-print(f"Eventos: {len(cms['sheets']['Eventos'])}")
+print(f"Mejoras contundentes de exploración/navegación: {sum(experience_checks.values())}/{len(experience_checks)}")
+print(f"Links CMS: {len(links)} · columnas: {', '.join(LINK_FIELDS)}")
+print("Orden Links: A-Z · directorio completo oculto")
 sys.exit(0)

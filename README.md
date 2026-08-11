@@ -1,70 +1,49 @@
 # Starbucks Hub
 
-PWA estática y responsive para consulta ejecutiva y operativa. Está preparada para publicarse desde la subruta:
+PWA estática y responsive para consulta ejecutiva y operativa en GitHub Pages.
 
-`https://[organizacion].github.io/Starbucks_Hub/`
-
-## Fuente de contenido
-
-El contenido se genera desde `Starbucks_Hub_CMS.xlsx`, que funciona como motor local de actualización:
+## Motor CMS
 
 ```text
-Starbucks_Hub_CMS.xlsx → scripts/build_cms.py → data/cms.json → interfaz
+Starbucks_Hub_CMS.xlsx → scripts/build_cms.py → data/cms.json → PWA
 ```
 
-El Excel contiene las fuentes originales y dos catálogos separados:
+El CMS mantiene nueve hojas. `Herramientas` y `Links` son catálogos independientes.
 
-- `Herramientas`: conserva el módulo actual y su comportamiento.
-- `Links`: catálogo discreto de accesos rápidos; puede permanecer oculto en Excel y solo publica filas con `Decisión = Dejar`.
+### Contrato de Links
 
-Estructura recomendada del paquete local:
+`Links` solo utiliza:
 
 ```text
-Starbucks_Hub_CMS.xlsx
-Starbucks_Hub-main/
+ID | Nombre | URL | Notas
 ```
 
-Desde `Starbucks_Hub-main/`, actualiza el sitio sin cambiar código:
+El motor descarta columnas extra, valida URLs web, elimina URLs duplicadas, ordena A–Z por `Nombre` y normaliza IDs. Para retirar un link se elimina su fila del Excel. La interfaz no expone un directorio completo: muestra coincidencias únicamente cuando el usuario busca.
+
+Actualización:
 
 ```bash
-python scripts/build_cms.py ../Starbucks_Hub_CMS.xlsx data/cms.json
+python scripts/build_cms.py
 python tests/validate_project.py
 ```
 
-El proceso valida las nueve hojas requeridas y conserva fechas como valores ISO `YYYY-MM-DD` para evitar interpretaciones regionales ambiguas. El archivo Excel debe mantenerse fuera de la publicación de GitHub Pages; el sitio solo necesita `data/cms.json`.
+## Navegación
 
-## Publicación en GitHub Pages
+- **Inicio**: prioridades y buscador global.
+- **Resumen Ops**: WFM y operación diaria.
+- **Herramientas**: catálogo operativo existente.
+- **Links**: buscador discreto de accesos internos.
+- **Agenda**: eventos publicados.
+- **Acerca de**: información del proyecto.
 
-1. Copiar el contenido de este proyecto en el repositorio `Starbucks_Hub`.
-2. Conservar las rutas relativas.
-3. Publicar la rama seleccionada mediante GitHub Pages.
-4. Verificar que `manifest.webmanifest`, `sw.js` y `data/cms.json` respondan correctamente desde `/Starbucks_Hub/`.
+Atajos: `Ctrl/Cmd + K` abre el buscador global y `/` abre el buscador de Herramientas.
 
-No requiere backend, tokens, credenciales, CDN ni dependencias de ejecución.
+## Rendimiento PWA
 
-## Archivos principales
+El Service Worker precarga solo el núcleo de la aplicación. Imágenes y recursos secundarios se almacenan en caché cuando se utilizan, reduciendo el peso de la primera instalación. `data/cms.json` usa estrategia network-first para recibir contenido actualizado.
 
-- `index.html`: estructura accesible y navegación.
-- `styles.css`: sistema visual corporativo y responsive.
-- `app.js`: carga del CMS, filtros, vistas y navegación.
-- `data/cms.json`: datos locales procesados.
-- `manifest.webmanifest`: instalación PWA.
-- `sw.js`: caché y funcionamiento sin conexión después de la primera carga.
-- `scripts/build_cms.py`: actualización reproducible desde Excel.
+## Mantenimiento
 
-## Vistas
-
-- Inicio
-- Vista ejecutiva
-- Informativo
-- Agenda y Eventos
-- WFM
-- Actividades semanales
-- Actividad diaria
-- Duty Roster
-- Enlaces
-- Acerca de
-
-Inicio concentra herramientas de mayor uso e incorpora un buscador inteligente que consulta Herramientas y Links sin mostrar el catálogo hasta que el usuario escribe. Duty Roster organiza once imágenes de lunes a domingo y las abre en un visor interno accesible. La navegación lateral puede contraerse en escritorio y funciona como panel superpuesto en móvil.
+`.github/workflows/cleanup-obsolete.yml` audita semanalmente residuos seguros. `scripts/audit_obsolete.py` elimina únicamente archivos temporales, copias de respaldo y recursos declarados como obsoletos; los posibles huérfanos o duplicados se reportan para revisión manual.
 
 Diseñado: Jorge Alcantar Aguiar & Enrique César Flores

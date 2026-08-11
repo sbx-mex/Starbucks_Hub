@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v7";
+const CACHE_NAME = "starbucks-hub-v8";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -6,20 +6,7 @@ const CORE_ASSETS = [
   "./app.js",
   "./manifest.webmanifest",
   "./data/cms.json",
-  "./assets/icons/starbucks_hub.png",
-  "./assets/about/Kike_pbt.jpeg",
-  "./assets/about/George_pbt.jpeg",
-  "./assets/duty-roster/lunes_food.png",
-  "./assets/duty-roster/lunes_showcase.png",
-  "./assets/duty-roster/martes_lobby.png",
-  "./assets/duty-roster/martes_pic.png",
-  "./assets/duty-roster/miercoles_boh.png",
-  "./assets/duty-roster/jueves_espresso.png",
-  "./assets/duty-roster/jueves_lobby.png",
-  "./assets/duty-roster/viernes_cafe_filtrado.png",
-  "./assets/duty-roster/sabado_cbs.png",
-  "./assets/duty-roster/domingo_drive_thru.png",
-  "./assets/duty-roster/domingo_lobby.png"
+  "./assets/icons/starbucks_hub.png"
 ];
 
 self.addEventListener("install", (event) => {
@@ -38,45 +25,39 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function networkFirst(request, fallback) {
+  return fetch(request)
+    .then((response) => {
+      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+      return response;
+    })
+    .catch(() => caches.match(request).then((cached) => cached || caches.match(fallback)));
+}
+
+function staleWhileRevalidate(request) {
+  return caches.match(request).then((cached) => {
+    const update = fetch(request).then((response) => {
+      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
+      return response;
+    }).catch(() => cached);
+    return cached || update;
+  });
+}
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
 
   if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
-    );
+    event.respondWith(networkFirst(event.request, "./index.html"));
     return;
   }
 
   if (requestUrl.pathname.endsWith("/data/cms.json")) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (!response.ok) return response;
-          const copy = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          return response;
-        })
-        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./data/cms.json")))
-    );
+    event.respondWith(networkFirst(event.request, "./data/cms.json"));
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-      }
-      return response;
-    }))
-  );
+  event.respondWith(staleWhileRevalidate(event.request));
 });

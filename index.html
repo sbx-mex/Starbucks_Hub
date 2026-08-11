@@ -39,10 +39,10 @@
       <section>
         <p>Principal</p>
         <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
         <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
         <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
         <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
+        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
         <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
       </section>
     </nav>
@@ -78,11 +78,6 @@
         </div>
       </div>
 
-      <nav class="operational-shortcuts" aria-label="Ruta rápida de consulta">
-        <a href="#resumen-ops" data-route-link="resumen-ops"><span aria-hidden="true">✓</span><span><strong>Operación de hoy</strong><small>Revisa prioridades y WFM</small></span><span aria-hidden="true">→</span></a>
-        <a href="#recordatorio" data-route-link="recordatorio"><span aria-hidden="true">◷</span><span><strong>Agenda</strong><small>Ubica próximos eventos</small></span><span aria-hidden="true">→</span></a>
-      </nav>
-
       <section id="wfm-home-card" class="wfm-home-card" aria-labelledby="wfm-home-title" hidden>
         <div id="wfm-home-card-content"></div>
       </section>
@@ -96,14 +91,14 @@
         <label class="smart-search-field" for="home-search">
           <span class="visually-hidden">Buscar en Starbucks Hub</span>
           <span aria-hidden="true">⌕</span>
-          <input id="home-search" type="search" autocomplete="off" placeholder="Ej. UKG, WFM, Humanet, WOE, BI…" aria-controls="home-search-results" aria-expanded="false">
+          <input id="home-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Ej. UKG, WFM, Humanet, WOE, BI…" aria-controls="home-search-results" aria-expanded="false">
           <kbd>⌘K</kbd>
         </label>
         <div id="home-search-results" class="smart-search-results" role="list" aria-live="polite" hidden></div>
       </section>
 
       <div id="home-tools" class="section-heading">
-        <div><p class="eyebrow">Accesos directos</p><h2>Herramientas para decidir y actuar</h2></div>
+        <div><p class="eyebrow">Accesos frecuentes</p><h2>Lo esencial, sin recorrer menús</h2></div>
       </div>
       <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>
@@ -139,7 +134,7 @@
     <section id="herramientas" class="view" data-view="herramientas" hidden aria-labelledby="tools-title">
       <div class="page-heading tools-heading"><div><p class="eyebrow">Consulta ejecutiva · DM+</p><h1 id="tools-title">Herramientas</h1><p>Encuentra el recurso correcto con menos pasos y mantén el foco en la operación.</p></div></div>
       <section class="tools-console" aria-label="Buscar y filtrar herramientas">
-        <label class="tool-search" for="tool-search"><span>Buscar herramienta</span><div><span aria-hidden="true">⌕</span><input id="tool-search" type="search" autocomplete="off" placeholder="Nombre, propósito o categoría" aria-keyshortcuts="/"><kbd>/</kbd></div></label>
+        <label class="tool-search" for="tool-search"><span>Buscar herramienta</span><div><span aria-hidden="true">⌕</span><input id="tool-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Nombre, propósito o categoría" aria-keyshortcuts="/"><kbd>/</kbd></div></label>
         <div class="tool-filters" role="group" aria-label="Filtrar herramientas">
           <button type="button" class="is-active" data-tool-filter="all" aria-pressed="true">Todas</button>
           <button type="button" data-tool-filter="favorites" aria-pressed="false">Prioritarias</button>
@@ -158,18 +153,21 @@
         <div>
           <p class="eyebrow">Accesos rápidos</p>
           <h1 id="links-title">Links</h1>
-          <p>Un buscador discreto para abrir plataformas internas sin recorrer listas largas.</p>
+          <p>Busca por nombre, nota o dominio. El índice A–Z permanece oculto hasta que escribes.</p>
         </div>
       </div>
       <section class="link-finder" aria-label="Buscar links">
         <label class="smart-search-field link-search-field" for="link-search">
           <span class="visually-hidden">Buscar link</span>
           <span aria-hidden="true">⌕</span>
-          <input id="link-search" type="search" autocomplete="off" placeholder="Escribe plataforma, dominio o palabra clave…" aria-controls="link-search-results" aria-expanded="false">
+          <input id="link-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Escribe al menos 2 caracteres…" aria-controls="link-search-results" aria-describedby="link-search-help" aria-expanded="false">
         </label>
-        <p class="link-search-hint">Escribe y abre. No mostramos listas largas hasta que las necesites.</p>
+        <div class="link-search-meta">
+          <p id="link-search-help" class="link-search-hint">Solo se indexan ID, Nombre, URL y Notas. Los resultados aparecen al escribir.</p>
+          <button id="clear-link-search" class="text-action" type="button" hidden>Limpiar búsqueda</button>
+        </div>
         <div id="link-search-results" class="smart-search-results link-search-results" role="list" aria-live="polite" hidden></div>
-        <p id="quick-links-count" class="link-index-count" aria-live="polite"></p>
+        <p id="quick-links-count" class="link-index-count" aria-live="polite" hidden></p>
       </section>
     </section>
 

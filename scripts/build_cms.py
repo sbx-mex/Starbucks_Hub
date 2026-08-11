@@ -1,20 +1,28 @@
 #!/usr/bin/env python3
-"""Convierte Starbucks_Hub_CMS.xlsx a data/cms.json sin dependencias externas."""
+"""Convierte Starbucks_Hub_CMS.xlsx a data/cms.json sin dependencias externas.
+
+La hoja Links tiene un contrato intencionalmente mínimo: ID, Nombre, URL y Notas.
+Cualquier otra columna de esa hoja se ignora para evitar acoplar la navegación a
+metadatos que no necesita la PWA.
+"""
 
 from __future__ import annotations
 
 import json
 import re
 import sys
+import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
 NS = {"m": "http://schemas.openxmlformats.org/spreadsheetml/2006/main"}
 REL_NS = {"r": "http://schemas.openxmlformats.org/package/2006/relationships"}
 SHEET_REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 DATE_HEADERS = {"Fecha", "Fecha Inicio", "Fecha Fin", "Vigencia Inicio", "Vigencia Fin"}
+LINK_HEADERS = ("ID", "Nombre", "URL", "Notas")
 REQUIRED_SHEETS = {
     "Informativo",
     "WFM",
@@ -41,6 +49,11 @@ REQUIRED_TOOLS = [
 ]
 
 
+def sort_text(value: object) -> str:
+    text = unicodedata.normalize("NFD", str(value or "").strip().casefold())
+    return "".join(character for character in text if unicodedata.category(character) != "Mn")
+
+
 def normalize_tools(records: list[dict]) -> list[dict]:
     """Aplica la navegación oficial de Herramientas sin mezclarla con Links."""
     current = [record for record in records if record.get("Nombre") not in REMOVED_TOOLS]
@@ -50,23 +63,34 @@ def normalize_tools(records: list[dict]) -> list[dict]:
             by_name[required["Nombre"]].update(required)
         else:
             current.append(dict(required))
-    return sorted(current, key=lambda record: (float(record.get("Orden") or 999), str(record.get("Nombre") or "")))
+    return sorted(current, key=lambda record: (float(record.get("Orden") or 999), sort_text(record.get("Nombre"))))
 
 
 def normalize_quick_links(records: list[dict]) -> list[dict]:
-    """Publica únicamente links marcados para conservar y con URL web válida."""
-    result = []
-    for index, record in enumerate(records, start=1):
-        decision = str(record.get("Decisión") or record.get("Decision") or "Dejar").strip().lower()
-        if decision not in {"dejar", "si", "sí", "true", "1"}:
-            continue
+    """Normaliza Links con solo cuatro campos, deduplica URL y ordena A-Z."""
+    result: list[dict] = []
+    seen_urls: set[str] = set()
+    skipped = 0
+
+    for record in records:
+        name = str(record.get("Nombre") or "").strip()
         url = str(record.get("URL") or "").strip()
-        if not re.match(r"^https?://", url, flags=re.IGNORECASE):
+        notes = str(record.get("Notas") or "").strip() or None
+        if not name or not re.match(r"^https?://", url, flags=re.IGNORECASE):
+            skipped += 1
             continue
-        clean = dict(record)
-        clean["URL"] = url
-        clean["Orden"] = index
-        result.append(clean)
+        if url in seen_urls:
+            skipped += 1
+            continue
+        seen_urls.add(url)
+        result.append({"ID": None, "Nombre": name, "URL": url, "Notas": notes})
+
+    result.sort(key=lambda record: sort_text(record["Nombre"]))
+    for index, record in enumerate(result, start=1):
+        record["ID"] = index
+
+    if skipped:
+        print(f"Aviso Links: {skipped} fila(s) omitidas por URL duplicada/inválida o nombre vacío.", file=sys.stderr)
     return result
 
 
@@ -89,19 +113,13 @@ def shared_strings(archive: zipfile.ZipFile) -> list[str]:
         root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
     except KeyError:
         return []
-    values = []
-    for item in root.findall("m:si", NS):
-        values.append("".join(node.text or "" for node in item.iterfind(".//m:t", NS)))
-    return values
+    return ["".join(node.text or "" for node in item.iterfind(".//m:t", NS)) for item in root.findall("m:si", NS)]
 
 
 def workbook_sheets(archive: zipfile.ZipFile) -> list[tuple[str, str]]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     relationships = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    targets = {
-        rel.attrib["Id"]: rel.attrib["Target"].lstrip("/")
-        for rel in relationships.findall("r:Relationship", REL_NS)
-    }
+    targets = {rel.attrib["Id"]: rel.attrib["Target"].lstrip("/") for rel in relationships.findall("r:Relationship", REL_NS)}
     result = []
     for sheet in workbook.findall("m:sheets/m:sheet", NS):
         target = targets[sheet.attrib[SHEET_REL]]
@@ -145,21 +163,24 @@ def read_rows(archive: zipfile.ZipFile, target: str, strings: list[str]) -> list
     return rows
 
 
-def normalize_records(rows: list[list]) -> list[dict]:
+def normalize_records(rows: list[list], allowed_headers: tuple[str, ...] | None = None) -> list[dict]:
     if not rows:
         return []
     headers = [str(value).strip() if value is not None else "" for value in rows[0]]
+    allowed = set(allowed_headers) if allowed_headers else None
     records = []
     for row in rows[1:]:
         record = {}
         for index, header in enumerate(headers):
-            if not header:
+            if not header or (allowed is not None and header not in allowed):
                 continue
             value = row[index] if index < len(row) else None
             if header in DATE_HEADERS and isinstance(value, (int, float)):
                 value = excel_date(value)
             record[header] = value
         if any(value not in (None, "") for value in record.values()):
+            if allowed_headers:
+                record = {header: record.get(header) for header in allowed_headers}
             records.append(record)
     return records
 
@@ -167,10 +188,10 @@ def normalize_records(rows: list[list]) -> list[dict]:
 def build(source: Path, destination: Path) -> None:
     with zipfile.ZipFile(source) as archive:
         strings = shared_strings(archive)
-        sheets = {
-            name: normalize_records(read_rows(archive, target, strings))
-            for name, target in workbook_sheets(archive)
-        }
+        sheets = {}
+        for name, target in workbook_sheets(archive):
+            allowed = LINK_HEADERS if name == "Links" else None
+            sheets[name] = normalize_records(read_rows(archive, target, strings), allowed)
 
     missing = sorted(REQUIRED_SHEETS - set(sheets))
     if missing:
@@ -179,20 +200,17 @@ def build(source: Path, destination: Path) -> None:
     sheets["Links"] = normalize_quick_links(sheets["Links"])
 
     payload = {
-        "schemaVersion": 2,
+        "schemaVersion": 3,
         "source": source.name,
         "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
         "sheets": {name: sheets[name] for name in sheets},
     }
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    destination.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
 if __name__ == "__main__":
-    cms = Path(sys.argv[1] if len(sys.argv) > 1 else "../Starbucks_Hub_CMS.xlsx")
-    output = Path(sys.argv[2] if len(sys.argv) > 2 else "data/cms.json")
+    cms = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "Starbucks_Hub_CMS.xlsx"
+    output = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "data/cms.json"
     build(cms.resolve(), output.resolve())
     print(f"CMS procesado: {output}")

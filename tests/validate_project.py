@@ -60,7 +60,7 @@ for term in FORBIDDEN_VISIBLE:
     if term.lower() in html.lower():
         fail(f"Referencia visible prohibida: {term}")
 
-for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Herramientas de mayor uso", "Sugerencias y/o comentarios"]:
+for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Herramientas para decidir y actuar", "Sugerencias y/o comentarios"]:
     if term not in html:
         fail(f"Falta contenido requerido: {term}")
 
@@ -127,8 +127,11 @@ for relative in REQUIRED[6:]:
     if expected not in service_worker:
         fail(f"Falta recurso en caché PWA: {expected}")
 
-if "starbucks-hub-v3" not in service_worker:
+if "starbucks-hub-v4" not in service_worker:
     fail("No se incrementó la versión de caché")
+
+if 'pathname.endsWith("/data/cms.json")' not in service_worker:
+    fail("El CMS no utiliza actualización network-first")
 
 if not all(fragment in javascript for fragment in ["renderOps", "renderEvents", "renderDutyForDay", "renderLinks"]):
     fail("Faltan vistas funcionales")
@@ -155,6 +158,8 @@ for name, path in [
         fail(f"Falta correspondencia de fotografía: {name}")
 
 for tool_name in [
+    "CN Connect",
+    "Esfuerzo Operativo",
     "Ranking",
     "Tasa de Éxito DT",
     "Calculadora de Ritmo",
@@ -171,7 +176,36 @@ for feature in ["openImageModal", "closeImageModal", "sidebarCollapsed", "DUTY_I
     if feature not in javascript:
         fail(f"Falta función de interfaz: {feature}")
 
+links_by_name = {row.get("Nombre"): row for row in cms["sheets"]["Links"]}
+if "Evidencia Antes / Después" in links_by_name or "Evidencia Antes / Después" in html:
+    fail("Permanece el acceso Evidencia Antes / Después")
+
+required_links = {
+    "CN Connect": "https://sbx-mx.github.io/CentroNorteConnect/",
+    "Esfuerzo Operativo": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
+}
+for name, url in required_links.items():
+    if links_by_name.get(name, {}).get("URL") != url:
+        fail(f"Enlace prioritario incorrecto: {name}")
+
+experience_checks = {
+    "búsqueda de herramientas": 'id="tool-search"' in html and "toolQuery" in javascript,
+    "filtros rápidos": 'data-tool-filter="favorites"' in html and "toolFilter" in javascript,
+    "limpieza de búsqueda": 'id="clear-tool-search"' in html,
+    "actualización manual": 'id="refresh-data"' in html and "refreshData" in javascript,
+    "actualización al reconectar": 'addEventListener("online"' in javascript and "refreshData(false)" in javascript,
+    "atajo de teclado": 'event.key === "/"' in javascript and 'key.toLowerCase() === "k"' in javascript,
+    "estado accesible de filtros": 'setAttribute("aria-pressed"' in javascript,
+    "fecha visible de datos": "updateDataTimestamp" in javascript and html.count('class="data-updated"') == 2,
+    "datos sin caché obsoleta": 'cache: "no-store"' in javascript and 'pathname.endsWith("/data/cms.json")' in service_worker,
+    "accesos prioritarios en inicio": all(name in javascript for name in required_links),
+}
+failed_experience = [name for name, passed in experience_checks.items() if not passed]
+if failed_experience:
+    fail(f"Mejoras de experiencia incompletas: {', '.join(failed_experience)}")
+
 print("Validación estática aprobada")
+print(f"Mejoras UX y accesibilidad: {sum(experience_checks.values())}/10")
 print(f"Hojas CMS: {len(cms['sheets'])}")
 print(f"Enlaces: {len(cms['sheets']['Links'])}")
 print(f"Eventos: {len(cms['sheets']['Eventos'])}")

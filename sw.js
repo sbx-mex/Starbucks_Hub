@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v3";
+const CACHE_NAME = "starbucks-hub-v4";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -52,6 +52,20 @@ self.addEventListener("fetch", (event) => {
           return response;
         })
         .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
+
+  if (requestUrl.pathname.endsWith("/data/cms.json")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (!response.ok) return response;
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cached) => cached || caches.match("./data/cms.json")))
     );
     return;
   }

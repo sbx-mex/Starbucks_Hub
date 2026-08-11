@@ -66,6 +66,7 @@
           <p>Herramientas clave para acompañar la operación, el desarrollo de Partners y la toma de decisiones.</p>
           <div class="hero-actions">
             <a class="button primary" href="#resumen-ops" data-route-link="resumen-ops">Consultar lo de hoy</a>
+            <a class="button secondary" href="#herramientas" data-route-link="herramientas">Explorar herramientas</a>
           </div>
         </div>
         <div class="campaign-panel" aria-label="Campaña">
@@ -76,7 +77,8 @@
       </div>
 
       <div id="home-tools" class="section-heading">
-        <div><p class="eyebrow">Accesos directos</p><h2>Herramientas de mayor uso</h2></div>
+        <div><p class="eyebrow">Accesos directos</p><h2>Herramientas para decidir y actuar</h2><p class="section-description">Prioridades de consulta para líderes DM y roles superiores.</p></div>
+        <span id="data-updated-home" class="data-updated"></span>
       </div>
       <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>
@@ -110,9 +112,19 @@
     </section>
 
     <section id="herramientas" class="view" data-view="herramientas" hidden aria-labelledby="tools-title">
-      <div class="page-heading"><div><p class="eyebrow">Accesos ejecutivos</p><h1 id="tools-title">Herramientas</h1><p>Accesos frecuentes y recursos disponibles desde el CMS.</p></div></div>
-      <div id="favorite-links" class="favorite-links"></div>
-      <div id="links-list" class="links-list"></div>
+      <div class="page-heading tools-heading"><div><p class="eyebrow">Consulta ejecutiva · DM+</p><h1 id="tools-title">Herramientas</h1><p>Encuentra el recurso correcto con menos pasos y mantén el foco en la operación.</p></div><span id="data-updated-tools" class="data-updated"></span></div>
+      <section class="tools-console" aria-label="Buscar y filtrar herramientas">
+        <label class="tool-search" for="tool-search"><span>Buscar herramienta</span><div><span aria-hidden="true">⌕</span><input id="tool-search" type="search" autocomplete="off" placeholder="Nombre, propósito o categoría"><kbd>/</kbd></div></label>
+        <div class="tool-filters" role="group" aria-label="Filtrar herramientas">
+          <button type="button" class="is-active" data-tool-filter="all" aria-pressed="true">Todas</button>
+          <button type="button" data-tool-filter="favorites" aria-pressed="false">Prioritarias</button>
+          <button type="button" data-tool-filter="cn" aria-pressed="false">Centro Norte</button>
+        </div>
+        <button id="refresh-data" class="refresh-data" type="button"><span aria-hidden="true">↻</span><span>Actualizar</span></button>
+      </section>
+      <div class="tools-result-bar"><p id="tools-result-count" role="status" aria-live="polite"></p><button id="clear-tool-search" type="button" hidden>Limpiar búsqueda</button></div>
+      <section id="favorite-section" aria-labelledby="favorite-title"><div class="tools-subheading"><div><p class="eyebrow">Prioridad</p><h2 id="favorite-title">Accesos frecuentes</h2></div></div><div id="favorite-links" class="favorite-links"></div></section>
+      <section aria-labelledby="directory-title"><div class="tools-subheading"><div><p class="eyebrow">Directorio</p><h2 id="directory-title">Todos los recursos</h2></div></div><div id="links-list" class="links-list"></div></section>
     </section>
 
     <section id="acerca" class="view" data-view="acerca" hidden aria-labelledby="about-title">

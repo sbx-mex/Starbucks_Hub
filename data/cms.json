@@ -123,18 +123,6 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "↔️",
-        "Nombre": "Evidencia Antes / Después",
-        "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Estandar_Max-Min/",
-        "Notas": "Documenta y compara evidencias operativas antes y después de cada intervención.",
-        "Favorito": "No",
-        "Orden": 9
-      },
-      {
-        "Categoria": "Operación",
-        "Grupo": "App",
-        "Vista": "General",
         "Icono": "🧹",
         "Nombre": "RSA 2.0",
         "Tipo": "Web",
@@ -226,6 +214,18 @@
         "Notas": "Centraliza información, comunicación y recursos del Centro Norte.",
         "Favorito": "No",
         "Orden": 17
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🚀",
+        "Nombre": "Esfuerzo Operativo",
+        "Tipo": "Web",
+        "URL": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
+        "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
+        "Favorito": "Si",
+        "Orden": 18
       }
     ],
     "Eventos": [

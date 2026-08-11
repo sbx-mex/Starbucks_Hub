@@ -4,11 +4,16 @@ const state = {
   selectedOpsDay: null,
   sidebarCollapsed: false,
   imageModalTrigger: null,
+  toolQuery: "",
+  toolFilter: "all",
+  refreshing: false,
 };
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const WEEK_ORDER = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
 const HOME_TOOL_NAMES = [
+  "CN Connect",
+  "Esfuerzo Operativo",
   "Ranking",
   "Tasa de Éxito DT",
   "Calculadora de Ritmo",
@@ -19,6 +24,8 @@ const HOME_TOOL_NAMES = [
   "RSA 2.0",
 ];
 const HOME_TOOL_DESCRIPTIONS = {
+  "CN Connect": "Centraliza información, comunicación y recursos del Centro Norte.",
+  "Esfuerzo Operativo": "Consulta avance, tendencia y prioridades por región, DM y tienda.",
   "Ranking": "Consulta indicadores, ranking y desempeño operativo del distrito.",
   "Tasa de Éxito DT": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See.",
   "Calculadora de Ritmo": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
@@ -279,9 +286,10 @@ function renderHome() {
         <span class="home-tool-state">No disponible</span>
       </article>`;
     }
-    return `<a class="home-tool-card" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="${title}: abrir herramienta">
+    const featured = ["CN Connect", "Esfuerzo Operativo"].includes(name);
+    return `<a class="home-tool-card${featured ? " is-featured" : ""}" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${title} en una pestaña nueva">
       <span class="home-tool-icon" aria-hidden="true">${iconText}</span>
-      <div><h3>${title}</h3><p>${description}</p></div>
+      <div>${featured ? '<span class="home-tool-kicker">Acceso prioritario</span>' : ""}<h3>${title}</h3><p>${description}</p></div>
       <span class="home-tool-arrow" aria-hidden="true">${icon("arrow")}</span>
     </a>`;
   }).join("");
@@ -431,16 +439,49 @@ function renderOps() {
 }
 
 function renderLinks() {
-  const records = [...sheet("Links")].sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
+  const query = state.toolQuery.trim().toLocaleLowerCase("es-MX");
+  const records = [...sheet("Links")]
+    .filter((record) => record.Nombre !== "Evidencia Antes / Después")
+    .filter((record) => externalUrl(record.URL))
+    .sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
   const favorites = records.filter((record) => normalizeBool(record.Favorito));
+  const filtered = records.filter((record) => {
+    const searchable = [record.Nombre, record.Notas, record.Categoria, record.Grupo, record.Vista]
+      .join(" ").toLocaleLowerCase("es-MX");
+    const matchesQuery = !query || searchable.includes(query);
+    const matchesFilter = state.toolFilter === "all"
+      || (state.toolFilter === "favorites" && normalizeBool(record.Favorito))
+      || (state.toolFilter === "cn" && /centro norte|cn connect/i.test(searchable));
+    return matchesQuery && matchesFilter;
+  });
+
+  const favoriteSection = $("#favorite-section");
+  favoriteSection.hidden = Boolean(query) || state.toolFilter !== "all";
   $("#favorite-links").innerHTML = favorites.length ? favorites.slice(0, 8).map((record) => `
-    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer">
-      <span class="link-icon">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "")}</small>
+    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+      <span class="link-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "")}</small><span class="favorite-link-action">Abrir <span aria-hidden="true">↗</span></span>
     </a>`).join("") : "";
-  $("#links-list").innerHTML = records.length ? records.map((record) => `
-    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer">
-      <span>${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><p>${esc(record.Notas || "")}</p><span class="external">Abrir ↗</span>
-    </a>`).join("") : emptyState("No hay herramientas disponibles en el CMS.");
+  $("#links-list").innerHTML = filtered.length ? filtered.map((record) => `
+    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+      <span class="link-row-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span>
+      <span class="link-row-title"><strong>${esc(record.Nombre)}</strong><small>${esc(record.Grupo || record.Categoria || "Herramienta")}</small></span>
+      <p>${esc(record.Notas || "")}</p><span class="external">Abrir <span aria-hidden="true">↗</span></span>
+    </a>`).join("") : emptyState(query ? `No encontramos herramientas para “${state.toolQuery.trim()}”.` : "No hay herramientas disponibles para este filtro.");
+  $("#tools-result-count").textContent = `${filtered.length} ${filtered.length === 1 ? "herramienta disponible" : "herramientas disponibles"}`;
+  $("#clear-tool-search").hidden = !query && state.toolFilter === "all";
+  $$('[data-tool-filter]').forEach((button) => {
+    const active = button.dataset.toolFilter === state.toolFilter;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+}
+
+function updateDataTimestamp() {
+  const generated = state.data?.generatedAt ? new Date(state.data.generatedAt) : null;
+  const label = generated && !Number.isNaN(generated.getTime())
+    ? `Datos actualizados ${new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(generated)}`
+    : "Datos disponibles sin marca de actualización";
+  $$(".data-updated").forEach((element) => { element.textContent = label; });
 }
 
 function renderAll() {
@@ -449,6 +490,7 @@ function renderAll() {
   renderEvents();
   renderOps();
   renderLinks();
+  updateDataTimestamp();
 }
 
 function openImageModal(src, alt, trigger) {
@@ -487,13 +529,44 @@ function bindEvents() {
     openImageModal(trigger.dataset.imageSrc, trigger.dataset.imageAlt, trigger);
   });
   $("#event-period").addEventListener("change", renderEvents);
-  window.addEventListener("online", updateConnectionStatus);
+  $("#tool-search").addEventListener("input", (event) => {
+    state.toolQuery = event.target.value;
+    renderLinks();
+  });
+  $$('[data-tool-filter]').forEach((button) => button.addEventListener("click", () => {
+    state.toolFilter = button.dataset.toolFilter;
+    renderLinks();
+  }));
+  $("#clear-tool-search").addEventListener("click", () => {
+    state.toolQuery = "";
+    state.toolFilter = "all";
+    $("#tool-search").value = "";
+    renderLinks();
+    $("#tool-search").focus();
+  });
+  $("#refresh-data").addEventListener("click", () => refreshData(true));
+  window.addEventListener("online", () => {
+    updateConnectionStatus();
+    refreshData(false);
+  });
   window.addEventListener("offline", updateConnectionStatus);
   window.addEventListener("resize", () => {
     closeMenu();
     applySidebarState();
   });
   document.addEventListener("keydown", (event) => {
+    const searchFocused = document.activeElement === $("#tool-search");
+    if ((event.key === "/" && !/input|textarea|select/i.test(document.activeElement?.tagName)) || ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "k")) {
+      event.preventDefault();
+      location.hash = "herramientas";
+      window.setTimeout(() => $("#tool-search").focus(), 0);
+      return;
+    }
+    if (event.key === "Escape" && searchFocused && (state.toolQuery || state.toolFilter !== "all")) {
+      event.preventDefault();
+      $("#clear-tool-search").click();
+      return;
+    }
     if (event.key === "Escape" && !$("#image-modal").hidden) {
       closeImageModal();
       return;
@@ -511,11 +584,36 @@ function updateConnectionStatus() {
 }
 
 async function loadData() {
-  const response = await fetch("./data/cms.json", { cache: "no-cache" });
+  const response = await fetch("./data/cms.json", { cache: "no-store" });
   if (!response.ok) throw new Error(`No fue posible cargar el CMS (${response.status}).`);
   const payload = await response.json();
   if (!payload.sheets) throw new Error("El archivo de datos no contiene las hojas esperadas.");
   return payload;
+}
+
+async function refreshData(announce = true) {
+  if (state.refreshing) return;
+  state.refreshing = true;
+  const button = $("#refresh-data");
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  try {
+    state.data = await loadData();
+    renderAll();
+    $("#error-banner").hidden = true;
+    if (announce) {
+      button.querySelector("span:last-child").textContent = "Actualizado";
+      window.setTimeout(() => { button.querySelector("span:last-child").textContent = "Actualizar"; }, 1600);
+    }
+  } catch (error) {
+    $("#error-banner").textContent = `${error.message} Se conserva la última información disponible.`;
+    $("#error-banner").hidden = false;
+    if (!state.data) throw error;
+  } finally {
+    state.refreshing = false;
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+  }
 }
 
 async function init() {
@@ -525,8 +623,7 @@ async function init() {
   bindEvents();
   updateConnectionStatus();
   try {
-    state.data = await loadData();
-    renderAll();
+    await refreshData(false);
     routeTo(location.hash.slice(1) || "inicio", false);
   } catch (error) {
     $("#error-banner").textContent = `${error.message} Actualiza los datos desde Starbucks_Hub_CMS.xlsx.`;
@@ -534,7 +631,13 @@ async function init() {
     routeTo("inicio", false);
   }
   if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("./sw.js").catch(() => {});
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    navigator.serviceWorker.register("./sw.js")
+      .then((registration) => registration.update())
+      .catch(() => {});
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (hadController) window.location.reload();
+    }, { once: true });
   }
 }
 

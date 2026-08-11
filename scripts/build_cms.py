@@ -28,6 +28,31 @@ REQUIRED_SHEETS = {
 SHEET_ALIASES = {
     "Herramientas": "Links",
 }
+REMOVED_LINKS = {"Evidencia Antes / Después"}
+REQUIRED_LINKS = [
+    {
+        "Categoria": "Operación", "Grupo": "App", "Vista": "CN", "Icono": "📍",
+        "Nombre": "CN Connect", "Tipo": "Web", "URL": "https://sbx-mx.github.io/CentroNorteConnect/",
+        "Notas": "Centraliza información, comunicación y recursos del Centro Norte.", "Favorito": "No", "Orden": 17,
+    },
+    {
+        "Categoria": "Operación", "Grupo": "App", "Vista": "General", "Icono": "🚀",
+        "Nombre": "Esfuerzo Operativo", "Tipo": "Web", "URL": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
+        "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.", "Favorito": "Si", "Orden": 18,
+    },
+]
+
+
+def normalize_links(records: list[dict]) -> list[dict]:
+    """Aplica la navegación oficial aunque el Excel agregue o quite filas."""
+    current = [record for record in records if record.get("Nombre") not in REMOVED_LINKS]
+    by_name = {record.get("Nombre"): record for record in current}
+    for required in REQUIRED_LINKS:
+        if required["Nombre"] in by_name:
+            by_name[required["Nombre"]].update(required)
+        else:
+            current.append(dict(required))
+    return sorted(current, key=lambda record: (float(record.get("Orden") or 999), str(record.get("Nombre") or "")))
 
 
 def column_index(reference: str) -> int:
@@ -135,6 +160,7 @@ def build(source: Path, destination: Path) -> None:
     missing = sorted(REQUIRED_SHEETS - set(sheets))
     if missing:
         raise SystemExit(f"Faltan hojas requeridas: {', '.join(missing)}")
+    sheets["Links"] = normalize_links(sheets["Links"])
 
     payload = {
         "schemaVersion": 1,

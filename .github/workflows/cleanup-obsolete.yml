@@ -27,23 +27,39 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Limpiar únicamente residuos autorizados
-        run: python scripts/audit_obsolete.py --fix
+      - name: Auditar y retirar solo residuos seguros
+        run: python scripts/audit_obsolete.py --fix --report "$RUNNER_TEMP/obsolete-report.json"
 
-      - name: Validar experiencia y estructura
+      - name: Validar PWA después de la limpieza
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python tests/validate_project.py
 
-      - name: Publicar limpieza validada
+      - name: Guardar reporte de mantenimiento
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: obsolete-audit-${{ github.run_number }}
+          path: ${{ runner.temp }}/obsolete-report.json
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Publicar únicamente eliminaciones validadas
         shell: bash
         run: |
           if git diff --quiet; then
-            echo "No hay obsoletos por retirar."
+            echo "No hay obsoletos seguros por retirar."
             exit 0
           fi
+
+          git add -u
+          if git diff --cached --name-status | grep -Ev '^D[[:space:]]' | grep -q .; then
+            echo "La auditoría intentó modificar algo distinto de una eliminación. Se cancela."
+            git diff --cached --name-status
+            exit 1
+          fi
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          git commit -m "chore: limpiar recursos obsoletos validados"
+          git commit -m "chore: retirar residuos obsoletos validados"
           git push

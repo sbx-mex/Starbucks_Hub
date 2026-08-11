@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.bak
+*.tmp
+*.orig
+*.patch
+*.zip
+~$*.xlsx
+links_para_depurar*.xlsx
+Starbucks_Hub_CMS (*).xlsx
+Starbucks_Hub_CMS_*backup*.xlsx

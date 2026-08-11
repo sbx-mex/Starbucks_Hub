@@ -14,6 +14,8 @@ REQUIRED = [
     "data/cms.json",
     "manifest.webmanifest",
     "sw.js",
+    "scripts/audit_obsolete.py",
+    ".github/workflows/cleanup-obsolete.yml",
     "assets/icons/starbucks_hub.png",
     "assets/about/Kike_pbt.jpeg",
     "assets/about/George_pbt.jpeg",
@@ -122,12 +124,12 @@ if manifest_icons != ["./assets/icons/starbucks_hub.png"]:
 if not all(asset in service_worker for asset in ["./index.html", "./data/cms.json", "./app.js", "./styles.css"]):
     fail("Faltan recursos esenciales en el Service Worker")
 
-for relative in REQUIRED[6:]:
+for relative in (item for item in REQUIRED if item.startswith("assets/")):
     expected = f'./{relative}'
     if expected not in service_worker:
         fail(f"Falta recurso en caché PWA: {expected}")
 
-if "starbucks-hub-v4" not in service_worker:
+if "starbucks-hub-v5" not in service_worker:
     fail("No se incrementó la versión de caché")
 
 if 'pathname.endsWith("/data/cms.json")' not in service_worker:
@@ -188,24 +190,30 @@ for name, url in required_links.items():
     if links_by_name.get(name, {}).get("URL") != url:
         fail(f"Enlace prioritario incorrecto: {name}")
 
+for removed_message in ["Datos actualizados", "Prioridades de consulta para líderes DM y roles superiores."]:
+    if removed_message in html or removed_message in javascript:
+        fail(f"Permanece mensaje solicitado para limpieza: {removed_message}")
+
+workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
+obsolete_audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
 experience_checks = {
-    "búsqueda de herramientas": 'id="tool-search"' in html and "toolQuery" in javascript,
-    "filtros rápidos": 'data-tool-filter="favorites"' in html and "toolFilter" in javascript,
-    "limpieza de búsqueda": 'id="clear-tool-search"' in html,
-    "actualización manual": 'id="refresh-data"' in html and "refreshData" in javascript,
-    "actualización al reconectar": 'addEventListener("online"' in javascript and "refreshData(false)" in javascript,
-    "atajo de teclado": 'event.key === "/"' in javascript and 'key.toLowerCase() === "k"' in javascript,
-    "estado accesible de filtros": 'setAttribute("aria-pressed"' in javascript,
-    "fecha visible de datos": "updateDataTimestamp" in javascript and html.count('class="data-updated"') == 2,
-    "datos sin caché obsoleta": 'cache: "no-store"' in javascript and 'pathname.endsWith("/data/cms.json")' in service_worker,
-    "accesos prioritarios en inicio": all(name in javascript for name in required_links),
+    "ruta rápida operativa": 'class="operational-shortcuts"' in html and html.count('class="operational-shortcuts"') == 1,
+    "directorio sin filtros duplicados": html.count('data-tool-filter="favorites"') == 1,
+    "búsqueda con respuesta ágil": "toolSearchTimer" in javascript and "}, 120);" in javascript,
+    "historial local de herramientas": 'id="recent-section"' in html and "rememberTool" in javascript,
+    "navegación anunciada": 'id="route-status"' in html and '$("#route-status").textContent' in javascript,
+    "foco accesible por vista": 'heading.focus({ preventScroll: true })' in javascript,
+    "título contextual": 'document.title = `${routeLabel} · Starbucks Hub`' in javascript,
+    "retorno superior discreto": 'id="back-to-top"' in html and 'window.scrollY < 700' in javascript,
+    "almacenamiento tolerante": "function readRecentTools" in javascript and javascript.count("catch {") >= 4,
+    "limpieza automatizada segura": "audit_obsolete.py --fix" in workflow and "KNOWN_OBSOLETE" in obsolete_audit,
 }
 failed_experience = [name for name, passed in experience_checks.items() if not passed]
 if failed_experience:
     fail(f"Mejoras de experiencia incompletas: {', '.join(failed_experience)}")
 
 print("Validación estática aprobada")
-print(f"Mejoras UX y accesibilidad: {sum(experience_checks.values())}/10")
+print(f"Mejoras UX, estabilidad y accesibilidad: {sum(experience_checks.values())}/10")
 print(f"Hojas CMS: {len(cms['sheets'])}")
 print(f"Enlaces: {len(cms['sheets']['Links'])}")
 print(f"Eventos: {len(cms['sheets']['Eventos'])}")

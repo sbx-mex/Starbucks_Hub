@@ -7,7 +7,10 @@ const state = {
   toolQuery: "",
   toolFilter: "all",
   refreshing: false,
+  recentTools: [],
 };
+
+let toolSearchTimer = null;
 
 const DAY_NAMES = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
 const WEEK_ORDER = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
@@ -86,6 +89,25 @@ function icon(name) {
 
 function normalizeBool(value) {
   return value === true || ["true", "si", "sí", "1"].includes(String(value ?? "").trim().toLowerCase());
+}
+
+function readRecentTools() {
+  try {
+    const value = JSON.parse(localStorage.getItem("starbucksHubRecentTools") || "[]");
+    return Array.isArray(value) ? value.filter((name) => typeof name === "string").slice(0, 4) : [];
+  } catch {
+    return [];
+  }
+}
+
+function rememberTool(name) {
+  if (!name) return;
+  state.recentTools = [name, ...state.recentTools.filter((item) => item !== name)].slice(0, 4);
+  try {
+    localStorage.setItem("starbucksHubRecentTools", JSON.stringify(state.recentTools));
+  } catch {
+    // La navegación continúa aun cuando el almacenamiento privado no esté disponible.
+  }
 }
 
 function parseDate(value) {
@@ -223,9 +245,18 @@ function routeTo(route, focus = true) {
     else link.removeAttribute("aria-current");
   });
   closeMenu();
+  const heading = $(`[data-view="${target}"] h1`);
+  const routeLabel = heading?.textContent.trim() || "Inicio";
+  document.title = `${routeLabel} · Starbucks Hub`;
+  $("#route-status").textContent = `Vista ${routeLabel}`;
   if (focus) {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    $("#main").focus({ preventScroll: true });
+    if (heading) {
+      heading.setAttribute("tabindex", "-1");
+      heading.focus({ preventScroll: true });
+    } else {
+      $("#main").focus({ preventScroll: true });
+    }
   }
 }
 
@@ -244,14 +275,14 @@ function applySidebarState() {
 
 function toggleSidebar() {
   state.sidebarCollapsed = !state.sidebarCollapsed;
-  localStorage.setItem("starbucksHubSidebarCollapsed", String(state.sidebarCollapsed));
+  try { localStorage.setItem("starbucksHubSidebarCollapsed", String(state.sidebarCollapsed)); } catch { /* almacenamiento opcional */ }
   applySidebarState();
 }
 
 function openMenu() {
   if (!isCompactViewport()) {
     state.sidebarCollapsed = false;
-    localStorage.setItem("starbucksHubSidebarCollapsed", "false");
+    try { localStorage.setItem("starbucksHubSidebarCollapsed", "false"); } catch { /* almacenamiento opcional */ }
     applySidebarState();
     return;
   }
@@ -287,7 +318,7 @@ function renderHome() {
       </article>`;
     }
     const featured = ["CN Connect", "Esfuerzo Operativo"].includes(name);
-    return `<a class="home-tool-card${featured ? " is-featured" : ""}" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${title} en una pestaña nueva">
+    return `<a class="home-tool-card${featured ? " is-featured" : ""}" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${title}" aria-label="Abrir ${title} en una pestaña nueva">
       <span class="home-tool-icon" aria-hidden="true">${iconText}</span>
       <div>${featured ? '<span class="home-tool-kicker">Acceso prioritario</span>' : ""}<h3>${title}</h3><p>${description}</p></div>
       <span class="home-tool-arrow" aria-hidden="true">${icon("arrow")}</span>
@@ -458,30 +489,31 @@ function renderLinks() {
   const favoriteSection = $("#favorite-section");
   favoriteSection.hidden = Boolean(query) || state.toolFilter !== "all";
   $("#favorite-links").innerHTML = favorites.length ? favorites.slice(0, 8).map((record) => `
-    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "")}</small><span class="favorite-link-action">Abrir <span aria-hidden="true">↗</span></span>
     </a>`).join("") : "";
   $("#links-list").innerHTML = filtered.length ? filtered.map((record) => `
-    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-row-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span>
       <span class="link-row-title"><strong>${esc(record.Nombre)}</strong><small>${esc(record.Grupo || record.Categoria || "Herramienta")}</small></span>
       <p>${esc(record.Notas || "")}</p><span class="external">Abrir <span aria-hidden="true">↗</span></span>
     </a>`).join("") : emptyState(query ? `No encontramos herramientas para “${state.toolQuery.trim()}”.` : "No hay herramientas disponibles para este filtro.");
   $("#tools-result-count").textContent = `${filtered.length} ${filtered.length === 1 ? "herramienta disponible" : "herramientas disponibles"}`;
   $("#clear-tool-search").hidden = !query && state.toolFilter === "all";
+  const recentRecords = state.recentTools
+    .map((name) => records.find((record) => record.Nombre === name))
+    .filter(Boolean);
+  const recentSection = $("#recent-section");
+  recentSection.hidden = !recentRecords.length || Boolean(query) || state.toolFilter !== "all";
+  $("#recent-links").innerHTML = recentRecords.map((record) => `
+    <a class="recent-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Volver a abrir ${esc(record.Nombre)} en una pestaña nueva">
+      <span aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>Volver a abrir <span aria-hidden="true">↗</span></small>
+    </a>`).join("");
   $$('[data-tool-filter]').forEach((button) => {
     const active = button.dataset.toolFilter === state.toolFilter;
     button.classList.toggle("is-active", active);
     button.setAttribute("aria-pressed", String(active));
   });
-}
-
-function updateDataTimestamp() {
-  const generated = state.data?.generatedAt ? new Date(state.data.generatedAt) : null;
-  const label = generated && !Number.isNaN(generated.getTime())
-    ? `Datos actualizados ${new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(generated)}`
-    : "Datos disponibles sin marca de actualización";
-  $$(".data-updated").forEach((element) => { element.textContent = label; });
 }
 
 function renderAll() {
@@ -490,7 +522,6 @@ function renderAll() {
   renderEvents();
   renderOps();
   renderLinks();
-  updateDataTimestamp();
 }
 
 function openImageModal(src, alt, trigger) {
@@ -530,21 +561,52 @@ function bindEvents() {
   });
   $("#event-period").addEventListener("change", renderEvents);
   $("#tool-search").addEventListener("input", (event) => {
-    state.toolQuery = event.target.value;
-    renderLinks();
+    window.clearTimeout(toolSearchTimer);
+    toolSearchTimer = window.setTimeout(() => {
+      state.toolQuery = event.target.value;
+      renderLinks();
+    }, 120);
   });
   $$('[data-tool-filter]').forEach((button) => button.addEventListener("click", () => {
+    window.clearTimeout(toolSearchTimer);
+    state.toolQuery = $("#tool-search").value;
     state.toolFilter = button.dataset.toolFilter;
     renderLinks();
   }));
   $("#clear-tool-search").addEventListener("click", () => {
+    window.clearTimeout(toolSearchTimer);
     state.toolQuery = "";
     state.toolFilter = "all";
     $("#tool-search").value = "";
     renderLinks();
     $("#tool-search").focus();
   });
+  $("#herramientas").addEventListener("click", (event) => {
+    const link = event.target.closest("[data-tool-name]");
+    if (!link) return;
+    rememberTool(link.dataset.toolName);
+    window.setTimeout(renderLinks, 0);
+  });
+  $("#home-tools-grid").addEventListener("click", (event) => {
+    const link = event.target.closest("[data-tool-name]");
+    if (link) {
+      rememberTool(link.dataset.toolName);
+      window.setTimeout(renderLinks, 0);
+    }
+  });
+  $(".tool-filters").addEventListener("keydown", (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    const buttons = $$('[data-tool-filter]');
+    const current = buttons.indexOf(document.activeElement);
+    const direction = event.key === "ArrowRight" ? 1 : -1;
+    buttons[(current + direction + buttons.length) % buttons.length].focus();
+  });
   $("#refresh-data").addEventListener("click", () => refreshData(true));
+  $("#back-to-top").addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  window.addEventListener("scroll", () => {
+    $("#back-to-top").hidden = window.scrollY < 700;
+  }, { passive: true });
   window.addEventListener("online", () => {
     updateConnectionStatus();
     refreshData(false);
@@ -617,7 +679,8 @@ async function refreshData(announce = true) {
 }
 
 async function init() {
-  state.sidebarCollapsed = localStorage.getItem("starbucksHubSidebarCollapsed") === "true";
+  state.recentTools = readRecentTools();
+  try { state.sidebarCollapsed = localStorage.getItem("starbucksHubSidebarCollapsed") === "true"; } catch { state.sidebarCollapsed = false; }
   applySidebarState();
   installIcons();
   bindEvents();

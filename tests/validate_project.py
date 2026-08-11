@@ -63,7 +63,7 @@ for term in FORBIDDEN_VISIBLE:
     if term.lower() in html.lower():
         fail(f"Referencia visible prohibida: {term}")
 
-for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Links", "Herramientas para decidir y actuar", "Busca y abre en segundos", "Sugerencias y/o comentarios"]:
+for term in ["#GreenApronService", "JUNTÉMONOS MÁS", "Recordatorio", "Resumen Ops", "Herramientas", "Links", "Herramientas para decidir y actuar", "¿Qué necesitas abrir?", "Sugerencias y/o comentarios"]:
     if term not in html:
         fail(f"Falta contenido requerido: {term}")
 
@@ -131,7 +131,7 @@ for relative in (item for item in REQUIRED if item.startswith("assets/")):
     if expected not in service_worker:
         fail(f"Falta recurso en caché PWA: {expected}")
 
-if "starbucks-hub-v6" not in service_worker:
+if "starbucks-hub-v7" not in service_worker:
     fail("No se incrementó la versión de caché")
 
 if 'pathname.endsWith("/data/cms.json")' not in service_worker:
@@ -199,11 +199,18 @@ for removed_message in ["Datos actualizados", "Prioridades de consulta para líd
 workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
 obsolete_audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
 experience_checks = {
-    "ruta rápida operativa": 'class="operational-shortcuts"' in html and html.count('class="operational-shortcuts"') == 1,
-    "directorio sin filtros duplicados": html.count('data-tool-filter="favorites"') == 1,
+    "ruta rápida sin directorio redundante": 'class="operational-shortcuts"' in html and '<strong>Directorio</strong>' not in html,
+    "acceso directo a búsqueda": 'id="focus-home-search"' in html and '$("#focus-home-search").addEventListener' in javascript,
+    "directorio de links eliminado": 'id="link-search-results"' in html and 'quick-links-directory' not in html and 'linkDirectoryOpen' not in javascript,
     "búsqueda con respuesta ágil": "toolSearchTimer" in javascript and "homeSearchTimer" in javascript and "linkSearchTimer" in javascript,
     "buscador inteligente global": 'id="home-search"' in html and "searchCatalog" in javascript and "normalizeSearchText" in javascript,
-    "links discretos por escritura": 'id="link-search-results"' in html and 'id="quick-links-directory"' in html and "linkDirectoryOpen" in javascript,
+    "navegación por teclado en búsqueda": "bindSmartSearchKeyboard" in javascript and 'event.key === "ArrowDown"' in javascript,
+    "alerta WFM martes a viernes": 'id="action-modal"' in html and "CRITICAL_WFM_DAYS" in javascript and "showCriticalWfmAlert" in javascript,
+    "acceso UKG desde WFM": "getUkgHorariosRecord" in javascript and "Abrir UKG Horarios" in javascript,
+    "Humanet V7 protegido por Edge": "isMicrosoftEdge" in javascript and 'normalized.includes("humanet v7")' in javascript and "Solo Edge" in javascript,
+    "WOE protegido por VPN": 'normalized === "woe web"' in javascript and "VPN encendida · Abrir WOE" in javascript,
+    "modal accesible y con foco": "openActionModal" in javascript and "closeActionModal" in javascript and "trapModalFocus" in javascript,
+    "navegación móvil prioriza links": '<a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>' in html,
     "historial local de herramientas": 'id="recent-section"' in html and "rememberTool" in javascript,
     "navegación anunciada": 'id="route-status"' in html and '$("#route-status").textContent' in javascript,
     "foco accesible por vista": 'heading.focus({ preventScroll: true })' in javascript,
@@ -212,6 +219,7 @@ experience_checks = {
     "almacenamiento tolerante": "function readRecentTools" in javascript and javascript.count("catch {") >= 4,
     "limpieza automatizada segura": "audit_obsolete.py --fix" in workflow and "KNOWN_OBSOLETE" in obsolete_audit,
 }
+
 failed_experience = [name for name, passed in experience_checks.items() if not passed]
 if failed_experience:
     fail(f"Mejoras de experiencia incompletas: {', '.join(failed_experience)}")

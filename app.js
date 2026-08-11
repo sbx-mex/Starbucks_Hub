@@ -4,11 +4,12 @@ const state = {
   selectedOpsDay: null,
   sidebarCollapsed: false,
   imageModalTrigger: null,
+  actionModalTrigger: null,
+  actionModalRoute: null,
   toolQuery: "",
   toolFilter: "all",
   homeQuery: "",
   linkQuery: "",
-  linkDirectoryOpen: false,
   refreshing: false,
   recentTools: [],
 };
@@ -43,6 +44,12 @@ const HOME_TOOL_DESCRIPTIONS = {
   "Code Brew": "Busca artículos, códigos y mercancía de forma rápida.",
   "RSA 2.0": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
 };
+const CRITICAL_WFM_DAYS = new Set(["Martes", "Miércoles", "Jueves", "Viernes"]);
+const ACCESS_RULES = {
+  humanetEdge: { badge: "Solo Edge", kind: "edge" },
+  woeVpn: { badge: "VPN", kind: "vpn" },
+};
+
 const DUTY_IMAGES_BY_DAY = {
   "Lunes": ["lunes_food.png", "lunes_showcase.png"],
   "Martes": ["martes_lobby.png", "martes_pic.png"],
@@ -205,6 +212,28 @@ function quickLinkRecords() {
     .sort((a, b) => Number(a.Orden || 999) - Number(b.Orden || 999));
 }
 
+function accessRuleForName(name) {
+  const normalized = normalizeSearchText(name);
+  if (normalized.includes("humanet v7")) return ACCESS_RULES.humanetEdge;
+  if (normalized === "woe web" || normalized.startsWith("woe web ")) return ACCESS_RULES.woeVpn;
+  return null;
+}
+
+function isMicrosoftEdge() {
+  return /(?:Edg|EdgA|EdgiOS)\//.test(navigator.userAgent || "");
+}
+
+function quickLinkByName(name) {
+  const target = normalizeSearchText(name);
+  return quickLinkRecords().find((record) => normalizeSearchText(record.Nombre) === target) || null;
+}
+
+function getUkgHorariosRecord() {
+  return quickLinkByName("UKG_Horarios")
+    || quickLinkRecords().find((record) => /ukg.*horario|horario.*ukg/i.test(String(record.Nombre || "")))
+    || null;
+}
+
 function catalogEntries() {
   const entries = [];
   const seenUrls = new Set();
@@ -259,10 +288,12 @@ function searchCatalog(query, options = {}) {
 function smartResultMarkup(entry) {
   const iconText = entry.source === "Herramienta" ? (entry.record.Icono || "↗") : "↗";
   const toolAttribute = entry.source === "Herramienta" ? ` data-tool-name="${esc(entry.name)}"` : "";
-  return `<a class="smart-result" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer" data-catalog-source="${esc(entry.source)}"${toolAttribute} aria-label="Abrir ${esc(entry.name)} en una pestaña nueva">
+  const accessRule = accessRuleForName(entry.name);
+  const badges = `<span class="smart-result-badges">${accessRule ? `<span class="access-guard ${esc(accessRule.kind)}">${esc(accessRule.badge)}</span>` : ""}<span class="smart-result-type">${esc(entry.source)}</span></span>`;
+  return `<a class="smart-result" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer" data-catalog-source="${esc(entry.source)}" data-access-name="${esc(entry.name)}"${toolAttribute} aria-label="Abrir ${esc(entry.name)} en una pestaña nueva">
     <span class="smart-result-icon" aria-hidden="true">${esc(iconText)}</span>
     <span class="smart-result-copy"><strong>${esc(entry.name)}</strong><small>${esc(entry.subtitle || entry.source)}</small>${entry.description ? `<span>${esc(entry.description)}</span>` : ""}</span>
-    <span class="smart-result-type">${esc(entry.source)}</span>
+    ${badges}
   </a>`;
 }
 
@@ -288,10 +319,8 @@ function renderHomeSearch() {
 function renderQuickLinks() {
   const input = $("#link-search");
   const resultsContainer = $("#link-search-results");
-  const directory = $("#quick-links-directory");
   const count = $("#quick-links-count");
-  const toggle = $("#toggle-link-directory");
-  if (!input || !resultsContainer || !directory || !count || !toggle) return;
+  if (!input || !resultsContainer || !count) return;
 
   const records = quickLinkRecords();
   const query = state.linkQuery.trim();
@@ -308,15 +337,7 @@ function renderQuickLinks() {
     input.setAttribute("aria-expanded", "false");
   }
 
-  count.textContent = `${records.length} accesos disponibles`;
-  directory.hidden = !state.linkDirectoryOpen;
-  toggle.setAttribute("aria-expanded", String(state.linkDirectoryOpen));
-  toggle.textContent = state.linkDirectoryOpen ? "Ocultar directorio" : "Ver directorio completo";
-  directory.innerHTML = records.map((record) => `
-    <a class="quick-link-card" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" aria-label="Abrir ${esc(record.Nombre || record.Dominio || "link")} en una pestaña nueva">
-      <span class="quick-link-card-icon" aria-hidden="true">↗</span>
-      <span><strong>${esc(record.Nombre || record.Dominio || "Acceso")}</strong><small>${esc(record.Dominio || record.Carpeta || "Link")}</small></span>
-    </a>`).join("");
+  count.textContent = `${records.length} accesos indexados · escribe para buscar`;
 }
 
 function localAsset(value) {
@@ -459,12 +480,51 @@ function renderHome() {
       </article>`;
     }
     const featured = ["CN Connect", "Esfuerzo Operativo"].includes(name);
-    return `<a class="home-tool-card${featured ? " is-featured" : ""}" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${title}" aria-label="Abrir ${title} en una pestaña nueva">
+    return `<a class="home-tool-card${featured ? " is-featured" : ""}" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${title}" data-access-name="${title}" aria-label="Abrir ${title} en una pestaña nueva">
       <span class="home-tool-icon" aria-hidden="true">${iconText}</span>
       <div>${featured ? '<span class="home-tool-kicker">Acceso prioritario</span>' : ""}<h3>${title}</h3><p>${description}</p></div>
       <span class="home-tool-arrow" aria-hidden="true">${icon("arrow")}</span>
     </a>`;
   }).join("");
+}
+
+function getCriticalWfmContext(day = currentDayName()) {
+  if (!CRITICAL_WFM_DAYS.has(day)) return null;
+  const record = getWeeklyForDay(day).find((item) => /^WFM\b/i.test(String(item.Actividad || "")));
+  if (!record) return null;
+  const selectedDate = dateForWeekDay(day);
+  const planningDate = new Date(selectedDate);
+  planningDate.setDate(planningDate.getDate() + 15);
+  return {
+    day,
+    record,
+    planningLabel: dateRangeLabel(mondayOf(planningDate), sundayOf(planningDate)),
+    ukg: getUkgHorariosRecord(),
+  };
+}
+
+function renderCriticalHomeCard() {
+  const card = $("#wfm-home-card");
+  const content = $("#wfm-home-card-content");
+  if (!card || !content) return;
+  const context = getCriticalWfmContext();
+  if (!context) {
+    card.hidden = true;
+    content.innerHTML = "";
+    return;
+  }
+  const ukgAction = context.ukg ? `<a class="button primary compact-action" href="${esc(context.ukg.URL)}" target="_blank" rel="noopener noreferrer" data-access-name="${esc(context.ukg.Nombre || "UKG_Horarios")}">Abrir UKG Horarios ↗</a>` : "";
+  content.innerHTML = `<div class="wfm-home-copy">
+      <span class="wfm-critical-badge">WFM · Día crítico</span>
+      <h2 id="wfm-home-title">${esc(context.day)} · ${esc(context.record.Actividad)}</h2>
+      <p>${esc(context.record.Descripción)}</p>
+      <small>Semana en planeación: <strong>${esc(context.planningLabel)}</strong></small>
+    </div>
+    <div class="wfm-home-actions">
+      ${ukgAction}
+      <a class="button secondary compact-action" href="#resumen-ops" data-route-link="resumen-ops" data-scroll-ops-wfm>Ver WFM de hoy</a>
+    </div>`;
+  card.hidden = false;
 }
 
 function eventInMonth(event, date = new Date()) {
@@ -589,10 +649,15 @@ function renderOps() {
   const planningDate = new Date(selectedDate);
   planningDate.setDate(planningDate.getDate() + 15);
   const planningLabel = dateRangeLabel(mondayOf(planningDate), sundayOf(planningDate));
-  const wfmContent = `<div class="ops-planning">
+  const ukg = getUkgHorariosRecord();
+  const isCriticalWfmDay = isToday && CRITICAL_WFM_DAYS.has(state.selectedOpsDay);
+  const ukgAction = ukg ? `<a class="ops-primary-link" href="${esc(ukg.URL)}" target="_blank" rel="noopener noreferrer" data-access-name="${esc(ukg.Nombre || "UKG_Horarios")}">Abrir UKG Horarios ${icon("arrow")}</a>` : "";
+  const wfmContent = `<div class="ops-planning${isCriticalWfmDay ? " is-critical" : ""}">
       <span>Semana en planeación</span><strong>${esc(planningLabel)}</strong>
       <small>Referencia calculada 15 días adelante</small>
+      ${isCriticalWfmDay ? '<span class="wfm-critical-inline">Día crítico WFM</span>' : ""}
     </div>
+    ${ukgAction}
     <div class="ops-list">${wfm.length ? wfm.map((record) => opsItem(record, "weekly")).join("") : emptyState("No hay una acción WFM programada para este día.")}</div>`;
 
   const focusLabel = isToday ? "Hoy" : state.selectedOpsDay;
@@ -627,11 +692,11 @@ function renderLinks() {
   const favoriteSection = $("#favorite-section");
   favoriteSection.hidden = Boolean(query) || state.toolFilter !== "all";
   $("#favorite-links").innerHTML = favorites.length ? favorites.slice(0, 8).map((record) => `
-    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+    <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" data-access-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "")}</small><span class="favorite-link-action">Abrir <span aria-hidden="true">↗</span></span>
     </a>`).join("") : "";
   $("#links-list").innerHTML = filtered.length ? filtered.map((record) => `
-    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
+    <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" data-access-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-row-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span>
       <span class="link-row-title"><strong>${esc(record.Nombre)}</strong><small>${esc(record.Grupo || record.Categoria || "Herramienta")}</small></span>
       <p>${esc(record.Notas || "")}</p><span class="external">Abrir <span aria-hidden="true">↗</span></span>
@@ -644,7 +709,7 @@ function renderLinks() {
   const recentSection = $("#recent-section");
   recentSection.hidden = !recentRecords.length || Boolean(query) || state.toolFilter !== "all";
   $("#recent-links").innerHTML = recentRecords.map((record) => `
-    <a class="recent-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" aria-label="Volver a abrir ${esc(record.Nombre)} en una pestaña nueva">
+    <a class="recent-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" data-access-name="${esc(record.Nombre)}" aria-label="Volver a abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>Volver a abrir <span aria-hidden="true">↗</span></small>
     </a>`).join("");
   $$('[data-tool-filter]').forEach((button) => {
@@ -657,11 +722,143 @@ function renderLinks() {
 function renderAll() {
   setGreeting();
   renderHome();
+  renderCriticalHomeCard();
   renderHomeSearch();
   renderEvents();
   renderOps();
   renderLinks();
   renderQuickLinks();
+}
+
+function openActionModal(config, trigger) {
+  const modal = $("#action-modal");
+  state.actionModalTrigger = trigger || document.activeElement;
+  state.actionModalRoute = config.route || null;
+  $("#action-modal-icon").textContent = config.icon || "!";
+  $("#action-modal-kicker").textContent = config.kicker || "Aviso";
+  $("#action-modal-title").textContent = config.title || "Aviso operativo";
+  $("#action-modal-description").textContent = config.description || "";
+  $("#action-modal-detail").innerHTML = config.detail || "";
+
+  const primary = $("#action-modal-primary");
+  if (config.primaryUrl) {
+    primary.href = config.primaryUrl;
+    primary.textContent = config.primaryLabel || "Abrir";
+    primary.hidden = false;
+  } else {
+    primary.hidden = true;
+    primary.removeAttribute("href");
+  }
+
+  const routeButton = $("#action-modal-route");
+  routeButton.hidden = !config.route;
+  routeButton.textContent = config.routeLabel || "Ver detalle";
+
+  modal.hidden = false;
+  document.body.classList.add("modal-open");
+  $(".action-modal-panel", modal).focus();
+}
+
+function closeActionModal({ restoreFocus = true } = {}) {
+  const modal = $("#action-modal");
+  if (!modal || modal.hidden) return;
+  modal.hidden = true;
+  document.body.classList.remove("modal-open");
+  state.actionModalRoute = null;
+  if (restoreFocus) state.actionModalTrigger?.focus?.();
+  state.actionModalTrigger = null;
+}
+
+function showCriticalWfmAlert() {
+  const context = getCriticalWfmContext();
+  if (!context) return;
+  const ukgUrl = context.ukg ? externalUrl(context.ukg.URL) : null;
+  openActionModal({
+    icon: "WFM",
+    kicker: "Alerta operativa · Día crítico",
+    title: `${context.day}: ${context.record.Actividad}`,
+    description: context.record.Descripción || "Revisa la actividad WFM prioritaria de hoy.",
+    detail: `<div class="wfm-alert-detail"><span>Semana en planeación</span><strong>${esc(context.planningLabel)}</strong><small>Referencia calculada 15 días adelante</small></div>`,
+    primaryUrl: ukgUrl,
+    primaryLabel: "Abrir UKG Horarios",
+    route: "resumen-ops",
+    routeLabel: "Ver WFM de hoy",
+  });
+}
+
+function handleGuardedAccess(event) {
+  const link = event.target.closest("a[data-access-name]");
+  if (!link) return;
+  const name = link.dataset.accessName || "";
+  const rule = accessRuleForName(name);
+  if (!rule) return;
+
+  if (rule.kind === "edge") {
+    if (isMicrosoftEdge()) return;
+    event.preventDefault();
+    openActionModal({
+      icon: "Edge",
+      kicker: "Compatibilidad requerida",
+      title: "Humanet V7 solo abre en Microsoft Edge",
+      description: "Abre Starbucks Hub desde Microsoft Edge y vuelve a seleccionar Humanet V7.",
+      detail: '<div class="access-alert-note"><strong>No se abrirá en este navegador.</strong><span>Esto evita enviarte a una pantalla que no funcionará correctamente.</span></div>',
+    }, link);
+    return;
+  }
+
+  if (rule.kind === "vpn") {
+    event.preventDefault();
+    openActionModal({
+      icon: "VPN",
+      kicker: "Conexión requerida",
+      title: "Enciende la VPN antes de abrir WOE Web",
+      description: "WOE Web necesita la conexión VPN activa para funcionar.",
+      detail: '<div class="access-alert-note"><strong>Confirma tu conexión.</strong><span>Cuando la VPN esté encendida, continúa con el botón de abajo.</span></div>',
+      primaryUrl: link.href,
+      primaryLabel: "VPN encendida · Abrir WOE",
+    }, link);
+  }
+}
+
+function bindSmartSearchKeyboard(input, container) {
+  if (!input || !container) return;
+  input.addEventListener("keydown", (event) => {
+    const results = $$("a.smart-result", container);
+    if (!results.length) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      results[0].focus();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      results[0].click();
+    }
+  });
+  container.addEventListener("keydown", (event) => {
+    if (!["ArrowDown", "ArrowUp"].includes(event.key)) return;
+    const results = $$("a.smart-result", container);
+    const current = results.indexOf(document.activeElement);
+    if (current < 0) return;
+    event.preventDefault();
+    const next = event.key === "ArrowDown" ? current + 1 : current - 1;
+    if (next < 0) input.focus();
+    else results[Math.min(next, results.length - 1)].focus();
+  });
+}
+
+function trapModalFocus(event, modal) {
+  if (event.key !== "Tab" || !modal || modal.hidden) return;
+  const focusables = $$('a[href]:not([hidden]), button:not([hidden]):not([disabled]), [tabindex]:not([tabindex="-1"])', modal)
+    .filter((element) => element.offsetParent !== null);
+  if (!focusables.length) return;
+  const first = focusables[0];
+  const last = focusables[focusables.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
 }
 
 function openImageModal(src, alt, trigger) {
@@ -690,16 +887,35 @@ function bindEvents() {
   $("#sidebar-collapse").addEventListener("click", toggleSidebar);
   $("#sidebar-close").addEventListener("click", closeMenu);
   $("#scrim").addEventListener("click", closeMenu);
+  $("#action-modal-close").addEventListener("click", () => closeActionModal());
+  $("#action-modal-secondary").addEventListener("click", () => closeActionModal());
+  $("#action-modal-route").addEventListener("click", () => {
+    const route = state.actionModalRoute;
+    closeActionModal({ restoreFocus: false });
+    if (!route) return;
+    location.hash = route;
+    window.setTimeout(() => $("#ops-wfm")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+  });
+  $("#action-modal").addEventListener("click", (event) => {
+    if (event.target === $("#action-modal")) closeActionModal();
+  });
   $("#image-modal-close").addEventListener("click", closeImageModal);
   $("#image-modal").addEventListener("click", (event) => {
     if (event.target === $("#image-modal")) closeImageModal();
   });
   document.addEventListener("click", (event) => {
+    handleGuardedAccess(event);
+    if (event.defaultPrevented) return;
     const trigger = event.target.closest("[data-image-src]");
-    if (!trigger) return;
-    openImageModal(trigger.dataset.imageSrc, trigger.dataset.imageAlt, trigger);
+    if (trigger) openImageModal(trigger.dataset.imageSrc, trigger.dataset.imageAlt, trigger);
+    const scrollWfm = event.target.closest("[data-scroll-ops-wfm]");
+    if (scrollWfm) window.setTimeout(() => $("#ops-wfm")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
   });
   $("#event-period").addEventListener("change", renderEvents);
+  $("#focus-home-search").addEventListener("click", () => {
+    $("#home-search").focus();
+    $("#home-search").scrollIntoView({ behavior: "smooth", block: "center" });
+  });
   $("#home-search").addEventListener("input", (event) => {
     window.clearTimeout(homeSearchTimer);
     homeSearchTimer = window.setTimeout(() => {
@@ -713,10 +929,6 @@ function bindEvents() {
       state.linkQuery = event.target.value;
       renderQuickLinks();
     }, 90);
-  });
-  $("#toggle-link-directory").addEventListener("click", () => {
-    state.linkDirectoryOpen = !state.linkDirectoryOpen;
-    renderQuickLinks();
   });
   $("#tool-search").addEventListener("input", (event) => {
     window.clearTimeout(toolSearchTimer);
@@ -759,6 +971,8 @@ function bindEvents() {
       window.setTimeout(renderLinks, 0);
     }
   });
+  bindSmartSearchKeyboard($("#home-search"), $("#home-search-results"));
+  bindSmartSearchKeyboard($("#link-search"), $("#link-search-results"));
   $(".tool-filters").addEventListener("keydown", (event) => {
     if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
     event.preventDefault();
@@ -816,11 +1030,16 @@ function bindEvents() {
       renderQuickLinks();
       return;
     }
+    if (event.key === "Escape" && !$("#action-modal").hidden) {
+      closeActionModal();
+      return;
+    }
     if (event.key === "Escape" && !$("#image-modal").hidden) {
       closeImageModal();
       return;
     }
     if (event.key === "Escape") closeMenu();
+    if (!$("#action-modal").hidden) trapModalFocus(event, $("#action-modal"));
     if (event.key === "Tab" && !$("#image-modal").hidden) {
       event.preventDefault();
       $("#image-modal-close").focus();
@@ -875,6 +1094,7 @@ async function init() {
   try {
     await refreshData(false);
     routeTo(location.hash.slice(1) || "inicio", false);
+    window.setTimeout(showCriticalWfmAlert, 120);
   } catch (error) {
     $("#error-banner").textContent = `${error.message} Actualiza los datos desde Starbucks_Hub_CMS.xlsx.`;
     $("#error-banner").hidden = false;

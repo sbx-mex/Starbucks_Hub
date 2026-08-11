@@ -39,7 +39,7 @@
       <section>
         <p>Principal</p>
         <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Recordatorio</span></a>
+        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
         <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
         <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
         <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
@@ -67,8 +67,8 @@
           <h1 id="inicio-title"><span id="greeting">Bienvenido</span><br>Starbucks Hub</h1>
           <p>Herramientas clave para acompañar la operación, el desarrollo de Partners y la toma de decisiones.</p>
           <div class="hero-actions">
-            <a class="button primary" href="#resumen-ops" data-route-link="resumen-ops">Consultar lo de hoy</a>
-            <a class="button secondary" href="#herramientas" data-route-link="herramientas">Explorar herramientas</a>
+            <a class="button primary" href="#resumen-ops" data-route-link="resumen-ops">Ver prioridades de hoy</a>
+            <button id="focus-home-search" class="button secondary" type="button">Buscar un acceso</button>
           </div>
         </div>
         <div class="campaign-panel" aria-label="Campaña">
@@ -79,21 +79,24 @@
       </div>
 
       <nav class="operational-shortcuts" aria-label="Ruta rápida de consulta">
-        <a href="#resumen-ops" data-route-link="resumen-ops"><span aria-hidden="true">✓</span><span><strong>Hoy</strong><small>Revisa el foco operativo</small></span><span aria-hidden="true">→</span></a>
+        <a href="#resumen-ops" data-route-link="resumen-ops"><span aria-hidden="true">✓</span><span><strong>Operación de hoy</strong><small>Revisa prioridades y WFM</small></span><span aria-hidden="true">→</span></a>
         <a href="#recordatorio" data-route-link="recordatorio"><span aria-hidden="true">◷</span><span><strong>Agenda</strong><small>Ubica próximos eventos</small></span><span aria-hidden="true">→</span></a>
-        <a href="#herramientas" data-route-link="herramientas"><span aria-hidden="true">⌕</span><span><strong>Directorio</strong><small>Encuentra una herramienta</small></span><span aria-hidden="true">→</span></a>
       </nav>
+
+      <section id="wfm-home-card" class="wfm-home-card" aria-labelledby="wfm-home-title" hidden>
+        <div id="wfm-home-card-content"></div>
+      </section>
 
       <section class="home-smart-search" aria-labelledby="home-search-title">
         <div class="home-smart-search-copy">
           <p class="eyebrow">Acceso inmediato</p>
-          <h2 id="home-search-title">Busca y abre en segundos</h2>
-          <p>Escribe el nombre de una plataforma, herramienta o propósito. Los resultados aparecen solo cuando los necesitas.</p>
+          <h2 id="home-search-title">¿Qué necesitas abrir?</h2>
+          <p>Escribe una plataforma o tarea. Te mostramos la opción más útil sin recorrer menús.</p>
         </div>
         <label class="smart-search-field" for="home-search">
           <span class="visually-hidden">Buscar en Starbucks Hub</span>
           <span aria-hidden="true">⌕</span>
-          <input id="home-search" type="search" autocomplete="off" placeholder="Ej. WFM, nómina, BI, Attensi…" aria-controls="home-search-results" aria-expanded="false">
+          <input id="home-search" type="search" autocomplete="off" placeholder="Ej. UKG, WFM, Humanet, WOE, BI…" aria-controls="home-search-results" aria-expanded="false">
           <kbd>⌘K</kbd>
         </label>
         <div id="home-search-results" class="smart-search-results" role="list" aria-live="polite" hidden></div>
@@ -147,7 +150,7 @@
       <div class="tools-result-bar"><p id="tools-result-count" role="status" aria-live="polite"></p><button id="clear-tool-search" type="button" hidden>Limpiar búsqueda</button></div>
       <section id="recent-section" aria-labelledby="recent-title" hidden><div class="tools-subheading"><div><p class="eyebrow">Continuar consulta</p><h2 id="recent-title">Usadas recientemente</h2></div></div><div id="recent-links" class="recent-links"></div></section>
       <section id="favorite-section" aria-labelledby="favorite-title"><div class="tools-subheading"><div><p class="eyebrow">Prioridad</p><h2 id="favorite-title">Accesos frecuentes</h2></div></div><div id="favorite-links" class="favorite-links"></div></section>
-      <section aria-labelledby="directory-title"><div class="tools-subheading"><div><p class="eyebrow">Directorio</p><h2 id="directory-title">Todos los recursos</h2></div></div><div id="links-list" class="links-list"></div></section>
+      <section aria-labelledby="directory-title"><div class="tools-subheading"><div><p class="eyebrow">Resultados</p><h2 id="directory-title">Recursos disponibles</h2></div></div><div id="links-list" class="links-list"></div></section>
     </section>
 
     <section id="links" class="view" data-view="links" hidden aria-labelledby="links-title">
@@ -164,14 +167,10 @@
           <span aria-hidden="true">⌕</span>
           <input id="link-search" type="search" autocomplete="off" placeholder="Escribe plataforma, dominio o palabra clave…" aria-controls="link-search-results" aria-expanded="false">
         </label>
-        <p class="link-search-hint">El directorio permanece oculto; al escribir aparecen primero las coincidencias más útiles.</p>
+        <p class="link-search-hint">Escribe y abre. No mostramos listas largas hasta que las necesites.</p>
         <div id="link-search-results" class="smart-search-results link-search-results" role="list" aria-live="polite" hidden></div>
+        <p id="quick-links-count" class="link-index-count" aria-live="polite"></p>
       </section>
-      <div class="link-directory-bar">
-        <button id="toggle-link-directory" type="button" aria-expanded="false" aria-controls="quick-links-directory">Ver directorio completo</button>
-        <span id="quick-links-count" aria-live="polite"></span>
-      </div>
-      <div id="quick-links-directory" class="quick-links-directory" hidden></div>
     </section>
 
     <section id="acerca" class="view" data-view="acerca" hidden aria-labelledby="about-title">
@@ -208,6 +207,22 @@
 
   <button id="back-to-top" class="back-to-top" type="button" aria-label="Volver al inicio de la página" hidden>↑</button>
 
+  <div id="action-modal" class="action-modal" role="dialog" aria-modal="true" aria-labelledby="action-modal-title" aria-describedby="action-modal-description" hidden>
+    <div class="action-modal-panel" tabindex="-1">
+      <button id="action-modal-close" class="action-modal-close" type="button" aria-label="Cerrar alerta">×</button>
+      <span id="action-modal-icon" class="action-modal-icon" aria-hidden="true">!</span>
+      <p id="action-modal-kicker" class="eyebrow">Aviso</p>
+      <h2 id="action-modal-title">Aviso operativo</h2>
+      <p id="action-modal-description"></p>
+      <div id="action-modal-detail" class="action-modal-detail"></div>
+      <div class="action-modal-actions">
+        <a id="action-modal-primary" class="button primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Abrir</a>
+        <button id="action-modal-route" class="button secondary" type="button" hidden>Ver detalle</button>
+        <button id="action-modal-secondary" class="button ghost" type="button">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   <div id="image-modal" class="image-modal" role="dialog" aria-modal="true" aria-labelledby="image-modal-title" hidden>
     <div class="image-modal-panel">
       <div class="image-modal-header">
@@ -224,10 +239,10 @@
 
   <nav class="bottom-nav" aria-label="Navegación móvil">
     <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-    <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Recordatorio</span></a>
     <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Ops</span></a>
     <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
-    <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca</span></a>
+    <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
+    <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
   </nav>
 
   <footer class="footer">

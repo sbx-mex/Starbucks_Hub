@@ -122,8 +122,8 @@ failed = [name for name, passed in experience_checks.items() if not passed]
 if failed:
     fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-if "starbucks-hub-v8" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v8")
+if "starbucks-hub-v9" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v9")
 for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
     if heavy in sw:
         fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")

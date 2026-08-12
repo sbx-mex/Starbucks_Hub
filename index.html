@@ -153,18 +153,26 @@
         <div>
           <p class="eyebrow">Accesos rápidos</p>
           <h1 id="links-title">Links</h1>
-          <p>Busca por nombre, nota o dominio. El índice A–Z permanece oculto hasta que escribes.</p>
+          <p>Dinos qué necesitas, aunque no recuerdes el nombre exacto. Te mostraremos primero la opción más útil.</p>
         </div>
       </div>
       <section class="link-finder" aria-label="Buscar links">
         <label class="smart-search-field link-search-field" for="link-search">
           <span class="visually-hidden">Buscar link</span>
           <span aria-hidden="true">⌕</span>
-          <input id="link-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Escribe al menos 2 caracteres…" aria-controls="link-search-results" aria-describedby="link-search-help" aria-expanded="false">
+          <input id="link-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Ej. horarios, nómina, facturas o VPN…" aria-controls="link-search-results" aria-describedby="link-search-help" aria-expanded="false">
         </label>
         <div class="link-search-meta">
-          <p id="link-search-help" class="link-search-hint">Solo se indexan ID, Nombre, URL y Notas. Los resultados aparecen al escribir.</p>
+          <p id="link-search-help" class="link-search-hint">Puedes escribir una necesidad, abreviatura o palabra parecida. No tiene que ser exacta.</p>
           <button id="clear-link-search" class="text-action" type="button" hidden>Limpiar búsqueda</button>
+        </div>
+        <div id="link-search-suggestions" class="link-search-suggestions" aria-label="Búsquedas sugeridas">
+          <span>Prueba con:</span>
+          <button type="button" data-link-suggestion="horarios">Horarios</button>
+          <button type="button" data-link-suggestion="nómina">Nómina</button>
+          <button type="button" data-link-suggestion="facturas">Facturas</button>
+          <button type="button" data-link-suggestion="capacitación">Capacitación</button>
+          <button type="button" data-link-suggestion="VPN">VPN</button>
         </div>
         <div id="link-search-results" class="smart-search-results link-search-results" role="list" aria-live="polite" hidden></div>
         <p id="quick-links-count" class="link-index-count" aria-live="polite" hidden></p>

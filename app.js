@@ -42,6 +42,20 @@ const HOME_TOOL_DESCRIPTIONS = {
   "RSA 2.0": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
 };
 const CRITICAL_WFM_DAYS = new Set(["Martes", "Miércoles", "Jueves", "Viernes"]);
+const SEARCH_STOP_WORDS = new Set(["a", "abrir", "al", "buscar", "con", "consultar", "de", "del", "el", "en", "la", "las", "lo", "los", "mi", "mis", "necesito", "para", "por", "quiero", "revisar", "un", "una", "ver", "y"]);
+const SEARCH_INTENTS = [
+  { signals: ["ukg", "wfm", "kronos"], aliases: ["horario", "horarios", "rol", "roles", "turno", "turnos"] },
+  { signals: ["nomina", "humanet", "hcm", "recibo"], aliases: ["nomina", "pago", "recibo", "salario", "sueldo", "rh", "personal"] },
+  { signals: ["facturacion", "factura", "ticket"], aliases: ["caseta", "comprobante", "estacionamiento", "factura", "facturas", "ticket"] },
+  { signals: ["college", "ubits", "attensi", "capacitacion"], aliases: ["aprender", "capacitacion", "curso", "cursos", "entrenamiento"] },
+  { signals: ["microstrategy", "powerbi", "bi", "kpis", "dashboard"], aliases: ["dashboard", "indicador", "indicadores", "kpi", "reporte", "reportes", "tablero"] },
+  { signals: ["mesa de servicio", "mds"], aliases: ["ayuda", "incidencia", "problema", "soporte", "ticket"] },
+  { signals: ["harmony", "musica", "playnetwork"], aliases: ["audio", "musica", "playlist", "sonido"] },
+  { signals: ["woe", "humanet v10", "vpn"], aliases: ["conexion", "remota", "vpn"] },
+  { signals: ["mapa", "directorio", "unete"], aliases: ["directorio", "mapa", "tienda", "ubicacion"] },
+  { signals: ["beneflex", "sgmm", "sura", "fondo de ahorro"], aliases: ["ahorro", "beneficio", "beneficios", "seguro"] },
+  { signals: ["concur", "edenred", "sfleet", "televia"], aliases: ["flotilla", "gasto", "gastos", "peaje", "viaticos"] },
+];
 const ACCESS_RULES = {
   humanetEdge: { badge: "Solo Edge", kind: "edge" },
   woeVpn: { badge: "VPN", kind: "vpn" },
@@ -193,7 +207,59 @@ function normalizeSearchText(value) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLocaleLowerCase("es-MX")
+    .replace(/&/g, " y ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
+}
+
+function tokenizeSearch(value) {
+  const tokens = normalizeSearchText(value).split(/\s+/).filter(Boolean);
+  const meaningful = tokens.filter((token) => !SEARCH_STOP_WORDS.has(token));
+  return [...new Set(meaningful.length ? meaningful : tokens)];
+}
+
+function acronymFor(value) {
+  const words = tokenizeSearch(value);
+  return words.length > 1 ? words.map((word) => word[0]).join("") : "";
+}
+
+function relatedSearchAliases(searchText) {
+  const padded = ` ${searchText} `;
+  return SEARCH_INTENTS
+    .filter(({ signals }) => signals.some((signal) => padded.includes(` ${normalizeSearchText(signal)} `)))
+    .flatMap(({ aliases }) => aliases);
+}
+
+function editDistance(left, right) {
+  if (left === right) return 0;
+  if (!left.length) return right.length;
+  if (!right.length) return left.length;
+  let previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let row = 1; row <= left.length; row += 1) {
+    const current = [row];
+    for (let column = 1; column <= right.length; column += 1) {
+      current[column] = Math.min(
+        current[column - 1] + 1,
+        previous[column] + 1,
+        previous[column - 1] + (left[row - 1] === right[column - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+  return previous[right.length];
+}
+
+function tokenMatchScore(queryToken, candidate) {
+  if (queryToken === candidate) return 1;
+  const shortest = Math.min(queryToken.length, candidate.length);
+  if (shortest >= 3 && (candidate.startsWith(queryToken) || queryToken.startsWith(candidate))) return 0.86;
+  if (shortest >= 4 && (candidate.includes(queryToken) || queryToken.includes(candidate))) return 0.72;
+  if (shortest < 4) return 0;
+  const distance = editDistance(queryToken, candidate);
+  const allowance = Math.max(queryToken.length, candidate.length) >= 7 ? 2 : 1;
+  const sameInitial = queryToken[0] === candidate[0];
+  return distance <= allowance && (distance < 2 || sameInitial) ? (distance === 1 ? 0.68 : 0.56) : 0;
 }
 
 function toolRecords() {
@@ -255,12 +321,18 @@ function buildCatalogIndex() {
     const searchableParts = isTool
       ? [name, subtitle, description, url, record.Vista, record.Categoria, record.Grupo]
       : [name, description, url, subtitle];
+    const searchText = normalizeSearchText(searchableParts.join(" "));
+    const aliasTokens = relatedSearchAliases(searchText);
+    const acronym = acronymFor(name);
     entries.push({
       record, source, name, subtitle, description, url,
       normalizedName: normalizeSearchText(name),
       normalizedSubtitle: normalizeSearchText(subtitle),
       normalizedDescription: normalizeSearchText(description),
-      searchText: normalizeSearchText(searchableParts.join(" ")),
+      searchText,
+      coreTokens: tokenizeSearch(searchText),
+      aliasTokens: [...new Set(aliasTokens.map(normalizeSearchText))],
+      searchTokens: [...new Set([...tokenizeSearch(searchText), ...aliasTokens.map(normalizeSearchText), acronym].filter(Boolean))],
     });
   };
   toolRecords().forEach((record) => append(record, "Herramienta"));
@@ -271,28 +343,46 @@ function buildCatalogIndex() {
 function searchCatalog(query, options = {}) {
   const normalized = normalizeSearchText(query);
   if (!normalized) return [];
-  const tokens = normalized.split(/\s+/).filter(Boolean);
+  const tokens = tokenizeSearch(normalized);
   const source = options.source || null;
   const limit = options.limit || 8;
   const catalog = state.catalog.length ? state.catalog : buildCatalogIndex();
   return catalog
     .filter((entry) => !source || entry.source === source)
     .map((entry) => {
-      if (!tokens.every((token) => entry.searchText.includes(token))) return null;
       const name = entry.normalizedName;
       const subtitle = entry.normalizedSubtitle;
       const description = entry.normalizedDescription;
+      const matches = tokens.map((token) => entry.searchTokens.reduce((best, candidate) => {
+        const value = tokenMatchScore(token, candidate);
+        return value > best.score ? { score: value, candidate } : best;
+      }, { score: 0, candidate: "" }));
+      const matched = matches.filter((match) => match.score >= 0.52);
+      const coverage = matched.length / Math.max(tokens.length, 1);
+      if ((tokens.length === 1 && coverage < 1) || (tokens.length > 1 && coverage < 0.6)) return null;
       let score = 0;
       if (name === normalized) score += 120;
       if (name.startsWith(normalized)) score += 90;
       if (name.includes(normalized)) score += 60;
       if (subtitle.includes(normalized)) score += 32;
       if (description.includes(normalized)) score += 18;
-      tokens.forEach((token) => {
-        if (name.split(/\s+/).some((word) => word.startsWith(token))) score += 14;
-        if (subtitle.includes(token)) score += 5;
-      });
-      return { ...entry, score };
+      score += matched.reduce((total, match) => total + match.score * 40, 0);
+      score += coverage * 25 - (tokens.length - matched.length) * 12;
+      const relatedMatch = matched.some((match) => entry.aliasTokens.includes(match.candidate));
+      const fuzzyMatch = matched.some((match) => match.score < 0.72);
+      const directCoreMatch = tokens.every((token) => entry.coreTokens.some((candidate) => tokenMatchScore(token, candidate) >= 0.72));
+      const matchReason = name === normalized
+        ? "Coincidencia exacta"
+        : name.includes(normalized)
+          ? "Coincide con el nombre"
+          : relatedMatch
+            ? "Relacionado con lo que necesitas"
+            : fuzzyMatch
+              ? "Nombre similar a tu búsqueda"
+              : directCoreMatch
+                ? "Coincide con sus datos"
+                : "Resultado recomendado";
+      return { ...entry, score, matchReason };
     })
     .filter(Boolean)
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, "es-MX"))
@@ -303,10 +393,10 @@ function smartResultMarkup(entry) {
   const iconText = entry.source === "Herramienta" ? (entry.record.Icono || "↗") : "↗";
   const toolAttribute = entry.source === "Herramienta" ? ` data-tool-name="${esc(entry.name)}"` : "";
   const accessRule = accessRuleForName(entry.name);
-  const badges = `<span class="smart-result-badges">${accessRule ? `<span class="access-guard ${esc(accessRule.kind)}">${esc(accessRule.badge)}</span>` : ""}<span class="smart-result-type">${esc(entry.source)}</span></span>`;
+  const badges = `<span class="smart-result-badges">${accessRule ? `<span class="access-guard ${esc(accessRule.kind)}">${esc(accessRule.badge)}</span>` : ""}<span class="smart-result-type">${esc(entry.source)}</span><span class="smart-result-open">Abrir ↗</span></span>`;
   return `<a class="smart-result" href="${esc(entry.url)}" target="_blank" rel="noopener noreferrer" data-catalog-source="${esc(entry.source)}" data-access-name="${esc(entry.name)}"${toolAttribute} aria-label="Abrir ${esc(entry.name)} en una pestaña nueva">
     <span class="smart-result-icon" aria-hidden="true">${esc(iconText)}</span>
-    <span class="smart-result-copy"><strong>${esc(entry.name)}</strong><small>${esc(entry.subtitle || entry.source)}</small>${entry.description ? `<span>${esc(entry.description)}</span>` : ""}</span>
+    <span class="smart-result-copy"><strong>${esc(entry.name)}</strong><small>${esc(entry.subtitle || entry.source)}</small>${entry.description ? `<span>${esc(entry.description)}</span>` : ""}${entry.matchReason ? `<span class="smart-result-match">${esc(entry.matchReason)}</span>` : ""}</span>
     ${badges}
   </a>`;
 }
@@ -335,10 +425,12 @@ function renderQuickLinks() {
   const resultsContainer = $("#link-search-results");
   const count = $("#quick-links-count");
   const clear = $("#clear-link-search");
-  if (!input || !resultsContainer || !count || !clear) return;
+  const suggestions = $("#link-search-suggestions");
+  if (!input || !resultsContainer || !count || !clear || !suggestions) return;
 
   const query = state.linkQuery.trim();
   clear.hidden = !query;
+  suggestions.hidden = query.length >= 2;
   if (query.length < 2) {
     resultsContainer.hidden = true;
     resultsContainer.innerHTML = "";
@@ -351,10 +443,10 @@ function renderQuickLinks() {
   const results = searchCatalog(query, { source: "Link", limit: 10 });
   resultsContainer.innerHTML = results.length
     ? results.map(smartResultMarkup).join("")
-    : emptyState(`No encontramos links para “${query}”.`);
+    : emptyState(`No encontramos una coincidencia para “${query}”. Prueba con una palabra más general, como horarios, nómina o soporte.`);
   resultsContainer.hidden = false;
   count.hidden = false;
-  count.textContent = `${results.length} ${results.length === 1 ? "resultado" : "resultados"}`;
+  count.textContent = `${results.length} ${results.length === 1 ? "coincidencia" : "coincidencias"} · mejor opción primero`;
   input.setAttribute("aria-expanded", "true");
 }
 
@@ -694,17 +786,19 @@ function renderOps() {
 }
 
 function renderLinks() {
-  const query = state.toolQuery.trim().toLocaleLowerCase("es-MX");
+  const query = normalizeSearchText(state.toolQuery);
   const records = toolRecords();
   const favorites = records.filter((record) => normalizeBool(record.Favorito));
-  const filtered = records.filter((record) => {
+  const rankedRecords = query
+    ? searchCatalog(state.toolQuery, { source: "Herramienta", limit: records.length }).map((entry) => entry.record)
+    : records;
+  const filtered = rankedRecords.filter((record) => {
     const searchable = [record.Nombre, record.Notas, record.Categoria, record.Grupo, record.Vista]
       .join(" ").toLocaleLowerCase("es-MX");
-    const matchesQuery = !query || searchable.includes(query);
     const matchesFilter = state.toolFilter === "all"
       || (state.toolFilter === "favorites" && normalizeBool(record.Favorito))
       || (state.toolFilter === "cn" && /centro norte|cn connect/i.test(searchable));
-    return matchesQuery && matchesFilter;
+    return matchesFilter;
   });
 
   const favoriteSection = $("#favorite-section");
@@ -954,6 +1048,15 @@ function bindEvents() {
     window.clearTimeout(linkSearchTimer);
     state.linkQuery = "";
     $("#link-search").value = "";
+    renderQuickLinks();
+    $("#link-search").focus();
+  });
+  $("#link-search-suggestions").addEventListener("click", (event) => {
+    const suggestion = event.target.closest("[data-link-suggestion]");
+    if (!suggestion) return;
+    window.clearTimeout(linkSearchTimer);
+    state.linkQuery = suggestion.dataset.linkSuggestion;
+    $("#link-search").value = state.linkQuery;
     renderQuickLinks();
     $("#link-search").focus();
   });

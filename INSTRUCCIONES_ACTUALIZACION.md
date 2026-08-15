@@ -1,5 +1,11 @@
 # Starbucks Hub · Motor CMS
 
+## Fuente única
+
+`Starbucks_Hub_CMS.xlsx` es la **fuente editorial única** del Hub. No edites `data/cms.json` manualmente: el workflow lo reconstruye desde el Excel cuando detecta ajustes y solo publica el JSON si el contenido realmente cambió.
+
+`Herramientas` también se administra únicamente desde el Excel. El generador puede ordenar registros, normalizar fechas o IDs técnicos, pero no agrega ni sustituye herramientas desde código.
+
 ## Regla obligatoria para `Links`
 
 La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:
@@ -18,14 +24,19 @@ La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:
 
 1. Edita `Starbucks_Hub_CMS.xlsx`.
 2. Guarda el archivo con ese nombre exacto en la raíz del proyecto.
-3. Ejecuta:
+3. Súbelo a `main`.
+4. GitHub Actions ejecuta automáticamente:
+   - `python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json`
+   - auditoría de residuos seguros;
+   - validación del proyecto;
+   - publicación de `data/cms.json` solo si el Excel produjo un cambio real.
+
+Para validar localmente:
 
 ```bash
 python scripts/build_cms.py
 python tests/validate_project.py
 ```
-
-4. Sube únicamente los archivos que cambiaron. El archivo que consume la PWA es `data/cms.json`.
 
 ## Navegación
 
@@ -38,4 +49,4 @@ python tests/validate_project.py
 
 ## Mantenimiento de obsoletos
 
-El workflow `.github/workflows/cleanup-obsolete.yml` se ejecuta cada lunes o manualmente. Solo elimina residuos definidos como seguros por `scripts/audit_obsolete.py`, valida la PWA después de limpiar y publica únicamente eliminaciones. Los recursos huérfanos o duplicados no se borran automáticamente: quedan registrados para revisión manual.
+El workflow `.github/workflows/cleanup-obsolete.yml` se ejecuta al cambiar el Excel CMS, manualmente y cada lunes. `scripts/audit_obsolete.py` elimina únicamente residuos definidos como seguros. Los recursos huérfanos o duplicados no se borran automáticamente: quedan registrados para revisión manual.

@@ -3,15 +3,18 @@ from __future__ import annotations
 
 import json
 import re
+import subprocess
 import sys
+import tempfile
 import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
     "index.html", "styles.css", "app.js", "data/cms.json", "manifest.webmanifest", "sw.js",
-    "scripts/build_cms.py", "scripts/audit_obsolete.py", ".github/workflows/cleanup-obsolete.yml",
-    "INSTRUCCIONES_ACTUALIZACION.md", ".gitignore", "assets/icons/starbucks_hub.png",
+    "Starbucks_Hub_CMS.xlsx", "scripts/build_cms.py", "scripts/audit_obsolete.py",
+    ".github/workflows/cleanup-obsolete.yml", "INSTRUCCIONES_ACTUALIZACION.md", ".gitignore",
+    "assets/icons/starbucks_hub.png",
 ]
 REQUIRED_SHEETS = {
     "Informativo", "WFM", "Herramientas", "Links", "Eventos",
@@ -27,6 +30,14 @@ def fail(message: str) -> None:
 def sort_text(value: object) -> str:
     text = unicodedata.normalize("NFD", str(value or "").strip().casefold())
     return "".join(c for c in text if unicodedata.category(c) != "Mn")
+
+
+def cms_core(payload: dict) -> dict:
+    return {
+        "schemaVersion": payload.get("schemaVersion"),
+        "source": payload.get("source"),
+        "sheets": payload.get("sheets"),
+    }
 
 
 for relative in REQUIRED:
@@ -48,6 +59,22 @@ if set(cms.get("sheets", {})) != REQUIRED_SHEETS:
     fail("Las hojas del JSON no corresponden al CMS")
 if cms.get("schemaVersion") != 3:
     fail("El CMS no usa el esquema 3")
+if cms.get("source") != "Starbucks_Hub_CMS.xlsx":
+    fail("data/cms.json no declara Starbucks_Hub_CMS.xlsx como fuente")
+
+# Prueba fuerte: el JSON versionado debe corresponder exactamente al Excel actual,
+# ignorando solo generatedAt para evitar commits semanales sin cambios reales.
+with tempfile.TemporaryDirectory() as temp_dir:
+    generated = Path(temp_dir) / "cms.json"
+    subprocess.run(
+        [sys.executable, str(ROOT / "scripts/build_cms.py"), str(ROOT / "Starbucks_Hub_CMS.xlsx"), str(generated)],
+        check=True,
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+    )
+    fresh = json.loads(generated.read_text(encoding="utf-8"))
+if cms_core(fresh) != cms_core(cms):
+    fail("data/cms.json está desincronizado respecto a Starbucks_Hub_CMS.xlsx")
 
 links = cms["sheets"]["Links"]
 if not links:
@@ -77,12 +104,14 @@ for event in cms["sheets"]["Eventos"]:
 
 if "LINK_HEADERS = (\"ID\", \"Nombre\", \"URL\", \"Notas\")" not in builder:
     fail("build_cms.py no declara el contrato mínimo de Links")
-if "allowed_headers=LINK_HEADERS" in builder:
-    pass
-elif "allowed = LINK_HEADERS if name == \"Links\" else None" not in builder:
+if 'allowed = LINK_HEADERS if name == "Links" else None' not in builder:
     fail("El motor no limita la lectura de columnas de Links")
 if "normalize_quick_links" not in builder or "sort_text" not in builder:
     fail("El motor no normaliza y ordena Links")
+if "REQUIRED_TOOLS" in builder or "REMOVED_TOOLS" in builder:
+    fail("Herramientas contiene overrides en código; el Excel debe ser la fuente")
+if "comparable(existing) == core" not in builder:
+    fail("El generador no evita reescrituras cuando el Excel no cambió")
 
 sidebar = re.search(r'<nav class="nav-groups">(.*?)</nav>', html, re.S)
 if not sidebar:
@@ -136,9 +165,15 @@ if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
 
 if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
     fail("La auditoría de obsoletos no genera reporte o no limita patrones")
-for requirement in ["audit_obsolete.py --fix --report", "actions/upload-artifact@v4", "git add -u", "grep -Ev '^D"]:
+for requirement in [
+    "python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json",
+    "audit_obsolete.py --fix --report",
+    "actions/upload-artifact@v4",
+    "git add -A",
+    '&& $2 == "data/cms.json"',
+]:
     if requirement not in workflow:
-        fail(f"Workflow de obsoletos incompleto: {requirement}")
+        fail(f"Workflow de mantenimiento incompleto: {requirement}")
 
 for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila"]:
     if text not in instructions:
@@ -147,5 +182,5 @@ for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan auto
 print("Validación estática aprobada")
 print(f"Mejoras contundentes de exploración/navegación: {sum(experience_checks.values())}/{len(experience_checks)}")
 print(f"Links CMS: {len(links)} · columnas: {', '.join(LINK_FIELDS)}")
-print("Orden Links: A-Z · directorio completo oculto")
+print("CMS Excel: fuente única · JSON sincronizado · commits sin ruido")
 sys.exit(0)

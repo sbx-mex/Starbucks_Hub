@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-11T23:39:50+00:00",
+  "generatedAt": "2026-08-15T20:03:12+00:00",
   "sheets": {
     "Informativo": [
       {
@@ -30,7 +30,7 @@
         "Icono": "💯",
         "Nombre": "Ranking",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/CeNtro-Partner/",
+        "URL": "https://sbx-mex.github.io/CeNtro-Partner/",
         "Notas": "Consulta indicadores, ranking y desempeño operativo del distrito.",
         "Favorito": "Si",
         "Orden": 1
@@ -42,7 +42,7 @@
         "Icono": "🚗",
         "Nombre": "Tasa de Éxito DT",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Tasa_ExitoDT/",
+        "URL": "https://sbx-mex.github.io/Tasa_ExitoDT/",
         "Notas": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See",
         "Favorito": "Si",
         "Orden": 2
@@ -54,7 +54,7 @@
         "Icono": "⏱️",
         "Nombre": "Calculadora de Ritmo",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Calculadora_Ritmo/",
+        "URL": "https://sbx-mex.github.io/Calculadora_Ritmo/",
         "Notas": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
         "Favorito": "Si",
         "Orden": 3
@@ -66,7 +66,7 @@
         "Icono": "⇄",
         "Nombre": "Transferencias",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Transferencia/",
+        "URL": "https://sbx-mex.github.io/Transferencia/",
         "Notas": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
         "Favorito": "Si",
         "Orden": 4
@@ -78,7 +78,7 @@
         "Icono": "💚",
         "Nombre": "Partner Hub",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Partner_Hub/",
+        "URL": "https://sbx-mex.github.io/Partner_Hub/",
         "Notas": "Consulta aniversarios, cumpleaños e información de Partners.",
         "Favorito": "Si",
         "Orden": 5
@@ -90,7 +90,7 @@
         "Icono": "📦",
         "Nombre": "Max & Min",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Max-Min/",
+        "URL": "https://sbx-mex.github.io/Max-Min/",
         "Notas": "Consulta máximos y mínimos para optimizar inventarios y disponibilidad de productos.",
         "Favorito": "No",
         "Orden": 6
@@ -102,7 +102,7 @@
         "Icono": "🏗️",
         "Nombre": "Layout",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/layout/",
+        "URL": "https://sbx-mex.github.io/layout/",
         "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
         "Favorito": "Si",
         "Orden": 7
@@ -114,7 +114,7 @@
         "Icono": "🔎",
         "Nombre": "Code Brew",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/CodeBrew_Merch/",
+        "URL": "https://sbx-mex.github.io/CodeBrew_Merch/",
         "Notas": "Busca artículos, códigos y mercancía de forma rápida.",
         "Favorito": "Si",
         "Orden": 8
@@ -126,7 +126,7 @@
         "Icono": "🧹",
         "Nombre": "RSA 2.0",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/checklist-rsa-semaforo/",
+        "URL": "https://sbx-mex.github.io/checklist-rsa-semaforo/",
         "Notas": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
         "Favorito": "Si",
         "Orden": 10
@@ -138,7 +138,7 @@
         "Icono": "🎯",
         "Nombre": "Foco 2026",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Foco2026/",
+        "URL": "https://sbx-mex.github.io/Foco2026/",
         "Notas": "Da seguimiento semanal a compromisos, avances y planes de acción.",
         "Favorito": "No",
         "Orden": 11
@@ -150,7 +150,7 @@
         "Icono": "📅",
         "Nombre": "PBT Web 2.0",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/pbt2.0_web/",
+        "URL": "https://sbx-mex.github.io/pbt2.0_web/",
         "Notas": "Consulta tu plan en tiempo real y mantén actualizado tu tablero de trabajo.",
         "Favorito": "No",
         "Orden": 12
@@ -162,7 +162,7 @@
         "Icono": "🧮",
         "Nombre": "PBT Planes",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/pbt_motor_exact/",
+        "URL": "https://sbx-mex.github.io/pbt_motor_exact/",
         "Notas": "Consulta e imprime planes por WeekPart y DayPart del Q",
         "Favorito": "No",
         "Orden": 13
@@ -174,7 +174,7 @@
         "Icono": "🏪",
         "Nombre": "Perfil Tienda",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Perfil_Tienda_DM/",
+        "URL": "https://sbx-mex.github.io/Perfil_Tienda_DM/",
         "Notas": "Consulta indicadores, históricos, tendencias y oportunidades por tienda.",
         "Favorito": "No",
         "Orden": 14
@@ -198,7 +198,7 @@
         "Icono": "💵",
         "Nombre": "Boost CN",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Boost_CN/",
+        "URL": "https://sbx-mex.github.io/Boost_CN/",
         "Notas": "Seguimiento a Impulso items Centro Norte",
         "Favorito": "No",
         "Orden": 16
@@ -210,7 +210,7 @@
         "Icono": "📍",
         "Nombre": "CN Connect",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/CentroNorteConnect/",
+        "URL": "https://sbx-mex.github.io/CentroNorteConnect/",
         "Notas": "Centraliza información, comunicación y recursos del Centro Norte.",
         "Favorito": "No",
         "Orden": 17
@@ -222,7 +222,7 @@
         "Icono": "🚀",
         "Nombre": "Esfuerzo Operativo",
         "Tipo": "Web",
-        "URL": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
+        "URL": "https://sbx-mex.github.io/Esfuerzo_Operativo/",
         "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
         "Favorito": "Si",
         "Orden": 18

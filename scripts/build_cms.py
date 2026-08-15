@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Convierte Starbucks_Hub_CMS.xlsx a data/cms.json sin dependencias externas.
 
-La hoja Links tiene un contrato intencionalmente mínimo: ID, Nombre, URL y Notas.
-Cualquier otra columna de esa hoja se ignora para evitar acoplar la navegación a
-metadatos que no necesita la PWA.
+El Excel es la única fuente editorial. El generador puede normalizar formato,
+fechas, orden e IDs técnicos, pero no agrega, elimina ni sustituye contenido de
+Herramientas fuera de lo que exista en Starbucks_Hub_CMS.xlsx.
 """
 
 from __future__ import annotations
@@ -34,19 +34,6 @@ REQUIRED_SHEETS = {
     "Duty_Roster",
     "Identidad",
 }
-REMOVED_TOOLS = {"Evidencia Antes / Después"}
-REQUIRED_TOOLS = [
-    {
-        "Categoria": "Operación", "Grupo": "App", "Vista": "CN", "Icono": "📍",
-        "Nombre": "CN Connect", "Tipo": "Web", "URL": "https://sbx-mx.github.io/CentroNorteConnect/",
-        "Notas": "Centraliza información, comunicación y recursos del Centro Norte.", "Favorito": "No", "Orden": 17,
-    },
-    {
-        "Categoria": "Operación", "Grupo": "App", "Vista": "General", "Icono": "🚀",
-        "Nombre": "Esfuerzo Operativo", "Tipo": "Web", "URL": "https://sbx-mx.github.io/Esfuerzo_Operativo/",
-        "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.", "Favorito": "Si", "Orden": 18,
-    },
-]
 
 
 def sort_text(value: object) -> str:
@@ -55,15 +42,14 @@ def sort_text(value: object) -> str:
 
 
 def normalize_tools(records: list[dict]) -> list[dict]:
-    """Aplica la navegación oficial de Herramientas sin mezclarla con Links."""
-    current = [record for record in records if record.get("Nombre") not in REMOVED_TOOLS]
-    by_name = {record.get("Nombre"): record for record in current}
-    for required in REQUIRED_TOOLS:
-        if required["Nombre"] in by_name:
-            by_name[required["Nombre"]].update(required)
-        else:
-            current.append(dict(required))
-    return sorted(current, key=lambda record: (float(record.get("Orden") or 999), sort_text(record.get("Nombre"))))
+    """Ordena Herramientas sin inventar ni reemplazar contenido fuera del Excel."""
+    return sorted(
+        records,
+        key=lambda record: (
+            float(record.get("Orden") or 999),
+            sort_text(record.get("Nombre")),
+        ),
+    )
 
 
 def normalize_quick_links(records: list[dict]) -> list[dict]:
@@ -90,7 +76,10 @@ def normalize_quick_links(records: list[dict]) -> list[dict]:
         record["ID"] = index
 
     if skipped:
-        print(f"Aviso Links: {skipped} fila(s) omitidas por URL duplicada/inválida o nombre vacío.", file=sys.stderr)
+        print(
+            f"Aviso Links: {skipped} fila(s) omitidas por URL duplicada/inválida o nombre vacío.",
+            file=sys.stderr,
+        )
     return result
 
 
@@ -113,13 +102,19 @@ def shared_strings(archive: zipfile.ZipFile) -> list[str]:
         root = ET.fromstring(archive.read("xl/sharedStrings.xml"))
     except KeyError:
         return []
-    return ["".join(node.text or "" for node in item.iterfind(".//m:t", NS)) for item in root.findall("m:si", NS)]
+    return [
+        "".join(node.text or "" for node in item.iterfind(".//m:t", NS))
+        for item in root.findall("m:si", NS)
+    ]
 
 
 def workbook_sheets(archive: zipfile.ZipFile) -> list[tuple[str, str]]:
     workbook = ET.fromstring(archive.read("xl/workbook.xml"))
     relationships = ET.fromstring(archive.read("xl/_rels/workbook.xml.rels"))
-    targets = {rel.attrib["Id"]: rel.attrib["Target"].lstrip("/") for rel in relationships.findall("r:Relationship", REL_NS)}
+    targets = {
+        rel.attrib["Id"]: rel.attrib["Target"].lstrip("/")
+        for rel in relationships.findall("r:Relationship", REL_NS)
+    }
     result = []
     for sheet in workbook.findall("m:sheets/m:sheet", NS):
         target = targets[sheet.attrib[SHEET_REL]]
@@ -185,7 +180,7 @@ def normalize_records(rows: list[list], allowed_headers: tuple[str, ...] | None 
     return records
 
 
-def build(source: Path, destination: Path) -> None:
+def read_cms(source: Path) -> dict:
     with zipfile.ZipFile(source) as archive:
         strings = shared_strings(archive)
         sheets = {}
@@ -196,21 +191,50 @@ def build(source: Path, destination: Path) -> None:
     missing = sorted(REQUIRED_SHEETS - set(sheets))
     if missing:
         raise SystemExit(f"Faltan hojas requeridas: {', '.join(missing)}")
+
     sheets["Herramientas"] = normalize_tools(sheets["Herramientas"])
     sheets["Links"] = normalize_quick_links(sheets["Links"])
-
-    payload = {
+    return {
         "schemaVersion": 3,
         "source": source.name,
-        "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
         "sheets": {name: sheets[name] for name in sheets},
     }
+
+
+def comparable(payload: dict) -> dict:
+    return {
+        "schemaVersion": payload.get("schemaVersion"),
+        "source": payload.get("source"),
+        "sheets": payload.get("sheets"),
+    }
+
+
+def build(source: Path, destination: Path) -> bool:
+    core = read_cms(source)
+    if destination.is_file():
+        try:
+            existing = json.loads(destination.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            existing = {}
+        if comparable(existing) == core:
+            return False
+
+    payload = {
+        "schemaVersion": core["schemaVersion"],
+        "source": core["source"],
+        "generatedAt": datetime.now().astimezone().isoformat(timespec="seconds"),
+        "sheets": core["sheets"],
+    }
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    destination.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return True
 
 
 if __name__ == "__main__":
     cms = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "Starbucks_Hub_CMS.xlsx"
     output = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "data/cms.json"
-    build(cms.resolve(), output.resolve())
-    print(f"CMS procesado: {output}")
+    changed = build(cms.resolve(), output.resolve())
+    print(f"CMS {'actualizado' if changed else 'sin cambios'}: {output}")

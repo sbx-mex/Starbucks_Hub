@@ -4,256 +4,91 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#006241">
-  <meta name="description" content="Starbucks Hub: información, prioridades y recursos para líderes de operación.">
-  <title>Starbucks Hub</title>
+  <meta name="description" content="Dashboard de avance de actividades de Centro Norte.">
+  <title>Sistema de Evidencia OPS</title>
   <link rel="manifest" href="./manifest.webmanifest">
-  <link rel="icon" href="./assets/icons/starbucks_hub.png" type="image/png">
-  <link rel="apple-touch-icon" href="./assets/icons/starbucks_hub.png">
+  <link rel="icon" href="./assets/icons/icon-64.png" type="image/png">
   <link rel="stylesheet" href="./styles.css">
-  <script src="./app.js" defer></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Saltar al contenido</a>
+  <a class="skip-link" href="#main">Ir al contenido</a>
+  <div id="offline-banner" class="notice" hidden>Sin conexión · mostramos la última información disponible.</div>
+  <div id="error-banner" class="notice error" role="alert" hidden></div>
 
-  <header class="mobile-header">
-    <a class="brand compact" href="#inicio" data-route-link="inicio" aria-label="Ir al inicio">
-      <img src="./assets/icons/starbucks_hub.png" alt="Starbucks Hub" width="44" height="44" decoding="async" fetchpriority="high">
-      <span>Starbucks Hub</span>
-    </a>
-    <button id="menu-toggle" class="icon-button" type="button" aria-expanded="false" aria-controls="sidebar" aria-label="Abrir navegación">
-      <span></span><span></span><span></span>
-    </button>
+  <header class="app-header">
+    <nav class="main-nav" aria-label="Navegación principal">
+      <a href="#resumen">Resumen</a>
+      <a href="#actividades">Actividades</a>
+      <a href="#ranking">Ranking DM</a>
+      <a href="#tiendas">Tiendas</a>
+    </nav>
+    <div class="header-actions">
+      <span id="connection-status" class="connection"><i></i>Actualizado</span>
+      <button id="install-button" class="button quiet" type="button" hidden>Instalar</button>
+      <button id="refresh-button" class="icon-button" type="button" aria-label="Actualizar información">
+        <svg viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5M18 9a7 7 0 0 0-12-2L4 11M6 15a7 7 0 0 0 12 2l2-4"/></svg>
+      </button>
+    </div>
   </header>
 
-  <aside id="sidebar" class="sidebar" aria-label="Navegación principal">
-    <a class="brand" href="#inicio" data-route-link="inicio">
-      <img src="./assets/icons/starbucks_hub.png" alt="Starbucks Hub" width="44" height="44" decoding="async">
-      <span><strong>Starbucks Hub</strong><small>Liderazgo y conexión</small></span>
-    </a>
-    <button id="sidebar-collapse" class="sidebar-collapse" type="button" aria-expanded="true" aria-label="Contraer navegación">
-      <span aria-hidden="true">‹</span>
-    </button>
-    <button id="sidebar-close" class="sidebar-close" type="button" aria-label="Cerrar navegación">×</button>
-
-    <nav class="nav-groups">
-      <section>
-        <p>Principal</p>
-        <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-        <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
-        <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
-        <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
-        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
-        <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
-      </section>
-    </nav>
-
-    <div class="sidebar-footer">
-      <span class="service-mark">#GreenApronService</span>
-      <small>Experiencia Starbucks</small>
-    </div>
-  </aside>
-
-  <div id="scrim" class="scrim" hidden></div>
-
-  <main id="main" class="main" tabindex="-1">
-    <p id="route-status" class="visually-hidden" role="status" aria-live="polite"></p>
-    <div id="offline-banner" class="status-banner" role="status" hidden>Sin conexión. Se muestra la última información disponible.</div>
-    <div id="error-banner" class="status-banner error" role="alert" hidden></div>
-
-    <section id="inicio" class="view" data-view="inicio" aria-labelledby="inicio-title">
-      <div class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Conexión que inspira</p>
-          <h1 id="inicio-title"><span id="greeting">Bienvenido</span><br>Starbucks Hub</h1>
-          <p>Herramientas clave para acompañar la operación, el desarrollo de Partners y la toma de decisiones.</p>
-          <div class="hero-actions">
-            <a class="button primary" href="#resumen-ops" data-route-link="resumen-ops">Ver prioridades de hoy</a>
-            <button id="focus-home-search" class="button secondary" type="button">Buscar un acceso</button>
-          </div>
-        </div>
-        <div class="campaign-panel" aria-label="Campaña">
-          <span>Comunidad Starbucks</span>
-          <strong id="campaign-display">JUNTÉMONOS MÁS</strong>
-          <p>Herramientas que nos conectan.</p>
-        </div>
+  <main id="main" tabindex="-1">
+    <section class="hero" id="resumen">
+      <div class="hero-copy">
+        <h1>Sistema de Evidencia OPS</h1>
+        <p>Dashboard de Avance de Actividades</p>
       </div>
-
-      <section id="wfm-home-card" class="wfm-home-card" aria-labelledby="wfm-home-title" hidden>
-        <div id="wfm-home-card-content"></div>
-      </section>
-
-      <section class="home-smart-search" aria-labelledby="home-search-title">
-        <div class="home-smart-search-copy">
-          <p class="eyebrow">Acceso inmediato</p>
-          <h2 id="home-search-title">¿Qué necesitas abrir?</h2>
-          <p>Escribe una plataforma o tarea. Te mostramos la opción más útil sin recorrer menús.</p>
-        </div>
-        <label class="smart-search-field" for="home-search">
-          <span class="visually-hidden">Buscar en Starbucks Hub</span>
-          <span aria-hidden="true">⌕</span>
-          <input id="home-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Ej. UKG, WFM, Humanet, WOE, BI…" aria-controls="home-search-results" aria-expanded="false">
-          <kbd>⌘K</kbd>
-        </label>
-        <div id="home-search-results" class="smart-search-results" role="list" aria-live="polite" hidden></div>
-      </section>
-
-      <div id="home-tools" class="section-heading">
-        <div><p class="eyebrow">Accesos frecuentes</p><h2>Lo esencial, sin recorrer menús</h2></div>
+      <div class="hero-status">
+        <span>Fecha de corte</span>
+        <strong id="last-updated">—</strong>
+        <small>Última hora del dato actualizado</small>
       </div>
-      <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>
 
-    <section id="recordatorio" class="view" data-view="recordatorio" hidden aria-labelledby="recordatorio-title">
-      <div class="page-heading"><div><p class="eyebrow">JUNTÉMONOS MÁS</p><h1 id="recordatorio-title">Recordatorio</h1><p>Eventos actuales y próximos, ordenados por fecha.</p></div></div>
-      <div class="toolbar">
-        <label>Periodo
-          <select id="event-period">
-            <option value="upcoming">Próximos</option>
-            <option value="month">Mes actual</option>
-            <option value="all">Todos los publicados</option>
-          </select>
-        </label>
-        <span id="event-period-label" class="date-chip"></span>
+    <section class="filters" aria-label="Filtros del dashboard">
+      <label><span>Gerente de Distrito</span><select id="filter-dm"><option value="">Todos</option></select></label>
+      <label><span>Tienda / CeCo</span><select id="filter-store"><option value="">Todas</option></select></label>
+      <label><span>Actividad</span><select id="filter-activity"><option value="">Todas</option></select></label>
+      <button id="clear-filters" class="button quiet" type="button">Limpiar</button>
+      <div class="export-actions" aria-label="Exportar reporte">
+        <button id="export-image" class="button primary" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 2-2 5 5"/></svg>Imagen</button>
+        <button id="export-pdf" class="button quiet" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7zM14 3v5h5M9 15h6M9 18h4"/></svg>PDF</button>
       </div>
-      <div id="events-timeline" class="timeline"></div>
     </section>
 
-    <section id="resumen-ops" class="view" data-view="resumen-ops" hidden aria-labelledby="ops-title">
-      <div class="ops-heading">
-        <div>
-          <p class="eyebrow">Prioridad del día</p>
-          <h1 id="ops-title">Resumen Ops</h1>
-          <p id="ops-date" class="ops-date"></p>
-        </div>
-        <span id="ops-day-badge" class="ops-day-badge"></span>
-      </div>
-      <div id="ops-day-tabs" class="day-tabs ops-day-tabs" role="tablist" aria-label="Consultar Resumen Ops por día"></div>
-      <div id="ops-content" class="ops-sections" aria-live="polite"></div>
+    <section class="summary" aria-live="polite">
+      <article class="main-score">
+        <div class="score-ring" id="score-ring"><strong id="score-value">0%</strong><span>cumplimiento</span></div>
+        <div><p class="eyebrow">Vista actual</p><h2 id="score-title">Centro Norte</h2><p id="score-message">Calculando seguimiento…</p></div>
+      </article>
+      <div id="kpi-grid" class="kpi-grid"></div>
     </section>
 
-    <section id="herramientas" class="view" data-view="herramientas" hidden aria-labelledby="tools-title">
-      <div class="page-heading tools-heading"><div><p class="eyebrow">Consulta ejecutiva · DM+</p><h1 id="tools-title">Herramientas</h1><p>Encuentra el recurso correcto con menos pasos y mantén el foco en la operación.</p></div></div>
-      <section class="tools-console" aria-label="Buscar y filtrar herramientas">
-        <label class="tool-search" for="tool-search"><span>Buscar herramienta</span><div><span aria-hidden="true">⌕</span><input id="tool-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Nombre, propósito o categoría" aria-keyshortcuts="/"><kbd>/</kbd></div></label>
-        <div class="tool-filters" role="group" aria-label="Filtrar herramientas">
-          <button type="button" class="is-active" data-tool-filter="all" aria-pressed="true">Todas</button>
-          <button type="button" data-tool-filter="favorites" aria-pressed="false">Prioritarias</button>
-          <button type="button" data-tool-filter="cn" aria-pressed="false">Centro Norte</button>
-        </div>
-        <button id="refresh-data" class="refresh-data" type="button"><span aria-hidden="true">↻</span><span>Actualizar</span></button>
-      </section>
-      <div class="tools-result-bar"><p id="tools-result-count" role="status" aria-live="polite"></p><button id="clear-tool-search" type="button" hidden>Limpiar búsqueda</button></div>
-      <section id="recent-section" aria-labelledby="recent-title" hidden><div class="tools-subheading"><div><p class="eyebrow">Continuar consulta</p><h2 id="recent-title">Usadas recientemente</h2></div></div><div id="recent-links" class="recent-links"></div></section>
-      <section id="favorite-section" aria-labelledby="favorite-title"><div class="tools-subheading"><div><p class="eyebrow">Prioridad</p><h2 id="favorite-title">Accesos frecuentes</h2></div></div><div id="favorite-links" class="favorite-links"></div></section>
-      <section aria-labelledby="directory-title"><div class="tools-subheading"><div><p class="eyebrow">Resultados</p><h2 id="directory-title">Recursos disponibles</h2></div></div><div id="links-list" class="links-list"></div></section>
+    <section id="actividades">
+      <article class="panel activities-panel">
+        <header><div><p class="eyebrow">Semaforización por actividad</p><h2>Avance de actividades</h2></div><div class="panel-actions"><button id="toggle-dates" class="button compact" type="button" aria-expanded="false" aria-controls="commitment-dates">Actividad · Fecha compromiso</button><span id="activity-context" class="tag">Centro Norte</span></div></header>
+        <div id="commitment-dates" class="commitment-dates" hidden></div>
+        <div id="activity-progress" class="progress-list"></div>
+      </article>
     </section>
 
-    <section id="links" class="view" data-view="links" hidden aria-labelledby="links-title">
-      <div class="page-heading links-heading">
-        <div>
-          <p class="eyebrow">Accesos rápidos</p>
-          <h1 id="links-title">Links</h1>
-          <p>Dinos qué necesitas, aunque no recuerdes el nombre exacto. Te mostraremos primero la opción más útil.</p>
-        </div>
-      </div>
-      <section class="link-finder" aria-label="Buscar links">
-        <label class="smart-search-field link-search-field" for="link-search">
-          <span class="visually-hidden">Buscar link</span>
-          <span aria-hidden="true">⌕</span>
-          <input id="link-search" type="search" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Ej. horarios, nómina, facturas o VPN…" aria-controls="link-search-results" aria-describedby="link-search-help" aria-expanded="false">
-        </label>
-        <div class="link-search-meta">
-          <p id="link-search-help" class="link-search-hint">Puedes escribir una necesidad, abreviatura o palabra parecida. No tiene que ser exacta.</p>
-          <button id="clear-link-search" class="text-action" type="button" hidden>Limpiar búsqueda</button>
-        </div>
-        <div id="link-search-suggestions" class="link-search-suggestions" aria-label="Búsquedas sugeridas">
-          <span>Prueba con:</span>
-          <button type="button" data-link-suggestion="horarios">Horarios</button>
-          <button type="button" data-link-suggestion="nómina">Nómina</button>
-          <button type="button" data-link-suggestion="facturas">Facturas</button>
-          <button type="button" data-link-suggestion="capacitación">Capacitación</button>
-          <button type="button" data-link-suggestion="VPN">VPN</button>
-        </div>
-        <div id="link-search-results" class="smart-search-results link-search-results" role="list" aria-live="polite" hidden></div>
-        <p id="quick-links-count" class="link-index-count" aria-live="polite" hidden></p>
-      </section>
+    <section class="section-block" id="ranking" aria-labelledby="team-title">
+      <header class="section-heading"><h2 id="team-title">Ranking DM</h2><div class="legend"><span class="green">En meta</span><span class="amber">Seguimiento</span><span class="red">Atención</span></div></header>
+      <div id="dm-team" class="dm-team"></div>
     </section>
 
-    <section id="acerca" class="view" data-view="acerca" hidden aria-labelledby="about-title">
-      <div class="about-card">
-        <div>
-          <p class="eyebrow">Starbucks Hub</p>
-          <h1 id="about-title">Liderazgo y conexión</h1>
-          <p>Una herramienta ligera para consultar información, prioridades, actividades, WFM y recursos operativos desde una fuente central.</p>
-          <div class="about-tags"><span>#GreenApronService</span><span>JUNTÉMONOS MÁS</span></div>
-        </div>
-        <div class="about-actions">
-          <a class="button primary" href="https://wa.me/message/ENKDSAHYHIGAN1" target="_blank" rel="noopener noreferrer" aria-label="Abrir Sugerencias y comentarios en WhatsApp">Sugerencias y/o comentarios</a>
-          <p>Diseñado: Jorge Alcantar Aguiar &amp; Enrique César Flores</p>
-        </div>
-        <section class="designers" aria-labelledby="designers-title">
-          <div class="designers-heading">
-            <p class="eyebrow">Diseño y desarrollo</p>
-            <h2 id="designers-title">Creado con cercanía para la operación</h2>
-          </div>
-          <div class="designers-grid">
-            <figure class="designer-card">
-              <img src="./assets/about/Kike_pbt.jpeg" alt="Enrique César Flores" loading="lazy" decoding="async">
-              <figcaption>Enrique César Flores</figcaption>
-            </figure>
-            <figure class="designer-card">
-              <img src="./assets/about/George_pbt.jpeg" alt="Jorge Alcantar Aguiar" loading="lazy" decoding="async">
-              <figcaption>Jorge Alcantar Aguiar</figcaption>
-            </figure>
-          </div>
-        </section>
-      </div>
+    <section class="section-block" id="tiendas" aria-labelledby="stores-title">
+      <header class="section-heading split"><div><h2 id="stores-title">Tiendas CN</h2><p id="store-summary">—</p></div></header>
+      <div class="table-shell"><table><thead><tr><th>Ranking</th><th>CeCo</th><th>Tienda</th><th>DM</th><th>Realizadas</th><th>Avance</th><th>Estado</th></tr></thead><tbody id="store-table"></tbody></table></div>
     </section>
   </main>
 
-  <button id="back-to-top" class="back-to-top" type="button" aria-label="Volver al inicio de la página" hidden>↑</button>
+  <section id="report-sheet" class="report-sheet" aria-hidden="true"></section>
 
-  <div id="action-modal" class="action-modal" role="dialog" aria-modal="true" aria-labelledby="action-modal-title" aria-describedby="action-modal-description" hidden>
-    <div class="action-modal-panel" tabindex="-1">
-      <button id="action-modal-close" class="action-modal-close" type="button" aria-label="Cerrar alerta">×</button>
-      <span id="action-modal-icon" class="action-modal-icon" aria-hidden="true">!</span>
-      <p id="action-modal-kicker" class="eyebrow">Aviso</p>
-      <h2 id="action-modal-title">Aviso operativo</h2>
-      <p id="action-modal-description"></p>
-      <div id="action-modal-detail" class="action-modal-detail"></div>
-      <div class="action-modal-actions">
-        <a id="action-modal-primary" class="button primary" href="#" target="_blank" rel="noopener noreferrer" hidden>Abrir</a>
-        <button id="action-modal-route" class="button secondary" type="button" hidden>Ver detalle</button>
-        <button id="action-modal-secondary" class="button ghost" type="button">Cerrar</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="image-modal" class="image-modal" role="dialog" aria-modal="true" aria-labelledby="image-modal-title" hidden>
-    <div class="image-modal-panel">
-      <div class="image-modal-header">
-        <h2 id="image-modal-title">Vista de imagen</h2>
-        <button id="image-modal-close" class="image-modal-close" type="button" aria-label="Cerrar visor de imagen">
-          <span aria-hidden="true">×</span><span>Cerrar</span>
-        </button>
-      </div>
-      <div class="image-modal-scroll">
-        <img id="image-modal-content" src="" alt="">
-      </div>
-    </div>
-  </div>
-
-  <nav class="bottom-nav" aria-label="Navegación móvil">
-    <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
-    <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Ops</span></a>
-    <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
-    <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
-    <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
-  </nav>
-
-  <footer class="footer">
-    <span>Starbucks Hub</span>
-    <span>Diseñado: Jorge Alcantar Aguiar &amp; Enrique César Flores</span>
+  <footer>
+    <div class="footer-brand"><img src="./assets/icons/icon-64.webp" alt="" width="42" height="42"><span><strong>Sistema de Evidencias OPS</strong></span></div>
+    <small>Diseñado por Jorge Alcantar Aguiar &amp; Enrique César Flores</small>
   </footer>
+
+  <script src="./app.js" defer></script>
 </body>
 </html>

@@ -5,12 +5,14 @@ on:
     branches: [main]
     paths:
       - 'Starbucks_Hub_CMS.xlsx'
+      - 'BORRAR_EN_GITHUB.txt'
       - 'scripts/build_cms.py'
+      - 'scripts/audit_obsolete.py'
       - 'tests/validate_project.py'
       - '.github/workflows/cleanup-obsolete.yml'
   workflow_dispatch:
   schedule:
-    - cron: "17 8 * * 1"
+    - cron: '17 8 * * 1'
 
 permissions:
   contents: write
@@ -19,75 +21,106 @@ concurrency:
   group: cleanup-obsolete-${{ github.ref }}
   cancel-in-progress: false
 
+env:
+  PYTHONDONTWRITEBYTECODE: '1'
+  PYTHONUNBUFFERED: '1'
+
 jobs:
   cleanup:
+    name: Validación y limpieza controlada
     runs-on: ubuntu-latest
     timeout-minutes: 10
+
     steps:
-      - name: Descargar repositorio
+      - name: Descargar repositorio completo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Preparar Python
+      - name: Preparar Python estable
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: '3.12'
 
-      - name: Reconstruir datos desde el CMS
+      - name: Verificar sintaxis Python
+        run: python -m compileall -q scripts tests
+
+      - name: Reconstruir JSON desde el CMS
         run: python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json
 
-      - name: Validar CMS y PWA
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
+      - name: Auditar antes de modificar
+        run: >-
+          python scripts/audit_obsolete.py
+          --manifest BORRAR_EN_GITHUB.txt
+          --report "$RUNNER_TEMP/pre-cleanup-report.json"
+
+      - name: Eliminar únicamente rutas autorizadas
+        run: >-
+          python scripts/audit_obsolete.py
+          --manifest BORRAR_EN_GITHUB.txt
+          --fix
+          --report "$RUNNER_TEMP/cleanup-report.json"
+
+      - name: Confirmar limpieza y rendimiento
+        run: >-
+          python scripts/audit_obsolete.py
+          --manifest BORRAR_EN_GITHUB.txt
+          --strict
+          --report "$RUNNER_TEMP/post-cleanup-report.json"
+
+      - name: Validar CMS interfaz y PWA
         run: python tests/validate_project.py
 
-      - name: Publicar solo el JSON generado por el CMS
-        shell: bash
-        run: |
-          if git diff --quiet -- data/cms.json; then
-            echo "El CMS no produjo cambios de datos."
-            exit 0
-          fi
-          git add data/cms.json
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "data: sincronizar CMS"
-          git push
-
-      - name: Auditar y retirar solo residuos seguros
-        run: python scripts/audit_obsolete.py --fix --report "$RUNNER_TEMP/obsolete-report.json"
-
-      - name: Validar PWA después de la limpieza
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
-        run: python tests/validate_project.py
-
-      - name: Guardar reporte de mantenimiento
+      - name: Guardar reportes Python
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: obsolete-audit-${{ github.run_number }}
-          path: ${{ runner.temp }}/obsolete-report.json
+          name: mantenimiento-${{ github.run_number }}
+          path: |
+            ${{ runner.temp }}/pre-cleanup-report.json
+            ${{ runner.temp }}/cleanup-report.json
+            ${{ runner.temp }}/post-cleanup-report.json
           if-no-files-found: ignore
           retention-days: 14
 
-      - name: Publicar únicamente eliminaciones validadas
+      - name: Publicar solo JSON y eliminaciones validadas
         shell: bash
         run: |
-          if git diff --quiet; then
-            echo "No hay obsoletos seguros por retirar."
+          git add data/cms.json
+          git add -u
+
+          if git diff --cached --quiet; then
+            echo 'El repositorio ya está limpio y sincronizado.'
             exit 0
           fi
 
-          git add -u
-          if git diff --cached --name-status | grep -Ev '^D[[:space:]]' | grep -q .; then
-            echo "La auditoría intentó modificar algo distinto de una eliminación. Se cancela."
-            git diff --cached --name-status
-            exit 1
-          fi
+          python - <<'PY'
+          import subprocess
+          from pathlib import Path
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: retirar residuos obsoletos validados"
-          git push
+          root = Path.cwd()
+          allowed_deletions = {
+              line.strip().replace('\\', '/').removeprefix('./')
+              for line in (root / 'BORRAR_EN_GITHUB.txt').read_text(encoding='utf-8-sig').splitlines()
+              if line.strip() and not line.lstrip().startswith('#')
+          }
+          output = subprocess.check_output(
+              ['git', 'diff', '--cached', '--name-status'], text=True, encoding='utf-8'
+          )
+          errors = []
+          for row in output.splitlines():
+              status, path = row.split('\t', 1)
+              valid_json = status == 'M' and path == 'data/cms.json'
+              valid_deletion = status == 'D' and path in allowed_deletions
+              if not (valid_json or valid_deletion):
+                  errors.append(row)
+          if errors:
+              raise SystemExit('Cambios no autorizados:\n' + '\n'.join(errors))
+          print('Política de cambios aprobada:\n' + output)
+          PY
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'data: sincronizar CMS y limpiar obsoletos validados'
+          git pull --rebase origin main
+          git push origin HEAD:main

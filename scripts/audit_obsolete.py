@@ -233,6 +233,7 @@ def main() -> int:
             removed.append(name)
 
     remaining = [name for name in manifest_entries if (ROOT / name).exists()]
+    remaining_candidates = [relative(path) for path in removable_files(manifest_entries)]
     files = project_files()
     assets_root = ROOT / "assets"
     assets = {relative(path) for path in assets_root.rglob("*") if path.is_file()} if assets_root.is_dir() else set()
@@ -241,6 +242,8 @@ def main() -> int:
     issues = manifest_errors + removal_errors + validate_structure()
     if args.strict and remaining:
         issues.append("Persisten rutas marcadas para borrar: " + ", ".join(remaining))
+    if args.strict and remaining_candidates:
+        issues.append("Persisten archivos obsoletos detectados: " + ", ".join(remaining_candidates))
     metrics, performance_warnings = performance_metrics(files)
     if args.strict_performance and performance_warnings:
         issues.extend(performance_warnings)
@@ -251,6 +254,7 @@ def main() -> int:
         "manifestEntries": manifest_entries,
         "safeCandidates": [relative(path) for path in candidates],
         "removed": removed, "remaining": remaining,
+        "remainingCandidates": remaining_candidates,
         "performance": metrics, "warnings": performance_warnings,
         "manualReview": {"orphanAssets": orphans, "duplicateGroups": duplicates},
         "errors": issues,

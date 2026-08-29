@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
-from build_cms import normalize_controls, normalize_tools, validate_sheet_headers  # noqa: E402
+from build_cms import HEADER_SEARCH_LIMIT, normalize_controls, normalize_tools, validate_sheet_headers  # noqa: E402
 
 REQUIRED = [
     "index.html", "styles.css", "app.js", "data/cms.json", "manifest.webmanifest", "sw.js",
@@ -155,6 +155,17 @@ reordered_headers = [[
 canonical_headers = validate_sheet_headers("Herramientas", reordered_headers)[0]
 if canonical_headers != ["Nombre", "Orden", "Inicio", "URL", "Notas", "Tipo", "Icono", "Vista", "Grupo", "Categoria"]:
     fail("El CMS no canoniza encabezados reordenados, con acentos o distinto uso de mayúsculas")
+preamble_rows = [
+    ["Starbucks Hub · hoja editorial"],
+    [None],
+    reordered_headers[0] + ["Columna futura"],
+    ["Herramienta", 1, "Si", "https://example.com", None, "Web", "↗", "General", "Grupo", "Categoria", "Dato futuro"],
+]
+preamble_result = validate_sheet_headers("Herramientas", preamble_rows)
+if preamble_result[0][-1] != "Columna futura" or preamble_result[1][0] != "Herramienta":
+    fail("El CMS no encuentra encabezados después de filas informativas o con columnas nuevas")
+if HEADER_SEARCH_LIMIT < 10:
+    fail("La búsqueda de encabezados es demasiado limitada")
 sample_sheets = {"Herramientas": [{"Nombre": "Nueva", "Inicio": "sí", "Orden": None}, {"Nombre": "Otra", "Inicio": False, "Orden": None}]}
 normalize_controls(sample_sheets)
 normalized_sample = normalize_tools(sample_sheets["Herramientas"])
@@ -193,6 +204,7 @@ experience_checks = {
     "links ocultos hasta buscar": 'query.length < 2' in js and 'resultsContainer.hidden = true' in js,
     "limpiar búsqueda de links": 'id="clear-link-search"' in html and '$("#clear-link-search").addEventListener' in js,
     "índice de búsqueda cacheado": "catalog: []" in js and "state.catalog = buildCatalogIndex()" in js,
+    "render por vista bajo demanda": "renderedRoutes: new Set()" in js and "function renderRouteContent" in js,
     "menú Inicio controlado por CMS": "function homeToolRecords()" in js and "normalizeBool(record.Inicio)" in js,
     "conteos de navegación dinámicos": "function renderNavigationCounts()" in js and 'data-nav-count="herramientas"' in html,
     "rejilla adaptable a altas y bajas": "repeat(auto-fit, minmax(min(100%, 280px), 1fr))" in css,
@@ -209,10 +221,12 @@ failed = [name for name, passed in experience_checks.items() if not passed]
 if failed:
     fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-if "starbucks-hub-v13" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v13")
+if "starbucks-hub-v14" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v14")
 if "event.waitUntil(update)" not in sw or "navigationPreload?.enable()" not in sw:
     fail("Service Worker no mantiene la actualización en segundo plano o no usa precarga")
+if "fetchWithTimeout" not in sw or "3500" not in sw or 'cache: "no-cache"' not in js:
+    fail("El CMS no tiene actualización condicional y recuperación rápida desde caché")
 for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
     if heavy in sw:
         fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")
@@ -225,7 +239,7 @@ if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
 
 if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
     fail("La auditoría de obsoletos no genera reporte o no limita patrones")
-for requirement in ["--manifest", "--strict", "PROTECTED", "PERFORMANCE_BUDGETS", "path.is_symlink()", '"scripts/audit_cms.py"']:
+for requirement in ["--manifest", "--strict", "PROTECTED", "PERFORMANCE_BUDGETS", "path.is_symlink()", '"scripts/audit_cms.py"', "remainingCandidates"]:
     if requirement not in audit:
         fail(f"Auditoría Python incompleta: {requirement}")
 for requirement in ["--strict-performance", "STARTUP_BUDGET", "criticalStartupBytes", "largestFiles"]:
@@ -243,8 +257,9 @@ for requirement in [
     "actions/upload-artifact@v4",
     "git add data/cms.json",
     "git add -u",
-    "service-worker.js",
-    "assets/dm/**",
+    "if: github.event_name == 'push'",
+    "pull_request:",
+    "allowed_deletions.update(removed_by_audit)",
 ]:
     if requirement not in workflow:
         fail(f"Workflow de mantenimiento incompleto: {requirement}")

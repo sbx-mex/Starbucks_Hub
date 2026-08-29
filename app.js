@@ -13,6 +13,7 @@ const state = {
   refreshing: false,
   recentTools: [],
   catalog: [],
+  renderedRoutes: new Set(),
 };
 
 let toolSearchTimer = null;
@@ -532,6 +533,7 @@ function renderNavigationCounts() {
 function routeTo(route, focus = true) {
   const target = $(`[data-view="${route}"]`) ? route : "inicio";
   state.route = target;
+  renderRouteContent(target);
   $$(".view").forEach((view) => {
     view.hidden = view.dataset.view !== target;
   });
@@ -875,16 +877,29 @@ function renderLinks() {
   });
 }
 
+function renderRouteContent(route, force = false) {
+  if (!state.data || (!force && state.renderedRoutes.has(route))) return;
+  if (route === "inicio") {
+    renderHome();
+    renderCriticalHomeCard();
+    renderHomeSearch();
+  } else if (route === "recordatorio") {
+    renderEvents();
+  } else if (route === "resumen-ops") {
+    renderOps();
+  } else if (route === "herramientas") {
+    renderLinks();
+  } else if (route === "links") {
+    renderQuickLinks();
+  }
+  state.renderedRoutes.add(route);
+}
+
 function renderAll() {
   setGreeting();
   renderNavigationCounts();
-  renderHome();
-  renderCriticalHomeCard();
-  renderHomeSearch();
-  renderEvents();
-  renderOps();
-  renderLinks();
-  renderQuickLinks();
+  state.renderedRoutes.clear();
+  renderRouteContent(state.route, true);
 }
 
 function openActionModal(config, trigger) {
@@ -1225,7 +1240,7 @@ function updateConnectionStatus() {
 }
 
 async function loadData() {
-  const response = await fetch("./data/cms.json", { cache: "no-store" });
+  const response = await fetch("./data/cms.json", { cache: "no-cache" });
   if (!response.ok) throw new Error(`No fue posible cargar el CMS (${response.status}).`);
   const payload = await response.json();
   if (!payload.sheets) throw new Error("El archivo de datos no contiene las hojas esperadas.");
@@ -1260,6 +1275,8 @@ async function refreshData(announce = true) {
 
 async function init() {
   state.recentTools = readRecentTools();
+  const requestedRoute = location.hash.slice(1) || "inicio";
+  state.route = $(`[data-view="${requestedRoute}"]`) ? requestedRoute : "inicio";
   try { state.sidebarCollapsed = localStorage.getItem("starbucksHubSidebarCollapsed") === "true"; } catch { state.sidebarCollapsed = false; }
   applySidebarState();
   installIcons();
@@ -1267,7 +1284,7 @@ async function init() {
   updateConnectionStatus();
   try {
     await refreshData(false);
-    routeTo(location.hash.slice(1) || "inicio", false);
+    routeTo(state.route, false);
     window.setTimeout(showCriticalWfmAlert, 120);
   } catch (error) {
     $("#error-banner").textContent = `${error.message} Actualiza los datos desde Starbucks_Hub_CMS.xlsx.`;

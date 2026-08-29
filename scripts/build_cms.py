@@ -46,6 +46,7 @@ REQUIRED_SHEETS = {
     "Duty_Roster",
     "Identidad",
 }
+HEADER_SEARCH_LIMIT = 25
 
 
 def sort_text(value: object) -> str:
@@ -237,14 +238,32 @@ def normalize_records(rows: list[list], allowed_headers: tuple[str, ...] | None 
 
 
 def validate_sheet_headers(name: str, rows: list[list]) -> list[list]:
-    """Canoniza encabezados y permite cambiar su orden sin romper el contrato."""
+    """Encuentra y canoniza encabezados sin depender de fila, orden o formato."""
     if not rows:
         raise SystemExit(f"La hoja {name} no contiene encabezados.")
     required = SHEET_REQUIRED_HEADERS.get(name, ())
     canonical_by_key = {header_key(header): header for header in required}
+    required_keys = set(canonical_by_key)
+
+    header_index = None
+    best_keys: set[str] = set()
+    for index, candidate in enumerate(rows[:HEADER_SEARCH_LIMIT]):
+        candidate_keys = {header_key(value) for value in candidate if header_key(value)}
+        if len(candidate_keys & required_keys) > len(best_keys & required_keys):
+            best_keys = candidate_keys
+        if required_keys.issubset(candidate_keys):
+            header_index = index
+            break
+    if header_index is None:
+        missing = [header for header in required if header_key(header) not in best_keys]
+        raise SystemExit(
+            f"La hoja {name} no conserva sus encabezados requeridos en las primeras "
+            f"{min(len(rows), HEADER_SEARCH_LIMIT)} filas: {', '.join(missing)}"
+        )
+
     headers = []
     seen: dict[str, str] = {}
-    for raw in rows[0]:
+    for raw in rows[header_index]:
         clean = str(raw).strip() if raw is not None else ""
         key = header_key(clean)
         canonical = canonical_by_key.get(key, clean)
@@ -256,10 +275,7 @@ def validate_sheet_headers(name: str, rows: list[list]) -> list[list]:
         if canonical_key:
             seen[canonical_key] = clean
         headers.append(canonical)
-    missing = [header for header in required if header_key(header) not in seen]
-    if missing:
-        raise SystemExit(f"La hoja {name} no conserva sus encabezados requeridos: {', '.join(missing)}")
-    return [headers, *rows[1:]]
+    return [headers, *rows[header_index + 1:]]
 
 
 def read_cms(source: Path) -> dict:

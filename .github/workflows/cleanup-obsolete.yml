@@ -7,6 +7,7 @@ on:
       - 'Starbucks_Hub_CMS.xlsx'
       - 'BORRAR_EN_GITHUB.txt'
       - 'scripts/build_cms.py'
+      - 'scripts/audit_cms.py'
       - 'scripts/audit_obsolete.py'
       - 'tests/validate_project.py'
       - 'app.js'
@@ -70,6 +71,12 @@ jobs:
       - name: Reconstruir JSON desde el CMS
         run: python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json
 
+      - name: Auditar encabezados y navegación CMS
+        run: >-
+          python scripts/audit_cms.py
+          --strict
+          --report "$RUNNER_TEMP/cms-report.json"
+
       - name: Auditar antes de modificar
         run: >-
           python scripts/audit_obsolete.py
@@ -103,6 +110,7 @@ jobs:
             ${{ runner.temp }}/pre-cleanup-report.json
             ${{ runner.temp }}/cleanup-report.json
             ${{ runner.temp }}/post-cleanup-report.json
+            ${{ runner.temp }}/cms-report.json
           if-no-files-found: ignore
           retention-days: 14
 

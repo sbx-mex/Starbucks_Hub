@@ -1,6 +1,13 @@
 name: Auditar y limpiar obsoletos
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'Starbucks_Hub_CMS.xlsx'
+      - 'scripts/build_cms.py'
+      - 'tests/validate_project.py'
+      - '.github/workflows/cleanup-obsolete.yml'
   workflow_dispatch:
   schedule:
     - cron: "17 8 * * 1"
@@ -26,6 +33,27 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
+      - name: Reconstruir datos desde el CMS
+        run: python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json
+
+      - name: Validar CMS y PWA
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python tests/validate_project.py
+
+      - name: Publicar solo el JSON generado por el CMS
+        shell: bash
+        run: |
+          if git diff --quiet -- data/cms.json; then
+            echo "El CMS no produjo cambios de datos."
+            exit 0
+          fi
+          git add data/cms.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: sincronizar CMS"
+          git push
 
       - name: Auditar y retirar solo residuos seguros
         run: python scripts/audit_obsolete.py --fix --report "$RUNNER_TEMP/obsolete-report.json"

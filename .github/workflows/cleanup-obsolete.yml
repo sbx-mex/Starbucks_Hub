@@ -9,6 +9,10 @@ on:
       - 'scripts/build_cms.py'
       - 'scripts/audit_obsolete.py'
       - 'tests/validate_project.py'
+      - 'index.html'
+      - 'manifest.webmanifest'
+      - 'sw.js'
+      - 'assets/icons/starbucks_hub.png'
       - '.github/workflows/cleanup-obsolete.yml'
   workflow_dispatch:
   schedule:
@@ -66,6 +70,7 @@ jobs:
           python scripts/audit_obsolete.py
           --manifest BORRAR_EN_GITHUB.txt
           --strict
+          --strict-performance
           --report "$RUNNER_TEMP/post-cleanup-report.json"
 
       - name: Validar CMS interfaz y PWA

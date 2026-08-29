@@ -1,0 +1,12 @@
+STARBUCKS HUB — VALIDACIÓN DE REPARACIÓN
+
+Base sana: 8afe10d166a3abcf3655ab76fe3dc89871aff555
+Estado afectado probado: ca86f83989e3c442686e8e8c47c901d7abc349a3
+
+Resultado:
+- 20/20 rutas de BORRAR_EN_GITHUB.txt eliminadas en una copia del estado afectado.
+- 0 rutas obsoletas pendientes.
+- 13/13 controles de navegación y experiencia aprobados.
+- CMS Excel sincronizado con data/cms.json.
+- Estructura PWA, manifest y service worker aprobados.
+- Auditoría Python completada sin errores.

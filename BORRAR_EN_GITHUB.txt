@@ -1,7 +1,5 @@
-STARBUCKS_HUB — ARCHIVOS AJENOS QUE DEBEN ELIMINARSE
-Comparación: último estado sano 8afe10d vs main ca86f83
-
-Elimina exactamente estos 20 archivos. No borres otros archivos de assets.
+# Starbucks Hub — manifiesto de limpieza controlada
+# Una ruta relativa exacta por línea. No agregue carpetas, comodines ni rutas críticas.
 
 assets/dm/enrique-cesar.webp
 assets/dm/nancy-carolina.webp
@@ -23,5 +21,3 @@ scripts/audit_project.py
 scripts/build_dashboard.py
 scripts/prepare_images.py
 service-worker.js
-
-Cuando una carpeta quede vacía (assets/dm, cms, data o scripts), GitHub la retirará automáticamente.

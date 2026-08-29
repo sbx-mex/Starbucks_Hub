@@ -2,200 +2,94 @@
 from __future__ import annotations
 
 import json
-import re
 import subprocess
 import sys
 import tempfile
-import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = [
-    "index.html", "styles.css", "app.js", "data/cms.json", "manifest.webmanifest", "sw.js",
-    "Starbucks_Hub_CMS.xlsx", "scripts/build_cms.py", "scripts/audit_obsolete.py",
-    ".github/workflows/cleanup-obsolete.yml", "INSTRUCCIONES_ACTUALIZACION.md", ".gitignore",
-    "assets/icons/starbucks_hub.png",
+    "index.html", "styles.css", "app.js", "service-worker.js", "manifest.webmanifest",
+    "data/dashboard.json", "scripts/build_dashboard.py", "scripts/prepare_images.py",
+    "scripts/audit_project.py", "config/settings.json",
+    "cms/Centro Norte_Directorio.xlsx", "cms/Sistema de Evidencias OPS.xlsx",
+    "cms/Sistema_Evidencias_OPS_CMS.xlsx", ".github/workflows/build-dashboard.yml", ".nojekyll",
+    "assets/icons/icon-64.png", "assets/icons/icon-192.png", "assets/icons/icon-512.png",
+    "assets/icons/icon-64.webp", "assets/icons/icon-192.webp", "assets/icons/icon-512.webp", "assets/icons/ops-logo.webp",
 ]
-REQUIRED_SHEETS = {
-    "Informativo", "WFM", "Herramientas", "Links", "Eventos",
-    "Actividades_Semanales", "Actividades_Diaria", "Duty_Roster", "Identidad",
-}
-LINK_FIELDS = ["ID", "Nombre", "URL", "Notas"]
+REQUIRED += [f"assets/dm/{name}.webp" for name in (
+    "enrique-cesar", "nancy-carolina", "vanessa-carreno", "veronica-garcia", "yazmin-chabela", "yazmin-garcia"
+)]
 
 
 def fail(message: str) -> None:
     raise AssertionError(message)
 
 
-def sort_text(value: object) -> str:
-    text = unicodedata.normalize("NFD", str(value or "").strip().casefold())
-    return "".join(c for c in text if unicodedata.category(c) != "Mn")
-
-
-def cms_core(payload: dict) -> dict:
-    return {
-        "schemaVersion": payload.get("schemaVersion"),
-        "source": payload.get("source"),
-        "sheets": payload.get("sheets"),
-    }
-
-
 for relative in REQUIRED:
     if not (ROOT / relative).is_file():
-        fail(f"Falta archivo: {relative}")
+        fail(f"Falta archivo requerido: {relative}")
 
+data = json.loads((ROOT / "data/dashboard.json").read_text(encoding="utf-8"))
+manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
 html = (ROOT / "index.html").read_text(encoding="utf-8")
 css = (ROOT / "styles.css").read_text(encoding="utf-8")
 js = (ROOT / "app.js").read_text(encoding="utf-8")
-sw = (ROOT / "sw.js").read_text(encoding="utf-8")
-builder = (ROOT / "scripts/build_cms.py").read_text(encoding="utf-8")
-audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
-workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
-instructions = (ROOT / "INSTRUCCIONES_ACTUALIZACION.md").read_text(encoding="utf-8")
-manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
-cms = json.loads((ROOT / "data/cms.json").read_text(encoding="utf-8"))
+sw = (ROOT / "service-worker.js").read_text(encoding="utf-8")
+workflow = (ROOT / ".github/workflows/build-dashboard.yml").read_text(encoding="utf-8")
 
-if set(cms.get("sheets", {})) != REQUIRED_SHEETS:
-    fail("Las hojas del JSON no corresponden al CMS")
-if cms.get("schemaVersion") != 3:
-    fail("El CMS no usa el esquema 3")
-if cms.get("source") != "Starbucks_Hub_CMS.xlsx":
-    fail("data/cms.json no declara Starbucks_Hub_CMS.xlsx como fuente")
+if data.get("project") != "Sistema de Evidencias OPS" or data.get("region") != "Centro Norte":
+    fail("Identidad del proyecto incorrecta")
+if data.get("sources", {}).get("directorySheet") != "72 T":
+    fail("No se utilizó la hoja configurada del directorio")
+if data.get("sources", {}).get("cms") != "Sistema_Evidencias_OPS_CMS.xlsx":
+    fail("Python no está leyendo el Excel CMS")
+if data.get("lastUpdatedDisplay") != "28/08/2026 20:32":
+    fail("Última actualización incorrecta")
+if data.get("summary", {}).get("stores") != 72 or data.get("summary", {}).get("activities") != 7:
+    fail("Conteos iniciales incorrectos")
+if data.get("calendar", {}).get("active") != 7:
+    fail("Las actividades vigentes del CMS no fueron calculadas")
 
-# Prueba fuerte: el JSON versionado debe corresponder exactamente al Excel actual,
-# ignorando solo generatedAt para evitar commits semanales sin cambios reales.
+sample = next((store for store in data.get("stores", []) if store.get("ceco") == "38401"), None)
+if not sample or sample.get("store") != "Coacalco" or sample.get("dm") != "Enrique Cesar Flores":
+    fail("Falló el cruce 38401 → Coacalco → Enrique Cesar")
+if sample.get("activities", {}).get("Roll Out") is not True:
+    fail("Roll Out no quedó contabilizado")
+if len(data.get("dms", [])) != 6 or any(not item.get("photo", "").endswith(".webp") for item in data.get("dms", [])):
+    fail("Las seis fotografías WebP no quedaron vinculadas")
+if data.get("quality", {}).get("unknownCeCos") or not data.get("quality", {}).get("privacyMode"):
+    fail("Calidad o privacidad inicial incorrecta")
+if any("email" in row or "submittedBy" in row or "evidenceUrl" in row for row in data.get("submissions", [])):
+    fail("El JSON público expone información privada")
+
 with tempfile.TemporaryDirectory() as temp_dir:
-    generated = Path(temp_dir) / "cms.json"
-    subprocess.run(
-        [sys.executable, str(ROOT / "scripts/build_cms.py"), str(ROOT / "Starbucks_Hub_CMS.xlsx"), str(generated)],
-        check=True,
-        cwd=ROOT,
-        stdout=subprocess.DEVNULL,
-    )
+    generated = Path(temp_dir) / "dashboard.json"
+    subprocess.run([sys.executable, str(ROOT / "scripts/build_dashboard.py"), "--output", str(generated)], cwd=ROOT, check=True, stdout=subprocess.DEVNULL)
     fresh = json.loads(generated.read_text(encoding="utf-8"))
-if cms_core(fresh) != cms_core(cms):
-    fail("data/cms.json está desincronizado respecto a Starbucks_Hub_CMS.xlsx")
+for payload in (data, fresh):
+    payload.pop("generatedAt", None)
+if data != fresh:
+    fail("data/dashboard.json está desincronizado")
 
-links = cms["sheets"]["Links"]
-if not links:
-    fail("Links no contiene registros")
-for index, record in enumerate(links, start=1):
-    if list(record.keys()) != LINK_FIELDS:
-        fail(f"Links contiene columnas no permitidas: {list(record.keys())}")
-    if record.get("ID") != index:
-        fail("Los IDs de Links no son consecutivos")
-    if str(record.get("Nombre") or "") != str(record.get("Nombre") or "").strip():
-        fail(f"Nombre con espacios laterales: {record.get('Nombre')}")
-    if not re.match(r"^https?://", str(record.get("URL") or "")):
-        fail(f"URL inválida en Links: {record.get('URL')}")
+for text in ["Lo importante, en una sola vista.", "dm-team", "store-table", "Sistema_Evidencias_OPS_CMS.xlsx"]:
+    if text not in html:
+        fail(f"Interfaz simplificada incompleta: {text}")
+for forbidden in ["class=\"sidebar\"", "side-nav", "data-route=", "routeTo(", "--sidebar"]:
+    if forbidden in html + js + css:
+        fail(f"Elemento lateral obsoleto aún presente: {forbidden}")
+for text in ["renderSummary", "renderActivities", "renderTeam", "renderStores", "exportCsv", "serviceWorker"]:
+    if text not in js:
+        fail(f"Funcionalidad faltante: {text}")
+if "sistema-evidencias-ops-v3" not in sw or ".webp" not in sw or "Sistema_Evidencias_OPS_CMS.xlsx" not in sw:
+    fail("Caché PWA v3 incompleto")
+if not any(icon.get("sizes") == "64x64" for icon in manifest.get("icons", [])):
+    fail("El nuevo logo no está configurado en todos los tamaños")
+for text in ["python scripts/build_dashboard.py", "python tests/validate_project.py", "git add data/dashboard.json"]:
+    if text not in workflow:
+        fail(f"Workflow incompleto: {text}")
 
-names = [sort_text(row["Nombre"]) for row in links]
-if names != sorted(names):
-    fail("Links no está ordenado A-Z")
-urls = [row["URL"] for row in links]
-if len(urls) != len(set(urls)):
-    fail("Links contiene URLs duplicadas")
-
-project_tools = [
-    record for record in cms["sheets"]["Herramientas"]
-    if str(record.get("Nombre") or "").strip() and not str(record.get("URL") or "").strip()
-]
-if not project_tools:
-    fail("La prueba CMS requiere al menos una Herramienta en proyecto sin URL")
-
-for event in cms["sheets"]["Eventos"]:
-    for field in ("Fecha Inicio", "Fecha Fin"):
-        value = event.get(field)
-        if value and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-            fail(f"Fecha no normalizada: {value}")
-
-if "LINK_HEADERS = (\"ID\", \"Nombre\", \"URL\", \"Notas\")" not in builder:
-    fail("build_cms.py no declara el contrato mínimo de Links")
-if 'allowed = LINK_HEADERS if name == "Links" else None' not in builder:
-    fail("El motor no limita la lectura de columnas de Links")
-if "normalize_quick_links" not in builder or "sort_text" not in builder:
-    fail("El motor no normaliza y ordena Links")
-if "SHEET_REQUIRED_HEADERS" not in builder or "validate_sheet_headers" not in builder:
-    fail("El motor no protege los encabezados del CMS")
-if "REQUIRED_TOOLS" in builder or "REMOVED_TOOLS" in builder:
-    fail("Herramientas contiene overrides en código; el Excel debe ser la fuente")
-if "comparable(existing) == core" not in builder:
-    fail("El generador no evita reescrituras cuando el Excel no cambió")
-
-sidebar = re.search(r'<nav class="nav-groups">(.*?)</nav>', html, re.S)
-if not sidebar:
-    fail("No se encontró el menú lateral")
-routes = re.findall(r'data-route-link="([^"]+)"', sidebar.group(1))
-expected_routes = ["inicio", "resumen-ops", "herramientas", "links", "recordatorio", "acerca"]
-if routes != expected_routes:
-    fail(f"Orden de navegación inesperado: {routes}")
-
-if "operational-shortcuts" in html or ".operational-shortcuts" in css:
-    fail("Permanece navegación redundante en Inicio")
-if "quick-links-directory" in html or "Ver directorio completo" in html:
-    fail("Links vuelve a exponer un directorio completo")
-if 'id="clear-link-search"' not in html or 'id="link-search-help"' not in html:
-    fail("Links no tiene búsqueda limpia y guiada")
-
-home_tools_block = re.search(r"const HOME_TOOL_NAMES = \[(.*?)\];", js, re.S)
-if not home_tools_block:
-    fail("No se encontró HOME_TOOL_NAMES")
-home_tools = re.findall(r'"([^"]+)"', home_tools_block.group(1))
-if len(home_tools) != 6:
-    fail(f"Inicio debe mostrar 6 accesos frecuentes, no {len(home_tools)}")
-
-experience_checks = {
-    "inicio sin navegación redundante": "operational-shortcuts" not in html,
-    "orden de menú orientado a tareas": routes == expected_routes,
-    "links ocultos hasta buscar": 'query.length < 2' in js and 'resultsContainer.hidden = true' in js,
-    "limpiar búsqueda de links": 'id="clear-link-search"' in html and '$("#clear-link-search").addEventListener' in js,
-    "índice de búsqueda cacheado": "catalog: []" in js and "state.catalog = buildCatalogIndex()" in js,
-    "herramientas sin URL visibles": "function toolAvailability(record)" in js and "En proyecto" in js,
-    "herramientas sin URL no se eliminan": '.filter((record) => String(record.Nombre || "").trim())' in js,
-    "búsqueda global conserva proyectos": 'if ((!url && !isTool)' in js and 'class="smart-result is-project"' in js,
-    "links usan solo nombre notas url dominio": "hostnameForUrl" in js and "record.Carpeta" not in js,
-    "navegación teclado completa": '["ArrowDown", "ArrowUp", "Home", "End"]' in js,
-    "alerta WFM martes a viernes": "CRITICAL_WFM_DAYS" in js and "showCriticalWfmAlert" in js,
-    "guardas Edge y VPN": "isMicrosoftEdge" in js and 'normalized === "woe web"' in js,
-    "render diferido de listas": "content-visibility: auto" in css,
-}
-failed = [name for name, passed in experience_checks.items() if not passed]
-if failed:
-    fail("Mejoras de navegación incompletas: " + ", ".join(failed))
-
-if "starbucks-hub-v10" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v10")
-for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
-    if heavy in sw:
-        fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")
-for core in ["./index.html", "./styles.css", "./app.js", "./data/cms.json", "./assets/icons/starbucks_hub.png"]:
-    if core not in sw:
-        fail(f"Falta recurso núcleo en caché: {core}")
-
-if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
-    fail("Manifest no preparado para subruta")
-
-if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
-    fail("La auditoría de obsoletos no genera reporte o no limita patrones")
-for requirement in [
-    "python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json",
-    "data: sincronizar CMS",
-    "Starbucks_Hub_CMS.xlsx",
-    "audit_obsolete.py --fix --report",
-    "actions/upload-artifact@v4",
-    "git add data/cms.json",
-    "git add -u",
-]:
-    if requirement not in workflow:
-        fail(f"Workflow de mantenimiento incompleto: {requirement}")
-
-for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila", "En proyecto", "Vínculo pendiente"]:
-    if text not in instructions:
-        fail(f"Falta instrucción CMS: {text}")
-
-print("Validación estática aprobada")
-print(f"Mejoras contundentes de exploración/navegación: {sum(experience_checks.values())}/{len(experience_checks)}")
-print(f"Links CMS: {len(links)} · columnas: {', '.join(LINK_FIELDS)}")
-print(f"Herramientas en proyecto: {len(project_tools)} · se mantienen visibles sin URL")
-print("CMS Excel: fuente única · JSON sincronizado · commits sin ruido")
-sys.exit(0)
+print("Validación aprobada · diseño sin barra lateral")
+print("CMS Excel → Python → un JSON consolidado")
+print("72 tiendas · 7 actividades vigentes · 6 fotografías WebP")
+print("CeCo 38401 → Coacalco → Enrique Cesar · privacidad protegida")

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-28T21:18:29-04:00",
+  "generatedAt": "2026-08-29T01:17:58-04:00",
   "sheets": {
     "Informativo": [
       {
@@ -32,7 +32,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/CeNtro-Partner/",
         "Notas": "Consulta indicadores, ranking y desempeño operativo del distrito.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 1
       },
       {
@@ -44,7 +44,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Tasa_ExitoDT/",
         "Notas": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 2
       },
       {
@@ -56,7 +56,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Calculadora_Ritmo/",
         "Notas": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 3
       },
       {
@@ -68,7 +68,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Transferencia/",
         "Notas": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 4
       },
       {
@@ -80,7 +80,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Partner_Hub/",
         "Notas": "Consulta aniversarios, cumpleaños e información de Partners.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 5
       },
       {
@@ -92,7 +92,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Max-Min/",
         "Notas": "Consulta máximos y mínimos para optimizar inventarios y disponibilidad de productos.",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 6
       },
       {
@@ -104,7 +104,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Lay-Out_2.0/",
         "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 7
       },
       {
@@ -116,7 +116,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/CodeBrew_Merch/",
         "Notas": "Busca artículos, códigos y mercancía de forma rápida.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 8
       },
       {
@@ -128,7 +128,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/checklist-rsa-semaforo/",
         "Notas": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 10
       },
       {
@@ -140,7 +140,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Foco2026/",
         "Notas": "Da seguimiento semanal a compromisos, avances y planes de acción.",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 11
       },
       {
@@ -152,7 +152,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/pbt2.0_web/",
         "Notas": "Consulta tu plan en tiempo real y mantén actualizado tu tablero de trabajo.",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 12
       },
       {
@@ -164,7 +164,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/pbt_motor_exact/",
         "Notas": "Consulta e imprime planes por WeekPart y DayPart del Q",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 13
       },
       {
@@ -176,7 +176,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Perfil_Tienda_DM/",
         "Notas": "Consulta indicadores, históricos, tendencias y oportunidades por tienda.",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 14
       },
       {
@@ -188,7 +188,7 @@
         "Tipo": "Web",
         "URL": "https://grupovips.sharepoint.com/sites/espressohub/SitePages/CollabHome.aspx?CT=1783694337488&OR=OWA-NT-Mail&CID=10b10932-84a0-a90e-58c4-5e79588d125c&SI=NonSentItems&SLSync=F",
         "Notas": "Biblioteca Espresso Hub",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 15
       },
       {
@@ -200,7 +200,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Boost_CN/",
         "Notas": "Seguimiento a Impulso items Centro Norte",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 16
       },
       {
@@ -212,7 +212,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/CentroNorteConnect/",
         "Notas": "Centraliza información, comunicación y recursos del Centro Norte.",
-        "Favorito": "No",
+        "Inicio": "No",
         "Orden": 17
       },
       {
@@ -224,19 +224,19 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Esfuerzo_Operativo/",
         "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 18
       },
       {
         "Categoria": "Operación",
         "Grupo": "App",
-        "Vista": "General",
+        "Vista": "CN",
         "Icono": "📸",
         "Nombre": "Evidencia Operativa 360",
         "Tipo": "Web",
-        "URL": null,
+        "URL": "https://sbx-mex.github.io/Sistemas_Evidencias_Ops/",
         "Notas": "Validacion y Seguimiento a Pendientes Operativos ",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 19
       },
       {
@@ -248,7 +248,7 @@
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/FHW/",
         "Notas": "Valida Avance de Cada Taza Cuenta",
-        "Favorito": "Si",
+        "Inicio": "Si",
         "Orden": 20
       }
     ],
@@ -471,72 +471,78 @@
       },
       {
         "ID": 37,
+        "Nombre": "Portal Bienestar",
+        "URL": "https://portalmasbienestar.com/#/",
+        "Notas": null
+      },
+      {
+        "ID": 38,
         "Nombre": "Promoplanner",
         "URL": "https://www.promoplannermexico.com.mx/POP/administracion/LogIn.asp",
         "Notas": null
       },
       {
-        "ID": 38,
+        "ID": 39,
         "Nombre": "Qualtrics",
         "URL": "https://xmalsea.qualtrics.com/login?path=%2FControlPanel%2F%3FLoginAction%3DHomepage&product=home-page-settings",
         "Notas": null
       },
       {
-        "ID": 39,
+        "ID": 40,
         "Nombre": "Recibo de Nomina",
         "URL": "https://alsea.tureciboelectronico.com/TuRecibo_Alsea/Login.aspx",
         "Notas": null
       },
       {
-        "ID": 40,
+        "ID": 41,
         "Nombre": "Retain",
         "URL": "https://alseamxres.retain.es//entrada.php",
         "Notas": null
       },
       {
-        "ID": 41,
+        "ID": 42,
         "Nombre": "S Fleet | Flotilla",
         "URL": "https://auth.sfleet.mx/?redirect_to=https%3A%2F%2Fgo.sfleet.mx%2Fauth%2Fcognito%2Fcallback",
         "Notas": null
       },
       {
-        "ID": 42,
+        "ID": 43,
         "Nombre": "Sura | Fondo de Ahorro",
         "URL": "https://rk.suraim.com.mx/RkWebSite/Account/Login",
         "Notas": null
       },
       {
-        "ID": 43,
+        "ID": 44,
         "Nombre": "Televia",
         "URL": "https://www.televia.com.mx/",
         "Notas": null
       },
       {
-        "ID": 44,
+        "ID": 45,
         "Nombre": "UBITS",
         "URL": "https://login.ubitslearning.com/login?state=hKFo2SBUZ3pscjBsQzU4M0EwNW15Nm15bVlUbWgwZmVxVkZuSaFupWxvZ2luo3RpZNkga0pVd19hZklzeDE0Um5YSWxBNlp1eWpjbERIc3J3OXKjY2lk2SA1TkhqdG90dHl1OE5aRFFkYXRMdmtjRW5nd296VU9nNA&client=5NHjtottyu8NZDQdatLvkcEngwozUOg4&protocol=oauth2&scope=openid%20profile%20email&audience=https%3A%2F%2Fubits-api-authorization&redirect_uri=https%3A%2F%2Fwww.lxp.ubitslearning.com&response_type=code&response_mode=query&nonce=aEdBZy5OZ3B1LkU4SzZ3NzAwNUdQLWhIX2luWDZrUXZ4R1lWbi14VnZiSw%3D%3D&code_challenge=yHNygE3auWnTL27xCLDcWFxyvueza6UbUk8QuIZ824I&code_challenge_method=S256&auth0Client=eyJuYW1lIjoiYXV0aDAtc3BhLWpzIiwidmVyc2lvbiI6IjIuMTkuMyJ9",
         "Notas": null
       },
       {
-        "ID": 45,
+        "ID": 46,
         "Nombre": "UKG | Horarios",
         "URL": "https://dcus21-prd17-ath01.prd.mykronos.com/authn/XUI/?realm=/sistemaintegral_prd_01#login&goto=https%3A%2F%2Fsistemaintegral.prd.mykronos.com%3A443%2F",
         "Notas": "WFM · acceso prioritario de martes a viernes."
       },
       {
-        "ID": 46,
+        "ID": 47,
         "Nombre": "Va por mi cuenta",
         "URL": "https://extranet.alsea.net/ex/vxmc/index.aspx?e=timeout",
         "Notas": null
       },
       {
-        "ID": 47,
+        "ID": 48,
         "Nombre": "WOE Web",
         "URL": "https://woe2.alsea.es/woe/login",
         "Notas": "Requiere VPN encendida."
       },
       {
-        "ID": 48,
+        "ID": 49,
         "Nombre": "Workvivo",
         "URL": "https://alsea.workvivo.us/login",
         "Notas": null

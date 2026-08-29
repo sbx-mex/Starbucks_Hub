@@ -26,7 +26,7 @@ LINK_HEADERS = ("ID", "Nombre", "URL", "Notas")
 SHEET_REQUIRED_HEADERS = {
     "Informativo": ("ID", "Actividad", "Descripción", "Link /Imagen", "Frecuencia", "Prioridad", "Categoría", "Icono", "Color", "Visible"),
     "WFM": ("Regla WFM",),
-    "Herramientas": ("Categoria", "Grupo", "Vista", "Icono", "Nombre", "Tipo", "URL", "Notas", "Favorito", "Orden"),
+    "Herramientas": ("Categoria", "Grupo", "Vista", "Icono", "Nombre", "Tipo", "URL", "Notas", "Inicio", "Orden"),
     "Links": LINK_HEADERS,
     "Eventos": ("ID", "Nombre Evento", "Descripción", "Fecha Inicio", "Fecha Fin", "Región", "Distrito", "Tienda", "Publicar", "Link/Imagen", "Imagen"),
     "Actividades_Semanales": ("ID", "Actividad", "Descripción", "Día", "Hora / Corte", "Icono", "Color", "Link"),

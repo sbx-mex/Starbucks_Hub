@@ -9,6 +9,11 @@
 ### Estado de Herramientas
 
 - Conserva los encabezados actuales de la hoja **Herramientas**; el CMS depende de ellos.
+- La columna **Inicio** decide cuáles herramientas aparecen en el menú principal:
+  - `Si`: muestra la herramienta en **Inicio**.
+  - `No`: la conserva únicamente en **Herramientas**.
+- La columna **Orden** define la posición. Los dos primeros registros seleccionados reciben mayor énfasis visual.
+- Usa el selector `Si` / `No` incorporado en las celdas; no escribas otros valores.
 - Una fila con **Nombre** y una `URL` web válida se publica como acceso disponible.
 - Una fila con **Nombre** y `URL` vacía no se elimina: se muestra como **En proyecto** con su icono y notas. Al pegar posteriormente la URL, se convierte en acceso disponible sin modificar código.
 - Si una URL contiene texto pero no inicia con `http://` o `https://`, se conserva para corrección y se muestra como **Vínculo pendiente**.
@@ -30,6 +35,8 @@ La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:
 ## Actualizar el sitio
 
 1. Edita `Starbucks_Hub_CMS.xlsx`.
+   - En `Herramientas`, elige `Inicio = Si` para publicar el acceso en la portada o `Inicio = No` para ocultarlo de la portada.
+   - Ajusta `Orden` para cambiar la posición sin tocar `app.js`.
 2. Guarda el archivo con ese nombre exacto en la raíz del proyecto.
 3. Súbelo a `main`.
 4. GitHub Actions ejecuta automáticamente:

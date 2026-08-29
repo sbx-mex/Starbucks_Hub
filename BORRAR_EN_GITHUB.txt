@@ -1,0 +1,27 @@
+STARBUCKS_HUB — ARCHIVOS AJENOS QUE DEBEN ELIMINARSE
+Comparación: último estado sano 8afe10d vs main ca86f83
+
+Elimina exactamente estos 20 archivos. No borres otros archivos de assets.
+
+assets/dm/enrique-cesar.webp
+assets/dm/nancy-carolina.webp
+assets/dm/vanessa-carreno.webp
+assets/dm/veronica-garcia.webp
+assets/dm/yazmin-chabela.webp
+assets/dm/yazmin-garcia.webp
+assets/icons/icon-192.png
+assets/icons/icon-192.webp
+assets/icons/icon-512.png
+assets/icons/icon-512.webp
+assets/icons/icon-64.png
+assets/icons/icon-64.webp
+assets/icons/ops-logo.webp
+cms/Sistema_Evidencias_OPS_CMS.xlsx
+data/dashboard.json
+requirements.txt
+scripts/audit_project.py
+scripts/build_dashboard.py
+scripts/prepare_images.py
+service-worker.js
+
+Cuando una carpeta quede vacía (assets/dm, cms, data o scripts), GitHub la retirará automáticamente.

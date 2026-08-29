@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-29T01:47:28-04:00",
+  "generatedAt": "2026-08-29T17:00:15+00:00",
   "sheets": {
     "Informativo": [
       {
@@ -40,10 +40,10 @@
         "Grupo": "App",
         "Vista": "CN",
         "Icono": "📸",
-        "Nombre": "Evidencia Operativa 360",
+        "Nombre": "Sistemas de Evidencias OPS",
         "Tipo": "Web",
         "URL": "https://sbx-mex.github.io/Sistemas_Evidencias_Ops/",
-        "Notas": "Validacion y Seguimiento a Pendientes Operativos ",
+        "Notas": "Validacion y Seguimiento a Pendientes Operativos",
         "Inicio": "Si",
         "Orden": 2
       },

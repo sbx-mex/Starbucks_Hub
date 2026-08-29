@@ -1,6 +1,7 @@
 name: Auditar y limpiar obsoletos
 
 on:
+  pull_request:
   push:
     branches: [main]
     paths:
@@ -16,21 +17,6 @@ on:
       - 'INSTRUCCIONES_ACTUALIZACION.md'
       - 'manifest.webmanifest'
       - 'sw.js'
-      - 'service-worker.js'
-      - 'data/dashboard.json'
-      - 'requirements.txt'
-      - 'scripts/audit_project.py'
-      - 'scripts/build_dashboard.py'
-      - 'scripts/prepare_images.py'
-      - 'assets/dm/**'
-      - 'assets/icons/icon-192.*'
-      - 'assets/icons/icon-512.*'
-      - 'assets/icons/icon-64.*'
-      - 'assets/icons/ops-logo.webp'
-      - 'cms/**'
-      - 'INSTRUCCIONES.md'
-      - 'VALIDACION.txt'
-      - 'VALIDACION_RESTAURACION.txt'
       - 'assets/icons/starbucks_hub.png'
       - '.github/workflows/cleanup-obsolete.yml'
   workflow_dispatch:
@@ -115,6 +101,7 @@ jobs:
           retention-days: 14
 
       - name: Publicar solo JSON y eliminaciones validadas
+        if: github.event_name == 'push'
         shell: bash
         run: |
           git add data/cms.json
@@ -126,6 +113,8 @@ jobs:
           fi
 
           python - <<'PY'
+          import json
+          import os
           import subprocess
           from pathlib import Path
 
@@ -135,6 +124,10 @@ jobs:
               for line in (root / 'BORRAR_EN_GITHUB.txt').read_text(encoding='utf-8-sig').splitlines()
               if line.strip() and not line.lstrip().startswith('#')
           }
+          cleanup_report = Path(os.environ['RUNNER_TEMP']) / 'cleanup-report.json'
+          if cleanup_report.is_file():
+              removed_by_audit = json.loads(cleanup_report.read_text(encoding='utf-8')).get('removed', [])
+              allowed_deletions.update(removed_by_audit)
           output = subprocess.check_output(
               ['git', 'diff', '--cached', '--name-status'], text=True, encoding='utf-8'
           )

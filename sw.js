@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v13";
+const CACHE_NAME = "starbucks-hub-v14";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -36,9 +36,20 @@ async function storeResponse(request, response) {
   return response;
 }
 
-async function networkFirst(request, fallback, preloadResponse) {
+async function fetchWithTimeout(request, timeoutMs) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const response = await preloadResponse || await fetch(request);
+    return await fetch(request, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function networkFirst(request, fallback, preloadResponse, timeoutMs = 0) {
+  try {
+    const response = await preloadResponse
+      || await (timeoutMs ? fetchWithTimeout(request, timeoutMs) : fetch(request));
     return await storeResponse(request, response);
   } catch {
     return (await caches.match(request)) || caches.match(fallback);
@@ -64,7 +75,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (requestUrl.pathname.endsWith("/data/cms.json")) {
-    event.respondWith(networkFirst(event.request, "./data/cms.json"));
+    event.respondWith(networkFirst(event.request, "./data/cms.json", undefined, 3500));
     return;
   }
 

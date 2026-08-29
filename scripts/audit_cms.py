@@ -38,7 +38,7 @@ def audit(source: Path, generated: Path) -> dict:
     checks.append({
         "name": "encabezados_y_hojas",
         "status": "ok" if not missing_sheets else "error",
-        "detail": f"{len(sheets)} hojas · encabezados canónicos e independientes del orden",
+        "detail": f"{len(sheets)} hojas · encabezados detectados por nombre, fila y orden",
     })
     if missing_sheets:
         errors.append("Faltan hojas: " + ", ".join(missing_sheets))

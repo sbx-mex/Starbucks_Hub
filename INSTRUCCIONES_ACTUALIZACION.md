@@ -8,8 +8,8 @@
 
 ### Estado de Herramientas
 
-- Conserva los encabezados actuales de la hoja **Herramientas**; el CMS depende de ellos.
-- Puedes **mover columnas**: Python identifica los encabezados por nombre y no por posición.
+- Conserva los nombres de los encabezados obligatorios de la hoja **Herramientas**; su posición puede cambiar.
+- Puedes **mover columnas** y agregar filas informativas arriba de la tabla: Python busca los encabezados por nombre dentro de las primeras 25 filas.
 - Mayúsculas, acentos y espacios laterales se normalizan automáticamente. No elimines un encabezado obligatorio ni dupliques su nombre.
 - Para agregar, quitar o reorganizar contenido, trabaja con la **fila completa**. La interfaz ajusta las tarjetas y los conteos sin modificar HTML.
 - La columna **Inicio** decide cuáles herramientas aparecen en el menú principal:
@@ -23,7 +23,7 @@
 
 ## Regla obligatoria para `Links`
 
-La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:
+La hoja **Links** usa exclusivamente estos cuatro encabezados; puedes mover las columnas sin afectar la lectura:
 
 | ID | Nombre | URL | Notas |
 |---|---|---|---|
@@ -67,4 +67,4 @@ python tests/validate_project.py
 
 ## Mantenimiento de obsoletos
 
-El workflow `.github/workflows/cleanup-obsolete.yml` se ejecuta al cambiar el Excel CMS, manualmente y cada lunes. `scripts/audit_obsolete.py` elimina únicamente residuos definidos como seguros. Los recursos huérfanos o duplicados no se borran automáticamente: quedan registrados para revisión manual.
+El workflow `.github/workflows/cleanup-obsolete.yml` se ejecuta en propuestas de cambio, al actualizar `main`, manualmente y cada lunes. `scripts/audit_obsolete.py` elimina únicamente residuos definidos como seguros y bloquea la validación si alguno permanece. Los recursos huérfanos o duplicados no se borran automáticamente: quedan registrados para revisión manual.

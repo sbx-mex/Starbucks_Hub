@@ -164,8 +164,10 @@ failed = [name for name, passed in experience_checks.items() if not passed]
 if failed:
     fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-if "starbucks-hub-v10" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v10")
+if "starbucks-hub-v11" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v11")
+if "event.waitUntil(update)" not in sw or "navigationPreload?.enable()" not in sw:
+    fail("Service Worker no mantiene la actualización en segundo plano o no usa precarga")
 for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
     if heavy in sw:
         fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")
@@ -181,18 +183,37 @@ if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
 for requirement in ["--manifest", "--strict", "PROTECTED", "PERFORMANCE_BUDGETS", "path.is_symlink()"]:
     if requirement not in audit:
         fail(f"Auditoría Python incompleta: {requirement}")
+for requirement in ["--strict-performance", "STARTUP_BUDGET", "criticalStartupBytes", "largestFiles"]:
+    if requirement not in audit:
+        fail(f"Auditoría de rendimiento incompleta: {requirement}")
 for requirement in [
     "python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json",
     "data: sincronizar CMS",
     "Starbucks_Hub_CMS.xlsx",
     "--manifest BORRAR_EN_GITHUB.txt",
     "--strict",
+    "--strict-performance",
     "actions/upload-artifact@v4",
     "git add data/cms.json",
     "git add -u",
 ]:
     if requirement not in workflow:
         fail(f"Workflow de mantenimiento incompleto: {requirement}")
+
+cleanup_entries = {
+    line.strip() for line in (ROOT / "BORRAR_EN_GITHUB.txt").read_text(encoding="utf-8-sig").splitlines()
+    if line.strip() and not line.lstrip().startswith("#")
+}
+for obsolete in {"INSTRUCCIONES.md", "VALIDACION.txt", "VALIDACION_RESTAURACION.txt"}:
+    if obsolete not in cleanup_entries:
+        fail(f"El manifiesto no retira el archivo temporal: {obsolete}")
+
+if manifest.get("icons", [{}])[0].get("sizes") != "512x512":
+    fail("El icono PWA no declara el tamaño optimizado 512x512")
+if (ROOT / "assets/icons/starbucks_hub.png").stat().st_size > 100_000:
+    fail("El icono principal excede 100 KB")
+if html.count('width="44" height="44" decoding="async"') != 2:
+    fail("Los logotipos no reservan espacio para evitar saltos visuales")
 
 for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila", "En proyecto", "Vínculo pendiente"]:
     if text not in instructions:

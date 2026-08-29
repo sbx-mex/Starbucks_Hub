@@ -21,3 +21,6 @@ scripts/audit_project.py
 scripts/build_dashboard.py
 scripts/prepare_images.py
 service-worker.js
+INSTRUCCIONES.md
+VALIDACION.txt
+VALIDACION_RESTAURACION.txt

@@ -8,6 +8,7 @@ import fnmatch
 import hashlib
 import json
 import re
+import struct
 import time
 from pathlib import Path
 from urllib.parse import unquote
@@ -39,6 +40,11 @@ PERFORMANCE_BUDGETS = {
     "index.html": 200_000, "styles.css": 250_000, "app.js": 350_000,
     "data/cms.json": 1_500_000, "sw.js": 80_000,
 }
+CRITICAL_STARTUP = {
+    "index.html", "styles.css", "app.js", "manifest.webmanifest",
+    "data/cms.json", "sw.js", "assets/icons/starbucks_hub.png",
+}
+STARTUP_BUDGET = 500_000
 
 
 def relative(path: Path) -> str:
@@ -134,6 +140,18 @@ def duplicate_groups(files: list[Path]) -> list[set[str]]:
     return [names for names in groups.values() if len(names) > 1 and frozenset(names) not in ALLOWED_DUPLICATE_GROUPS]
 
 
+def png_dimensions(path: Path) -> tuple[int, int] | None:
+    """Obtiene dimensiones PNG desde IHDR sin dependencias externas."""
+    try:
+        with path.open("rb") as stream:
+            header = stream.read(24)
+        if header[:8] != b"\x89PNG\r\n\x1a\n" or header[12:16] != b"IHDR":
+            return None
+        return struct.unpack(">II", header[16:24])
+    except OSError:
+        return None
+
+
 def validate_structure() -> list[str]:
     issues = [f"Falta archivo crítico: {name}" for name in sorted(REQUIRED) if not (ROOT / name).is_file()]
     for json_name in ("manifest.webmanifest", "data/cms.json"):
@@ -150,19 +168,38 @@ def validate_structure() -> list[str]:
             for icon in {str(item.get("src", "")).removeprefix("./") for item in manifest.get("icons", [])}:
                 if icon and not (ROOT / icon).is_file():
                     issues.append(f"El manifiesto referencia un icono inexistente: {icon}")
+            for item in manifest.get("icons", []):
+                icon = str(item.get("src", "")).removeprefix("./")
+                declared = str(item.get("sizes", ""))
+                dimensions = png_dimensions(ROOT / icon) if icon else None
+                if dimensions and declared != f"{dimensions[0]}x{dimensions[1]}":
+                    issues.append(
+                        f"Tamaño PWA incorrecto para {icon}: declara {declared}, mide {dimensions[0]}x{dimensions[1]}"
+                    )
         except json.JSONDecodeError:
             pass
     return issues
 
 
-def performance_metrics(files: list[Path]) -> tuple[dict[str, int], list[str]]:
+def performance_metrics(files: list[Path]) -> tuple[dict[str, object], list[str]]:
     sizes = {relative(path): path.stat().st_size for path in files}
-    metrics = {name: sizes.get(name, 0) for name in PERFORMANCE_BUDGETS}
+    metrics: dict[str, object] = {name: sizes.get(name, 0) for name in PERFORMANCE_BUDGETS}
     warnings = [
         f"Presupuesto excedido: {name} ({metrics[name]} > {limit} bytes)"
         for name, limit in PERFORMANCE_BUDGETS.items() if metrics[name] > limit
     ]
+    critical_bytes = sum(sizes.get(name, 0) for name in CRITICAL_STARTUP)
+    metrics["criticalStartupBytes"] = critical_bytes
+    metrics["startupBudgetBytes"] = STARTUP_BUDGET
     metrics["totalProjectBytes"] = sum(sizes.values())
+    metrics["largestFiles"] = [
+        {"path": name, "bytes": size}
+        for name, size in sorted(sizes.items(), key=lambda item: item[1], reverse=True)[:8]
+    ]
+    if critical_bytes > STARTUP_BUDGET:
+        warnings.append(
+            f"Carga inicial excedida: {critical_bytes} > {STARTUP_BUDGET} bytes"
+        )
     return metrics, warnings
 
 
@@ -176,6 +213,7 @@ def main() -> int:
     parser.add_argument("--manifest", type=Path, default=ROOT / "BORRAR_EN_GITHUB.txt")
     parser.add_argument("--fix", action="store_true", help="Elimina únicamente archivos autorizados")
     parser.add_argument("--strict", action="store_true", help="Falla si aún existe una ruta del manifiesto")
+    parser.add_argument("--strict-performance", action="store_true", help="Falla si se excede el presupuesto inicial")
     parser.add_argument("--report", type=Path, help="Guarda el reporte JSON")
     args = parser.parse_args()
     started = time.perf_counter()
@@ -204,6 +242,8 @@ def main() -> int:
     if args.strict and remaining:
         issues.append("Persisten rutas marcadas para borrar: " + ", ".join(remaining))
     metrics, performance_warnings = performance_metrics(files)
+    if args.strict_performance and performance_warnings:
+        issues.extend(performance_warnings)
     payload = {
         "status": "ok" if not issues else "error",
         "durationMs": round((time.perf_counter() - started) * 1000, 2),
@@ -220,7 +260,10 @@ def main() -> int:
 
     print(f"Archivos revisados: {len(files)} en {payload['durationMs']} ms")
     print(f"Rutas autorizadas: {len(manifest_entries)} · eliminadas: {len(removed)} · pendientes: {len(remaining)}")
-    print(f"Peso total auditado: {metrics['totalProjectBytes']} bytes")
+    print(
+        f"Carga inicial: {metrics['criticalStartupBytes']}/{metrics['startupBudgetBytes']} bytes · "
+        f"proyecto: {metrics['totalProjectBytes']} bytes"
+    )
     for item in removed:
         print(f"ELIMINADO: {item}")
     for warning in performance_warnings:

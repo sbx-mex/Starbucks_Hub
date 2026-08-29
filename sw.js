@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v10";
+const CACHE_NAME = "starbucks-hub-v11";
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -19,38 +19,47 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((names) => Promise.all(names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))))
-      .then(() => self.clients.claim())
+    Promise.all([
+      caches.keys().then((names) => Promise.all(
+        names.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
+      )),
+      self.registration.navigationPreload?.enable(),
+    ]).then(() => self.clients.claim())
   );
 });
 
-function networkFirst(request, fallback) {
-  return fetch(request)
-    .then((response) => {
-      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
-      return response;
-    })
-    .catch(() => caches.match(request).then((cached) => cached || caches.match(fallback)));
+async function storeResponse(request, response) {
+  if (response?.ok) {
+    const cache = await caches.open(CACHE_NAME);
+    await cache.put(request, response.clone());
+  }
+  return response;
 }
 
-function staleWhileRevalidate(request) {
-  return caches.match(request).then((cached) => {
-    const update = fetch(request).then((response) => {
-      if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(request, response.clone()));
-      return response;
-    }).catch(() => cached);
-    return cached || update;
-  });
+async function networkFirst(request, fallback, preloadResponse) {
+  try {
+    const response = await preloadResponse || await fetch(request);
+    return await storeResponse(request, response);
+  } catch {
+    return (await caches.match(request)) || caches.match(fallback);
+  }
+}
+
+function staleWhileRevalidate(request, event) {
+  const update = fetch(request)
+    .then((response) => storeResponse(request, response))
+    .catch(() => undefined);
+  event.waitUntil(update);
+  return caches.match(request).then((cached) => cached || update);
 }
 
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  if (event.request.method !== "GET" || event.request.headers.has("range")) return;
   const requestUrl = new URL(event.request.url);
   if (requestUrl.origin !== self.location.origin) return;
 
   if (event.request.mode === "navigate") {
-    event.respondWith(networkFirst(event.request, "./index.html"));
+    event.respondWith(networkFirst(event.request, "./index.html", event.preloadResponse));
     return;
   }
 
@@ -59,5 +68,5 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  event.respondWith(staleWhileRevalidate(event.request));
+  event.respondWith(staleWhileRevalidate(event.request, event));
 });

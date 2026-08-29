@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-29T01:17:58-04:00",
+  "generatedAt": "2026-08-29T05:37:26+00:00",
   "sheets": {
     "Informativo": [
       {
@@ -27,23 +27,23 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "💯",
-        "Nombre": "Ranking",
+        "Icono": "🚀",
+        "Nombre": "Esfuerzo Operativo",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/CeNtro-Partner/",
-        "Notas": "Consulta indicadores, ranking y desempeño operativo del distrito.",
+        "URL": "https://sbx-mex.github.io/Esfuerzo_Operativo/",
+        "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
         "Inicio": "Si",
         "Orden": 1
       },
       {
         "Categoria": "Operación",
         "Grupo": "App",
-        "Vista": "General",
-        "Icono": "🚗",
-        "Nombre": "Tasa de Éxito DT",
+        "Vista": "CN",
+        "Icono": "📸",
+        "Nombre": "Evidencia Operativa 360",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Tasa_ExitoDT/",
-        "Notas": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See",
+        "URL": "https://sbx-mex.github.io/Sistemas_Evidencias_Ops/",
+        "Notas": "Validacion y Seguimiento a Pendientes Operativos ",
         "Inicio": "Si",
         "Orden": 2
       },
@@ -51,11 +51,11 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "⏱️",
-        "Nombre": "Calculadora de Ritmo",
+        "Icono": "🏗️",
+        "Nombre": "Layout",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Calculadora_Ritmo/",
-        "Notas": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
+        "URL": "https://sbx-mex.github.io/Lay-Out_2.0/",
+        "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
         "Inicio": "Si",
         "Orden": 3
       },
@@ -63,11 +63,11 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "⇄",
-        "Nombre": "Transferencias",
+        "Icono": "🔎",
+        "Nombre": "Code Brew",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Transferencia/",
-        "Notas": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
+        "URL": "https://sbx-mex.github.io/CodeBrew_Merch/",
+        "Notas": "Busca artículos, códigos y mercancía de forma rápida.",
         "Inicio": "Si",
         "Orden": 4
       },
@@ -75,11 +75,11 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "💚",
-        "Nombre": "Partner Hub",
+        "Icono": "💯",
+        "Nombre": "Ranking",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Partner_Hub/",
-        "Notas": "Consulta aniversarios, cumpleaños e información de Partners.",
+        "URL": "https://sbx-mex.github.io/CeNtro-Partner/",
+        "Notas": "Consulta indicadores, ranking y desempeño operativo del distrito.",
         "Inicio": "Si",
         "Orden": 5
       },
@@ -99,11 +99,11 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "🏗️",
-        "Nombre": "Layout",
+        "Icono": "☕",
+        "Nombre": "FHW",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Lay-Out_2.0/",
-        "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
+        "URL": "https://sbx-mex.github.io/FHW/",
+        "Notas": "Valida Avance de Cada Taza Cuenta",
         "Inicio": "Si",
         "Orden": 7
       },
@@ -111,13 +111,37 @@
         "Categoria": "Operación",
         "Grupo": "App",
         "Vista": "General",
-        "Icono": "🔎",
-        "Nombre": "Code Brew",
+        "Icono": "⏱️",
+        "Nombre": "Calculadora de Ritmo",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/CodeBrew_Merch/",
-        "Notas": "Busca artículos, códigos y mercancía de forma rápida.",
+        "URL": "https://sbx-mex.github.io/Calculadora_Ritmo/",
+        "Notas": "Mide el ritmo de producción de bebidas durante observaciones en tienda.",
         "Inicio": "Si",
         "Orden": 8
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "⇄",
+        "Nombre": "Transferencias",
+        "Tipo": "Web",
+        "URL": "https://sbx-mex.github.io/Transferencia/",
+        "Notas": "Audita transferencias entre tiendas con foco operativo y conciliación rápida.",
+        "Inicio": "Si",
+        "Orden": 9
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "💚",
+        "Nombre": "Partner Hub",
+        "Tipo": "Web",
+        "URL": "https://sbx-mex.github.io/Partner_Hub/",
+        "Notas": "Consulta aniversarios, cumpleaños e información de Partners.",
+        "Inicio": "Si",
+        "Orden": 10
       },
       {
         "Categoria": "Operación",
@@ -129,7 +153,19 @@
         "URL": "https://sbx-mex.github.io/checklist-rsa-semaforo/",
         "Notas": "Realiza auditorías RSA, seguimiento de hallazgos y control mediante semáforo operativo.",
         "Inicio": "Si",
-        "Orden": 10
+        "Orden": 11
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "🚗",
+        "Nombre": "Tasa de Éxito DT",
+        "Tipo": "Web",
+        "URL": "https://sbx-mex.github.io/Tasa_ExitoDT/",
+        "Notas": "Registra observaciones de Drive Thru, Tasa de Éxito & Goo See",
+        "Inicio": "Si",
+        "Orden": 12
       },
       {
         "Categoria": "Operación",
@@ -141,7 +177,7 @@
         "URL": "https://sbx-mex.github.io/Foco2026/",
         "Notas": "Da seguimiento semanal a compromisos, avances y planes de acción.",
         "Inicio": "No",
-        "Orden": 11
+        "Orden": 13
       },
       {
         "Categoria": "Operación",
@@ -153,7 +189,7 @@
         "URL": "https://sbx-mex.github.io/pbt2.0_web/",
         "Notas": "Consulta tu plan en tiempo real y mantén actualizado tu tablero de trabajo.",
         "Inicio": "No",
-        "Orden": 12
+        "Orden": 14
       },
       {
         "Categoria": "Operación",
@@ -165,7 +201,7 @@
         "URL": "https://sbx-mex.github.io/pbt_motor_exact/",
         "Notas": "Consulta e imprime planes por WeekPart y DayPart del Q",
         "Inicio": "No",
-        "Orden": 13
+        "Orden": 15
       },
       {
         "Categoria": "Operación",
@@ -177,7 +213,7 @@
         "URL": "https://sbx-mex.github.io/Perfil_Tienda_DM/",
         "Notas": "Consulta indicadores, históricos, tendencias y oportunidades por tienda.",
         "Inicio": "No",
-        "Orden": 14
+        "Orden": 16
       },
       {
         "Categoria": "Operación",
@@ -189,7 +225,7 @@
         "URL": "https://grupovips.sharepoint.com/sites/espressohub/SitePages/CollabHome.aspx?CT=1783694337488&OR=OWA-NT-Mail&CID=10b10932-84a0-a90e-58c4-5e79588d125c&SI=NonSentItems&SLSync=F",
         "Notas": "Biblioteca Espresso Hub",
         "Inicio": "No",
-        "Orden": 15
+        "Orden": 17
       },
       {
         "Categoria": "Operación",
@@ -201,7 +237,7 @@
         "URL": "https://sbx-mex.github.io/Boost_CN/",
         "Notas": "Seguimiento a Impulso items Centro Norte",
         "Inicio": "No",
-        "Orden": 16
+        "Orden": 18
       },
       {
         "Categoria": "Operación",
@@ -213,43 +249,7 @@
         "URL": "https://sbx-mex.github.io/CentroNorteConnect/",
         "Notas": "Centraliza información, comunicación y recursos del Centro Norte.",
         "Inicio": "No",
-        "Orden": 17
-      },
-      {
-        "Categoria": "Operación",
-        "Grupo": "App",
-        "Vista": "General",
-        "Icono": "🚀",
-        "Nombre": "Esfuerzo Operativo",
-        "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Esfuerzo_Operativo/",
-        "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
-        "Inicio": "Si",
-        "Orden": 18
-      },
-      {
-        "Categoria": "Operación",
-        "Grupo": "App",
-        "Vista": "CN",
-        "Icono": "📸",
-        "Nombre": "Evidencia Operativa 360",
-        "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Sistemas_Evidencias_Ops/",
-        "Notas": "Validacion y Seguimiento a Pendientes Operativos ",
-        "Inicio": "Si",
         "Orden": 19
-      },
-      {
-        "Categoria": "Operación",
-        "Grupo": "App",
-        "Vista": "General",
-        "Icono": "☕",
-        "Nombre": "FHW",
-        "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/FHW/",
-        "Notas": "Valida Avance de Cada Taza Cuenta",
-        "Inicio": "Si",
-        "Orden": 20
       }
     ],
     "Links": [

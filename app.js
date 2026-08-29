@@ -264,9 +264,18 @@ function tokenMatchScore(queryToken, candidate) {
 
 function toolRecords() {
   return [...sheet("Herramientas")]
-    .filter((record) => record.Nombre !== "Evidencia Antes / Después")
-    .filter((record) => externalUrl(record.URL))
+    .filter((record) => String(record.Nombre || "").trim())
     .sort((a, b) => Number(a.Orden || 99) - Number(b.Orden || 99));
+}
+
+function toolAvailability(record) {
+  if (externalUrl(record.URL)) return "active";
+  return String(record.URL || "").trim() ? "review" : "project";
+}
+
+function toolStatusLabel(record) {
+  const status = toolAvailability(record);
+  return status === "active" ? "Disponible" : status === "project" ? "En proyecto" : "Vínculo pendiente";
 }
 
 function quickLinkRecords() {
@@ -310,9 +319,9 @@ function buildCatalogIndex() {
   const seenUrls = new Set();
   const append = (record, source) => {
     const url = externalUrl(record.URL);
-    if (!url || seenUrls.has(url)) return;
-    seenUrls.add(url);
     const isTool = source === "Herramienta";
+    if ((!url && !isTool) || (url && seenUrls.has(url))) return;
+    seenUrls.add(url);
     const name = String(record.Nombre || "Acceso").trim();
     const subtitle = isTool
       ? String(record.Grupo || record.Categoria || "Herramienta").trim()
@@ -325,7 +334,7 @@ function buildCatalogIndex() {
     const aliasTokens = relatedSearchAliases(searchText);
     const acronym = acronymFor(name);
     entries.push({
-      record, source, name, subtitle, description, url,
+      record, source, name, subtitle, description, url, availability: isTool ? toolAvailability(record) : "active",
       normalizedName: normalizeSearchText(name),
       normalizedSubtitle: normalizeSearchText(subtitle),
       normalizedDescription: normalizeSearchText(description),
@@ -391,6 +400,13 @@ function searchCatalog(query, options = {}) {
 
 function smartResultMarkup(entry) {
   const iconText = entry.source === "Herramienta" ? (entry.record.Icono || "↗") : "↗";
+  if (!entry.url) {
+    return `<article class="smart-result is-project" aria-label="${esc(entry.name)}: ${esc(toolStatusLabel(entry.record))}">
+      <span class="smart-result-icon" aria-hidden="true">${esc(iconText)}</span>
+      <span class="smart-result-copy"><strong>${esc(entry.name)}</strong><small>${esc(entry.description || entry.subtitle || "Este recurso se está preparando.")}</small></span>
+      <span class="smart-result-badges"><span class="tool-status project">${esc(toolStatusLabel(entry.record))}</span><span class="smart-result-type">Herramienta</span></span>
+    </article>`;
+  }
   const toolAttribute = entry.source === "Herramienta" ? ` data-tool-name="${esc(entry.name)}"` : "";
   const accessRule = accessRuleForName(entry.name);
   const badges = `<span class="smart-result-badges">${accessRule ? `<span class="access-guard ${esc(accessRule.kind)}">${esc(accessRule.badge)}</span>` : ""}<span class="smart-result-type">${esc(entry.source)}</span><span class="smart-result-open">Abrir ↗</span></span>`;
@@ -803,21 +819,35 @@ function renderLinks() {
 
   const favoriteSection = $("#favorite-section");
   favoriteSection.hidden = Boolean(query) || state.toolFilter !== "all";
-  $("#favorite-links").innerHTML = favorites.length ? favorites.slice(0, 8).map((record) => `
+  const favoriteMarkup = (record) => externalUrl(record.URL) ? `
     <a class="favorite-link" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" data-access-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "")}</small><span class="favorite-link-action">Abrir <span aria-hidden="true">↗</span></span>
-    </a>`).join("") : "";
-  $("#links-list").innerHTML = filtered.length ? filtered.map((record) => `
+    </a>` : `
+    <article class="favorite-link is-project" aria-label="${esc(record.Nombre)}: ${esc(toolStatusLabel(record))}">
+      <span class="link-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span><strong>${esc(record.Nombre)}</strong><small>${esc(record.Notas || record.Grupo || "Este recurso se está preparando.")}</small><span class="favorite-link-action"><span class="tool-status ${esc(toolAvailability(record))}">${esc(toolStatusLabel(record))}</span></span>
+    </article>`;
+  const rowMarkup = (record) => externalUrl(record.URL) ? `
     <a class="link-row" href="${esc(record.URL)}" target="_blank" rel="noopener noreferrer" data-tool-name="${esc(record.Nombre)}" data-access-name="${esc(record.Nombre)}" aria-label="Abrir ${esc(record.Nombre)} en una pestaña nueva">
       <span class="link-row-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span>
       <span class="link-row-title"><strong>${esc(record.Nombre)}</strong><small>${esc(record.Grupo || record.Categoria || "Herramienta")}</small></span>
       <p>${esc(record.Notas || "")}</p><span class="external">Abrir <span aria-hidden="true">↗</span></span>
-    </a>`).join("") : emptyState(query ? `No encontramos herramientas para “${state.toolQuery.trim()}”.` : "No hay herramientas disponibles para este filtro.");
-  $("#tools-result-count").textContent = `${filtered.length} ${filtered.length === 1 ? "herramienta disponible" : "herramientas disponibles"}`;
+    </a>` : `
+    <article class="link-row is-project" aria-label="${esc(record.Nombre)}: ${esc(toolStatusLabel(record))}">
+      <span class="link-row-icon" aria-hidden="true">${esc(record.Icono || "↗")}</span>
+      <span class="link-row-title"><strong>${esc(record.Nombre)}</strong><small>${esc(record.Grupo || record.Categoria || "Herramienta")}</small></span>
+      <p>${esc(record.Notas || "Este recurso se está preparando.")}</p><span class="tool-status ${esc(toolAvailability(record))}">${esc(toolStatusLabel(record))}</span>
+    </article>`;
+  $("#favorite-links").innerHTML = favorites.length ? favorites.slice(0, 8).map(favoriteMarkup).join("") : "";
+  $("#links-list").innerHTML = filtered.length ? filtered.map(rowMarkup).join("") : emptyState(query ? `No encontramos herramientas para “${state.toolQuery.trim()}”.` : "No hay herramientas disponibles para este filtro.");
+  const available = filtered.filter((record) => toolAvailability(record) === "active").length;
+  const pending = filtered.length - available;
+  $("#tools-result-count").textContent = pending
+    ? `${available} disponibles · ${pending} ${pending === 1 ? "en proyecto" : "pendientes"}`
+    : `${available} ${available === 1 ? "herramienta disponible" : "herramientas disponibles"}`;
   $("#clear-tool-search").hidden = !query && state.toolFilter === "all";
   const recentRecords = state.recentTools
     .map((name) => records.find((record) => record.Nombre === name))
-    .filter(Boolean);
+    .filter((record) => record && externalUrl(record.URL));
   const recentSection = $("#recent-section");
   recentSection.hidden = !recentRecords.length || Boolean(query) || state.toolFilter !== "all";
   $("#recent-links").innerHTML = recentRecords.map((record) => `

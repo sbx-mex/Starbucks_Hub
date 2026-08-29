@@ -96,6 +96,13 @@ urls = [row["URL"] for row in links]
 if len(urls) != len(set(urls)):
     fail("Links contiene URLs duplicadas")
 
+project_tools = [
+    record for record in cms["sheets"]["Herramientas"]
+    if str(record.get("Nombre") or "").strip() and not str(record.get("URL") or "").strip()
+]
+if not project_tools:
+    fail("La prueba CMS requiere al menos una Herramienta en proyecto sin URL")
+
 for event in cms["sheets"]["Eventos"]:
     for field in ("Fecha Inicio", "Fecha Fin"):
         value = event.get(field)
@@ -108,6 +115,8 @@ if 'allowed = LINK_HEADERS if name == "Links" else None' not in builder:
     fail("El motor no limita la lectura de columnas de Links")
 if "normalize_quick_links" not in builder or "sort_text" not in builder:
     fail("El motor no normaliza y ordena Links")
+if "SHEET_REQUIRED_HEADERS" not in builder or "validate_sheet_headers" not in builder:
+    fail("El motor no protege los encabezados del CMS")
 if "REQUIRED_TOOLS" in builder or "REMOVED_TOOLS" in builder:
     fail("Herramientas contiene overrides en código; el Excel debe ser la fuente")
 if "comparable(existing) == core" not in builder:
@@ -141,6 +150,9 @@ experience_checks = {
     "links ocultos hasta buscar": 'query.length < 2' in js and 'resultsContainer.hidden = true' in js,
     "limpiar búsqueda de links": 'id="clear-link-search"' in html and '$("#clear-link-search").addEventListener' in js,
     "índice de búsqueda cacheado": "catalog: []" in js and "state.catalog = buildCatalogIndex()" in js,
+    "herramientas sin URL visibles": "function toolAvailability(record)" in js and "En proyecto" in js,
+    "herramientas sin URL no se eliminan": '.filter((record) => String(record.Nombre || "").trim())' in js,
+    "búsqueda global conserva proyectos": 'if ((!url && !isTool)' in js and 'class="smart-result is-project"' in js,
     "links usan solo nombre notas url dominio": "hostnameForUrl" in js and "record.Carpeta" not in js,
     "navegación teclado completa": '["ArrowDown", "ArrowUp", "Home", "End"]' in js,
     "alerta WFM martes a viernes": "CRITICAL_WFM_DAYS" in js and "showCriticalWfmAlert" in js,
@@ -151,8 +163,8 @@ failed = [name for name, passed in experience_checks.items() if not passed]
 if failed:
     fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-if "starbucks-hub-v9" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v9")
+if "starbucks-hub-v10" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v10")
 for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
     if heavy in sw:
         fail(f"El precache inicial sigue incluyendo recurso pesado: {heavy}")
@@ -167,20 +179,23 @@ if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
     fail("La auditoría de obsoletos no genera reporte o no limita patrones")
 for requirement in [
     "python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json",
+    "data: sincronizar CMS",
+    "Starbucks_Hub_CMS.xlsx",
     "audit_obsolete.py --fix --report",
     "actions/upload-artifact@v4",
-    "git add -A",
-    '&& $2 == "data/cms.json"',
+    "git add data/cms.json",
+    "git add -u",
 ]:
     if requirement not in workflow:
         fail(f"Workflow de mantenimiento incompleto: {requirement}")
 
-for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila"]:
+for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila", "En proyecto", "Vínculo pendiente"]:
     if text not in instructions:
         fail(f"Falta instrucción CMS: {text}")
 
 print("Validación estática aprobada")
 print(f"Mejoras contundentes de exploración/navegación: {sum(experience_checks.values())}/{len(experience_checks)}")
 print(f"Links CMS: {len(links)} · columnas: {', '.join(LINK_FIELDS)}")
+print(f"Herramientas en proyecto: {len(project_tools)} · se mantienen visibles sin URL")
 print("CMS Excel: fuente única · JSON sincronizado · commits sin ruido")
 sys.exit(0)

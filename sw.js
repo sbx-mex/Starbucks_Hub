@@ -1,4 +1,4 @@
-const CACHE_NAME = "starbucks-hub-v9";
+const CACHE_NAME = "starbucks-hub-v10";
 const CORE_ASSETS = [
   "./",
   "./index.html",

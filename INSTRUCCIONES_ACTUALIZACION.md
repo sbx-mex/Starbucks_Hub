@@ -6,6 +6,13 @@
 
 `Herramientas` también se administra únicamente desde el Excel. El generador puede ordenar registros, normalizar fechas o IDs técnicos, pero no agrega ni sustituye herramientas desde código.
 
+### Estado de Herramientas
+
+- Conserva los encabezados actuales de la hoja **Herramientas**; el CMS depende de ellos.
+- Una fila con **Nombre** y una `URL` web válida se publica como acceso disponible.
+- Una fila con **Nombre** y `URL` vacía no se elimina: se muestra como **En proyecto** con su icono y notas. Al pegar posteriormente la URL, se convierte en acceso disponible sin modificar código.
+- Si una URL contiene texto pero no inicia con `http://` o `https://`, se conserva para corrección y se muestra como **Vínculo pendiente**.
+
 ## Regla obligatoria para `Links`
 
 La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:

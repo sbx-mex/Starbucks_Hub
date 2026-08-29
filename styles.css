@@ -1833,6 +1833,39 @@ select {
   background: var(--green-pale);
 }
 
+.favorite-link.is-project,
+.link-row.is-project,
+.smart-result.is-project {
+  border-style: dashed;
+  background: #f7faf8;
+  cursor: default;
+}
+
+.favorite-link.is-project:hover,
+.link-row.is-project:hover,
+.smart-result.is-project:hover {
+  border-color: #cbdcd4;
+  background: #f7faf8;
+}
+
+.tool-status {
+  display: inline-flex;
+  width: max-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: #edf3ef;
+  color: var(--green-dark);
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tool-status.review {
+  background: #fff2dc;
+  color: #8a5200;
+}
+
 .links-list {
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1888,6 +1921,10 @@ select {
   color: var(--green);
   font-size: 0.75rem;
   font-weight: 800;
+}
+
+.link-row.is-project .tool-status {
+  justify-self: end;
 }
 
 .back-to-top {

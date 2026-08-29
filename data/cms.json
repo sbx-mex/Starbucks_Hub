@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-15T20:03:12+00:00",
+  "generatedAt": "2026-08-28T21:18:29-04:00",
   "sheets": {
     "Informativo": [
       {
@@ -102,7 +102,7 @@
         "Icono": "🏗️",
         "Nombre": "Layout",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/layout/",
+        "URL": "https://sbx-mex.github.io/Lay-Out_2.0/",
         "Notas": "Diseña, ajusta y valida layouts operativos de tienda.",
         "Favorito": "Si",
         "Orden": 7
@@ -226,6 +226,30 @@
         "Notas": "Consulta el avance diario, la tendencia semanal y las prioridades por región, DM y tienda.",
         "Favorito": "Si",
         "Orden": 18
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "📸",
+        "Nombre": "Evidencia Operativa 360",
+        "Tipo": "Web",
+        "URL": null,
+        "Notas": "Validacion y Seguimiento a Pendientes Operativos ",
+        "Favorito": "Si",
+        "Orden": 19
+      },
+      {
+        "Categoria": "Operación",
+        "Grupo": "App",
+        "Vista": "General",
+        "Icono": "☕",
+        "Nombre": "FHW",
+        "Tipo": "Web",
+        "URL": "https://sbx-mex.github.io/FHW/",
+        "Notas": "Valida Avance de Cada Taza Cuenta",
+        "Favorito": "Si",
+        "Orden": 20
       }
     ],
     "Links": [

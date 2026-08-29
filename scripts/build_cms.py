@@ -23,6 +23,17 @@ REL_NS = {"r": "http://schemas.openxmlformats.org/package/2006/relationships"}
 SHEET_REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 DATE_HEADERS = {"Fecha", "Fecha Inicio", "Fecha Fin", "Vigencia Inicio", "Vigencia Fin"}
 LINK_HEADERS = ("ID", "Nombre", "URL", "Notas")
+SHEET_REQUIRED_HEADERS = {
+    "Informativo": ("ID", "Actividad", "Descripción", "Link /Imagen", "Frecuencia", "Prioridad", "Categoría", "Icono", "Color", "Visible"),
+    "WFM": ("Regla WFM",),
+    "Herramientas": ("Categoria", "Grupo", "Vista", "Icono", "Nombre", "Tipo", "URL", "Notas", "Favorito", "Orden"),
+    "Links": LINK_HEADERS,
+    "Eventos": ("ID", "Nombre Evento", "Descripción", "Fecha Inicio", "Fecha Fin", "Región", "Distrito", "Tienda", "Publicar", "Link/Imagen", "Imagen"),
+    "Actividades_Semanales": ("ID", "Actividad", "Descripción", "Día", "Hora / Corte", "Icono", "Color", "Link"),
+    "Actividades_Diaria": ("ID", "Actividad", "Descripción", "Link / Imagen", "Frecuencia", "Prioridad", "Categoría", "Icono", "Color", "Visible"),
+    "Duty_Roster": ("Orden", "Día", "Estaciones", "Imágenes", "Color", "Enfoque"),
+    "Identidad": ("Identificador", "Sección", "Campo", "Valor", "Color", "Estilo", "Visible", "Notas"),
+}
 REQUIRED_SHEETS = {
     "Informativo",
     "WFM",
@@ -180,13 +191,26 @@ def normalize_records(rows: list[list], allowed_headers: tuple[str, ...] | None 
     return records
 
 
+def validate_sheet_headers(name: str, rows: list[list]) -> None:
+    """Protege el contrato del CMS sin alterar sus encabezados editoriales."""
+    if not rows:
+        raise SystemExit(f"La hoja {name} no contiene encabezados.")
+    headers = tuple(str(value).strip() if value is not None else "" for value in rows[0])
+    required = SHEET_REQUIRED_HEADERS.get(name, ())
+    missing = [header for header in required if header not in headers]
+    if missing:
+        raise SystemExit(f"La hoja {name} no conserva sus encabezados requeridos: {', '.join(missing)}")
+
+
 def read_cms(source: Path) -> dict:
     with zipfile.ZipFile(source) as archive:
         strings = shared_strings(archive)
         sheets = {}
         for name, target in workbook_sheets(archive):
+            rows = read_rows(archive, target, strings)
+            validate_sheet_headers(name, rows)
             allowed = LINK_HEADERS if name == "Links" else None
-            sheets[name] = normalize_records(read_rows(archive, target, strings), allowed)
+            sheets[name] = normalize_records(rows, allowed)
 
     missing = sorted(REQUIRED_SHEETS - set(sheets))
     if missing:

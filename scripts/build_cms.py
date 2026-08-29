@@ -23,6 +23,7 @@ REL_NS = {"r": "http://schemas.openxmlformats.org/package/2006/relationships"}
 SHEET_REL = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}id"
 DATE_HEADERS = {"Fecha", "Fecha Inicio", "Fecha Fin", "Vigencia Inicio", "Vigencia Fin"}
 LINK_HEADERS = ("ID", "Nombre", "URL", "Notas")
+CONTROL_HEADERS = {"Inicio", "Visible", "Publicar"}
 SHEET_REQUIRED_HEADERS = {
     "Informativo": ("ID", "Actividad", "Descripción", "Link /Imagen", "Frecuencia", "Prioridad", "Categoría", "Icono", "Color", "Visible"),
     "WFM": ("Regla WFM",),
@@ -52,15 +53,59 @@ def sort_text(value: object) -> str:
     return "".join(character for character in text if unicodedata.category(character) != "Mn")
 
 
+def header_key(value: object) -> str:
+    """Compara encabezados ignorando acentos, mayúsculas, espacios y separadores."""
+    return re.sub(r"[^a-z0-9]+", " ", sort_text(value)).strip()
+
+
+def normalize_yes_no(value: object, *, sheet: str, field: str, row: int) -> str:
+    """Normaliza controles editoriales sin dejar estados ambiguos en la interfaz."""
+    normalized = sort_text(value)
+    if value is True or normalized in {"true", "si", "1", "yes"}:
+        return "Si"
+    if value in (None, "") or value is False or normalized in {"false", "no", "0"}:
+        return "No"
+    raise SystemExit(f"{sheet}, fila {row}: {field} solo acepta Si o No; se recibió {value!r}.")
+
+
+def normalize_controls(sheets: dict[str, list[dict]]) -> None:
+    """Aplica un contrato común a Inicio, Visible y Publicar en todas las hojas."""
+    for sheet_name, records in sheets.items():
+        for row_number, record in enumerate(records, start=2):
+            for field in CONTROL_HEADERS & record.keys():
+                record[field] = normalize_yes_no(
+                    record.get(field), sheet=sheet_name, field=field, row=row_number
+                )
+
+
 def normalize_tools(records: list[dict]) -> list[dict]:
-    """Ordena Herramientas sin inventar ni reemplazar contenido fuera del Excel."""
-    return sorted(
-        records,
-        key=lambda record: (
-            float(record.get("Orden") or 999),
-            sort_text(record.get("Nombre")),
-        ),
-    )
+    """Ordena y compacta posiciones; si Orden es ambiguo usa el orden visual del Excel."""
+    parsed: list[tuple[int, int, dict]] = []
+    seen: set[int] = set()
+    fallback_to_rows = False
+    for row_index, record in enumerate(records, start=1):
+        try:
+            order = int(float(record.get("Orden")))
+            if order < 1 or order in seen:
+                raise ValueError
+        except (TypeError, ValueError):
+            fallback_to_rows = True
+            order = row_index
+        seen.add(order)
+        parsed.append((order, row_index, record))
+
+    if fallback_to_rows:
+        print(
+            "Aviso Herramientas: Orden vacío, duplicado o inválido; se usa el orden actual de las filas.",
+            file=sys.stderr,
+        )
+        ordered = [record for _, _, record in sorted(parsed, key=lambda item: item[1])]
+    else:
+        ordered = [record for _, _, record in sorted(parsed, key=lambda item: (item[0], item[1]))]
+
+    for position, record in enumerate(ordered, start=1):
+        record["Orden"] = position
+    return ordered
 
 
 def normalize_quick_links(records: list[dict]) -> list[dict]:
@@ -191,15 +236,30 @@ def normalize_records(rows: list[list], allowed_headers: tuple[str, ...] | None 
     return records
 
 
-def validate_sheet_headers(name: str, rows: list[list]) -> None:
-    """Protege el contrato del CMS sin alterar sus encabezados editoriales."""
+def validate_sheet_headers(name: str, rows: list[list]) -> list[list]:
+    """Canoniza encabezados y permite cambiar su orden sin romper el contrato."""
     if not rows:
         raise SystemExit(f"La hoja {name} no contiene encabezados.")
-    headers = tuple(str(value).strip() if value is not None else "" for value in rows[0])
     required = SHEET_REQUIRED_HEADERS.get(name, ())
-    missing = [header for header in required if header not in headers]
+    canonical_by_key = {header_key(header): header for header in required}
+    headers = []
+    seen: dict[str, str] = {}
+    for raw in rows[0]:
+        clean = str(raw).strip() if raw is not None else ""
+        key = header_key(clean)
+        canonical = canonical_by_key.get(key, clean)
+        canonical_key = header_key(canonical)
+        if canonical_key and canonical_key in seen:
+            raise SystemExit(
+                f"La hoja {name} repite el encabezado {canonical!r}: {seen[canonical_key]!r} y {clean!r}."
+            )
+        if canonical_key:
+            seen[canonical_key] = clean
+        headers.append(canonical)
+    missing = [header for header in required if header_key(header) not in seen]
     if missing:
         raise SystemExit(f"La hoja {name} no conserva sus encabezados requeridos: {', '.join(missing)}")
+    return [headers, *rows[1:]]
 
 
 def read_cms(source: Path) -> dict:
@@ -208,7 +268,7 @@ def read_cms(source: Path) -> dict:
         sheets = {}
         for name, target in workbook_sheets(archive):
             rows = read_rows(archive, target, strings)
-            validate_sheet_headers(name, rows)
+            rows = validate_sheet_headers(name, rows)
             allowed = LINK_HEADERS if name == "Links" else None
             sheets[name] = normalize_records(rows, allowed)
 
@@ -216,6 +276,7 @@ def read_cms(source: Path) -> dict:
     if missing:
         raise SystemExit(f"Faltan hojas requeridas: {', '.join(missing)}")
 
+    normalize_controls(sheets)
     sheets["Herramientas"] = normalize_tools(sheets["Herramientas"])
     sheets["Links"] = normalize_quick_links(sheets["Links"])
     return {

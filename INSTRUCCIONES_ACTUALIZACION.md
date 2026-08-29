@@ -9,10 +9,13 @@
 ### Estado de Herramientas
 
 - Conserva los encabezados actuales de la hoja **Herramientas**; el CMS depende de ellos.
+- Puedes **mover columnas**: Python identifica los encabezados por nombre y no por posición.
+- Mayúsculas, acentos y espacios laterales se normalizan automáticamente. No elimines un encabezado obligatorio ni dupliques su nombre.
+- Para agregar, quitar o reorganizar contenido, trabaja con la **fila completa**. La interfaz ajusta las tarjetas y los conteos sin modificar HTML.
 - La columna **Inicio** decide cuáles herramientas aparecen en el menú principal:
   - `Si`: muestra la herramienta en **Inicio**.
   - `No`: la conserva únicamente en **Herramientas**.
-- La columna **Orden** define la posición. Los dos primeros registros seleccionados reciben mayor énfasis visual.
+- La columna **Orden** define la posición. Después de una baja, Python compacta la numeración; si encuentra valores vacíos o repetidos utiliza temporalmente el orden visible de las filas.
 - Usa el selector `Si` / `No` incorporado en las celdas; no escribas otros valores.
 - Una fila con **Nombre** y una `URL` web válida se publica como acceso disponible.
 - Una fila con **Nombre** y `URL` vacía no se elimina: se muestra como **En proyecto** con su icono y notas. Al pegar posteriormente la URL, se convierte en acceso disponible sin modificar código.
@@ -41,6 +44,7 @@ La hoja **Links** usa exclusivamente estas cuatro columnas, en este orden:
 3. Súbelo a `main`.
 4. GitHub Actions ejecuta automáticamente:
    - `python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json`
+   - `python scripts/audit_cms.py --strict` para validar encabezados, controles, altas/bajas, vínculos y navegación;
    - auditoría de residuos seguros;
    - validación del proyecto;
    - publicación de `data/cms.json` solo si el Excel produjo un cambio real.

@@ -10,9 +10,12 @@ import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+from build_cms import normalize_controls, normalize_tools, validate_sheet_headers  # noqa: E402
+
 REQUIRED = [
     "index.html", "styles.css", "app.js", "data/cms.json", "manifest.webmanifest", "sw.js",
-    "Starbucks_Hub_CMS.xlsx", "scripts/build_cms.py", "scripts/audit_obsolete.py",
+    "Starbucks_Hub_CMS.xlsx", "scripts/build_cms.py", "scripts/audit_cms.py", "scripts/audit_obsolete.py",
     ".github/workflows/cleanup-obsolete.yml", "INSTRUCCIONES_ACTUALIZACION.md", ".gitignore",
     "BORRAR_EN_GITHUB.txt",
     "assets/icons/starbucks_hub.png",
@@ -50,6 +53,7 @@ css = (ROOT / "styles.css").read_text(encoding="utf-8")
 js = (ROOT / "app.js").read_text(encoding="utf-8")
 sw = (ROOT / "sw.js").read_text(encoding="utf-8")
 builder = (ROOT / "scripts/build_cms.py").read_text(encoding="utf-8")
+cms_audit = (ROOT / "scripts/audit_cms.py").read_text(encoding="utf-8")
 audit = (ROOT / "scripts/audit_obsolete.py").read_text(encoding="utf-8")
 workflow = (ROOT / ".github/workflows/cleanup-obsolete.yml").read_text(encoding="utf-8")
 instructions = (ROOT / "INSTRUCCIONES_ACTUALIZACION.md").read_text(encoding="utf-8")
@@ -67,6 +71,7 @@ if cms.get("source") != "Starbucks_Hub_CMS.xlsx":
 # ignorando solo generatedAt para evitar commits semanales sin cambios reales.
 with tempfile.TemporaryDirectory() as temp_dir:
     generated = Path(temp_dir) / "cms.json"
+    cms_report = Path(temp_dir) / "cms-report.json"
     subprocess.run(
         [sys.executable, str(ROOT / "scripts/build_cms.py"), str(ROOT / "Starbucks_Hub_CMS.xlsx"), str(generated)],
         check=True,
@@ -74,8 +79,21 @@ with tempfile.TemporaryDirectory() as temp_dir:
         stdout=subprocess.DEVNULL,
     )
     fresh = json.loads(generated.read_text(encoding="utf-8"))
+    subprocess.run(
+        [
+            sys.executable, str(ROOT / "scripts/audit_cms.py"),
+            "--source", str(ROOT / "Starbucks_Hub_CMS.xlsx"),
+            "--generated", str(generated), "--strict", "--report", str(cms_report),
+        ],
+        check=True,
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+    )
+    cms_audit_report = json.loads(cms_report.read_text(encoding="utf-8"))
 if cms_core(fresh) != cms_core(cms):
     fail("data/cms.json está desincronizado respecto a Starbucks_Hub_CMS.xlsx")
+if cms_audit_report.get("status") != "ok" or len(cms_audit_report.get("checks", [])) != 5:
+    fail("La auditoría especializada del CMS no aprobó sus cinco controles")
 
 links = cms["sheets"]["Links"]
 if not links:
@@ -124,6 +142,24 @@ if "normalize_quick_links" not in builder or "sort_text" not in builder:
     fail("El motor no normaliza y ordena Links")
 if "SHEET_REQUIRED_HEADERS" not in builder or "validate_sheet_headers" not in builder:
     fail("El motor no protege los encabezados del CMS")
+for requirement in ["header_key", "normalize_yes_no", "normalize_controls", "fallback_to_rows"]:
+    if requirement not in builder:
+        fail(f"El motor CMS no tolera reorganización editorial: {requirement}")
+for requirement in ["encabezados_y_hojas", "controles_si_no", "altas_bajas_y_orden", "vinculos", "navegacion_y_sincronizacion"]:
+    if requirement not in cms_audit:
+        fail(f"La auditoría CMS no incluye el control: {requirement}")
+
+reordered_headers = [[
+    " nombre ", "ORDEN", "inicio", "url", "notas", "tipo", "ícono", "vista", "grupo", "categoría",
+]]
+canonical_headers = validate_sheet_headers("Herramientas", reordered_headers)[0]
+if canonical_headers != ["Nombre", "Orden", "Inicio", "URL", "Notas", "Tipo", "Icono", "Vista", "Grupo", "Categoria"]:
+    fail("El CMS no canoniza encabezados reordenados, con acentos o distinto uso de mayúsculas")
+sample_sheets = {"Herramientas": [{"Nombre": "Nueva", "Inicio": "sí", "Orden": None}, {"Nombre": "Otra", "Inicio": False, "Orden": None}]}
+normalize_controls(sample_sheets)
+normalized_sample = normalize_tools(sample_sheets["Herramientas"])
+if [row["Inicio"] for row in normalized_sample] != ["Si", "No"] or [row["Orden"] for row in normalized_sample] != [1, 2]:
+    fail("El CMS no normaliza altas nuevas con Inicio y Orden seguros")
 if "REQUIRED_TOOLS" in builder or "REMOVED_TOOLS" in builder:
     fail("Herramientas contiene overrides en código; el Excel debe ser la fuente")
 if "comparable(existing) == core" not in builder:
@@ -158,6 +194,8 @@ experience_checks = {
     "limpiar búsqueda de links": 'id="clear-link-search"' in html and '$("#clear-link-search").addEventListener' in js,
     "índice de búsqueda cacheado": "catalog: []" in js and "state.catalog = buildCatalogIndex()" in js,
     "menú Inicio controlado por CMS": "function homeToolRecords()" in js and "normalizeBool(record.Inicio)" in js,
+    "conteos de navegación dinámicos": "function renderNavigationCounts()" in js and 'data-nav-count="herramientas"' in html,
+    "rejilla adaptable a altas y bajas": "repeat(auto-fit, minmax(min(100%, 280px), 1fr))" in css,
     "herramientas sin URL visibles": "function toolAvailability(record)" in js and "En proyecto" in js,
     "herramientas sin URL no se eliminan": '.filter((record) => String(record.Nombre || "").trim())' in js,
     "búsqueda global conserva proyectos": 'if ((!url && !isTool)' in js and 'class="smart-result is-project"' in js,
@@ -171,8 +209,8 @@ failed = [name for name, passed in experience_checks.items() if not passed]
 if failed:
     fail("Mejoras de navegación incompletas: " + ", ".join(failed))
 
-if "starbucks-hub-v12" not in sw or "staleWhileRevalidate" not in sw:
-    fail("Service Worker no usa la estrategia ligera v12")
+if "starbucks-hub-v13" not in sw or "staleWhileRevalidate" not in sw:
+    fail("Service Worker no usa la estrategia ligera v13")
 if "event.waitUntil(update)" not in sw or "navigationPreload?.enable()" not in sw:
     fail("Service Worker no mantiene la actualización en segundo plano o no usa precarga")
 for heavy in ["assets/duty-roster/lunes_food.png", "assets/about/Kike_pbt.jpeg"]:
@@ -187,7 +225,7 @@ if manifest.get("start_url") != "./" or manifest.get("scope") != "./":
 
 if "--report" not in audit or "ROOT_GENERATED_PATTERNS" not in audit:
     fail("La auditoría de obsoletos no genera reporte o no limita patrones")
-for requirement in ["--manifest", "--strict", "PROTECTED", "PERFORMANCE_BUDGETS", "path.is_symlink()"]:
+for requirement in ["--manifest", "--strict", "PROTECTED", "PERFORMANCE_BUDGETS", "path.is_symlink()", '"scripts/audit_cms.py"']:
     if requirement not in audit:
         fail(f"Auditoría Python incompleta: {requirement}")
 for requirement in ["--strict-performance", "STARTUP_BUDGET", "criticalStartupBytes", "largestFiles"]:
@@ -195,6 +233,8 @@ for requirement in ["--strict-performance", "STARTUP_BUDGET", "criticalStartupBy
         fail(f"Auditoría de rendimiento incompleta: {requirement}")
 for requirement in [
     "python scripts/build_cms.py Starbucks_Hub_CMS.xlsx data/cms.json",
+    "python scripts/audit_cms.py",
+    "cms-report.json",
     "data: sincronizar CMS",
     "Starbucks_Hub_CMS.xlsx",
     "--manifest BORRAR_EN_GITHUB.txt",
@@ -224,7 +264,7 @@ if (ROOT / "assets/icons/starbucks_hub.png").stat().st_size > 100_000:
 if html.count('width="44" height="44" decoding="async"') != 2:
     fail("Los logotipos no reservan espacio para evitar saltos visuales")
 
-for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila", "En proyecto", "Vínculo pendiente", "Inicio", "Si", "No"]:
+for text in ["ID | Nombre | URL | Notas", "al menos 2 caracteres", "ordenan automáticamente **A–Z", "elimina su fila", "En proyecto", "Vínculo pendiente", "Inicio", "Si", "No", "mover columnas", "fila completa", "audit_cms.py --strict"]:
     if text not in instructions:
         fail(f"Falta instrucción CMS: {text}")
 

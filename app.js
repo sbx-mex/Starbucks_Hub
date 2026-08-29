@@ -516,6 +516,19 @@ function setGreeting() {
   $("#campaign-display").textContent = campaign || "JUNTÉMONOS MÁS";
 }
 
+function renderNavigationCounts() {
+  const counts = {
+    herramientas: toolRecords().length,
+    links: quickLinkRecords().length,
+    recordatorio: sheet("Eventos").filter((record) => normalizeBool(record.Publicar)).length,
+  };
+  $$('[data-nav-count]').forEach((element) => {
+    const value = counts[element.dataset.navCount] ?? 0;
+    element.textContent = String(value);
+    element.title = `${value} registros activos`;
+  });
+}
+
 function routeTo(route, focus = true) {
   const target = $(`[data-view="${route}"]`) ? route : "inicio";
   state.route = target;
@@ -589,6 +602,7 @@ function currentDayName() {
 
 function renderHome() {
   const records = homeToolRecords();
+  $("#home-tools-count").textContent = `${records.length} ${records.length === 1 ? "acceso" : "accesos"}`;
   if (!records.length) {
     $("#home-tools-grid").innerHTML = emptyState("Selecciona Inicio = Si en la hoja Herramientas del CMS.");
     return;
@@ -863,6 +877,7 @@ function renderLinks() {
 
 function renderAll() {
   setGreeting();
+  renderNavigationCounts();
   renderHome();
   renderCriticalHomeCard();
   renderHomeSearch();

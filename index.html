@@ -40,9 +40,9 @@
         <p>Principal</p>
         <a href="#inicio" data-route-link="inicio" data-icon="home"><span>Inicio</span></a>
         <a href="#resumen-ops" data-route-link="resumen-ops" data-icon="check"><span>Resumen Ops</span></a>
-        <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span></a>
-        <a href="#links" data-route-link="links" data-icon="search"><span>Links</span></a>
-        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span></a>
+        <a href="#herramientas" data-route-link="herramientas" data-icon="link"><span>Herramientas</span><small class="nav-count" data-nav-count="herramientas" aria-label="Herramientas disponibles"></small></a>
+        <a href="#links" data-route-link="links" data-icon="search"><span>Links</span><small class="nav-count" data-nav-count="links" aria-label="Links disponibles"></small></a>
+        <a href="#recordatorio" data-route-link="recordatorio" data-icon="calendar"><span>Agenda</span><small class="nav-count" data-nav-count="recordatorio" aria-label="Eventos publicados"></small></a>
         <a href="#acerca" data-route-link="acerca" data-icon="about"><span>Acerca de</span></a>
       </section>
     </nav>
@@ -97,8 +97,9 @@
         <div id="home-search-results" class="smart-search-results" role="list" aria-live="polite" hidden></div>
       </section>
 
-      <div id="home-tools" class="section-heading">
+      <div id="home-tools" class="section-heading home-tools-heading">
         <div><p class="eyebrow">Accesos frecuentes</p><h2>Lo esencial, sin recorrer menús</h2></div>
+        <span id="home-tools-count" class="section-count" aria-live="polite"></span>
       </div>
       <div id="home-tools-grid" class="home-tools-grid" aria-live="polite"></div>
     </section>

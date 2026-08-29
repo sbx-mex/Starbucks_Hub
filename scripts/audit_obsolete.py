@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 REQUIRED = {
     "index.html", "app.js", "styles.css", "sw.js", "manifest.webmanifest",
     "Starbucks_Hub_CMS.xlsx", "data/cms.json", "scripts/build_cms.py",
-    "scripts/audit_obsolete.py", "tests/validate_project.py",
+    "scripts/audit_cms.py", "scripts/audit_obsolete.py", "tests/validate_project.py",
 }
 PROTECTED = REQUIRED | {
     ".github/workflows/cleanup-obsolete.yml", ".gitignore", "README.md",

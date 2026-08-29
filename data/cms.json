@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-08-29T05:37:26+00:00",
+  "generatedAt": "2026-08-29T01:47:28-04:00",
   "sheets": {
     "Informativo": [
       {
@@ -14,7 +14,7 @@
         "Categoría": "Operación",
         "Icono": "☕",
         "Color": "Marrón",
-        "Visible": "TRUE"
+        "Visible": "Si"
       }
     ],
     "WFM": [
@@ -558,7 +558,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -571,7 +571,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": null,
         "Imagen": "📚"
       },
@@ -584,7 +584,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
         "Imagen": "🛡️"
       },
@@ -597,7 +597,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -610,7 +610,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -623,7 +623,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": null,
         "Imagen": "🚀"
       },
@@ -636,7 +636,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -649,7 +649,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
         "Imagen": "🛡️"
       },
@@ -662,7 +662,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -675,7 +675,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -688,7 +688,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "pinpad-atb-cambios.png",
         "Imagen": "💳"
       },
@@ -701,7 +701,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
         "Imagen": "🛡️"
       },
@@ -714,7 +714,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -727,7 +727,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": null,
         "Imagen": "📖"
       },
@@ -740,7 +740,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
         "Imagen": "🛡️"
       },
@@ -753,7 +753,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -766,7 +766,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -779,7 +779,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       },
@@ -792,7 +792,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ica-stage.bw-globalsolutions.com/Login.php",
         "Imagen": "🛡️"
       },
@@ -805,7 +805,7 @@
         "Región": "Centro Norte",
         "Distrito": "Enrique Cesar Flores",
         "Tienda": "Todas",
-        "Publicar": true,
+        "Publicar": "Si",
         "Link/Imagen": "https://ejlw.login.us2.oraclecloud.com/oam/server/obrareq.cgi?encquery%3DLK1T...",
         "Imagen": "📅"
       }
@@ -933,7 +933,7 @@
         "Categoría": "Calidad",
         "Icono": "☕",
         "Color": "Marrón",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 2,
@@ -945,7 +945,7 @@
         "Categoría": "Seguridad Alimentaria",
         "Icono": "🛡️",
         "Color": "Rojo",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 3,
@@ -957,7 +957,7 @@
         "Categoría": "Experiencia",
         "Icono": "🚶",
         "Color": "Verde",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 4,
@@ -969,7 +969,7 @@
         "Categoría": "Operación",
         "Icono": "🌅",
         "Color": "Azul",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 5,
@@ -981,7 +981,7 @@
         "Categoría": "Liderazgo",
         "Icono": "🔟",
         "Color": "Naranja",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 6,
@@ -993,7 +993,7 @@
         "Categoría": "Operación",
         "Icono": "📋",
         "Color": "Morado",
-        "Visible": "TRUE"
+        "Visible": "Si"
       },
       {
         "ID": 7,
@@ -1005,7 +1005,7 @@
         "Categoría": "Operación",
         "Icono": "🥛",
         "Color": "Celeste",
-        "Visible": "TRUE"
+        "Visible": "Si"
       }
     ],
     "Duty_Roster": [
@@ -1074,7 +1074,7 @@
         "Valor": "Buenos días Partners.",
         "Color": null,
         "Estilo": "corporativo",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Saludo dinámico antes de las 12:00"
       },
       {
@@ -1084,7 +1084,7 @@
         "Valor": "Buenas tardes Partners.",
         "Color": null,
         "Estilo": "corporativo",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Saludo dinámico de 12:00 a 18:59"
       },
       {
@@ -1094,7 +1094,7 @@
         "Valor": "Buenas noches Partners.",
         "Color": null,
         "Estilo": "corporativo",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Saludo dinámico desde las 19:00"
       },
       {
@@ -1104,7 +1104,7 @@
         "Valor": "JUNTÉMONOS",
         "Color": "#006241",
         "Estilo": "corporativo-sólido",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Identidad principal"
       },
       {
@@ -1114,7 +1114,7 @@
         "Valor": "más",
         "Color": "#111111",
         "Estilo": "expresivo",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Acento visual"
       },
       {
@@ -1124,7 +1124,7 @@
         "Valor": "JUNTÉMONOS MÁS",
         "Color": null,
         "Estilo": "corporativo-expresivo",
-        "Visible": "TRUE",
+        "Visible": "Si",
         "Notas": "Texto compuesto de referencia"
       }
     ]

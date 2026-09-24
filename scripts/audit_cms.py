@@ -6,12 +6,51 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import zipfile
 from pathlib import Path
+from urllib.parse import urlsplit
 
-from build_cms import REQUIRED_SHEETS, SHEET_REQUIRED_HEADERS, read_cms, sort_text
+from build_cms import (
+    LINK_HEADERS, REQUIRED_SHEETS, SHEET_REQUIRED_HEADERS, normalize_records,
+    read_cms, read_rows, shared_strings, sort_text, validate_sheet_headers,
+    workbook_sheets,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 WEB_URL = re.compile(r"^https?://", re.IGNORECASE)
+
+
+def source_link_errors(source: Path) -> list[str]:
+    """Inspect the Excel rows before normalization can silently omit any link."""
+    with zipfile.ZipFile(source) as archive:
+        strings = shared_strings(archive)
+        for name, target in workbook_sheets(archive):
+            if name == "Links":
+                rows = validate_sheet_headers(name, read_rows(archive, target, strings))
+                records = normalize_records(rows, LINK_HEADERS)
+                break
+        else:
+            return ["Falta la hoja Links en el Excel"]
+
+    errors = []
+    seen_urls = set()
+    for index, record in enumerate(records, start=1):
+        name = str(record.get("Nombre") or "").strip()
+        url = str(record.get("URL") or "").strip()
+        if not name or not url:
+            errors.append(f"Links registro {index}: faltan Nombre o URL")
+            continue
+        try:
+            parsed = urlsplit(url)
+            valid = parsed.scheme.lower() in {"http", "https"} and bool(parsed.hostname)
+        except ValueError:
+            valid = False
+        if not valid or any(c.isspace() for c in url):
+            errors.append(f"Links registro {index}: URL inválida")
+        if url in seen_urls:
+            errors.append(f"Links registro {index}: URL duplicada")
+        seen_urls.add(url)
+    return errors
 
 
 def duplicate_values(records: list[dict], field: str) -> list[str]:
@@ -71,7 +110,7 @@ def audit(source: Path, generated: Path) -> dict:
         "detail": f"{len(tools)} herramientas · orden 1–{len(tools)}",
     })
 
-    invalid_urls = []
+    invalid_urls = source_link_errors(source)
     for sheet_name in ("Herramientas", "Links"):
         for row, record in enumerate(sheets[sheet_name], start=2):
             value = str(record.get("URL") or "").strip()

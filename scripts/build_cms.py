@@ -9,8 +9,11 @@ Herramientas fuera de lo que exista en Starbucks_Hub_CMS.xlsx.
 from __future__ import annotations
 
 import json
+import math
+import os
 import re
 import sys
+import tempfile
 import unicodedata
 import xml.etree.ElementTree as ET
 import zipfile
@@ -86,10 +89,13 @@ def normalize_tools(records: list[dict]) -> list[dict]:
     fallback_to_rows = False
     for row_index, record in enumerate(records, start=1):
         try:
-            order = int(float(record.get("Orden")))
+            numeric_order = float(record.get("Orden"))
+            if not math.isfinite(numeric_order) or not numeric_order.is_integer():
+                raise ValueError
+            order = int(numeric_order)
             if order < 1 or order in seen:
                 raise ValueError
-        except (TypeError, ValueError):
+        except (TypeError, ValueError, OverflowError):
             fallback_to_rows = True
             order = row_index
         seen.add(order)
@@ -327,10 +333,22 @@ def build(source: Path, destination: Path) -> bool:
         "sheets": core["sheets"],
     }
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    # A failed write must never leave a truncated CMS for the next deployment.
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=destination.parent,
+            prefix=f".{destination.name}.", suffix=".tmp", delete=False,
+        ) as stream:
+            temporary = Path(stream.name)
+            json.dump(payload, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
     return True
 
 

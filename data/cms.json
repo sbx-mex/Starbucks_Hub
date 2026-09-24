@@ -1,7 +1,7 @@
 {
   "schemaVersion": 3,
   "source": "Starbucks_Hub_CMS.xlsx",
-  "generatedAt": "2026-09-24T17:43:57+00:00",
+  "generatedAt": "2026-09-24T18:21:27+00:00",
   "sheets": {
     "Informativo": [
       {
@@ -230,13 +230,13 @@
       {
         "Categoria": "Operación",
         "Grupo": "App",
-        "Vista": "CN",
+        "Vista": "General",
         "Icono": "💵",
-        "Nombre": "Boost CN",
+        "Nombre": "Control Ops 360°",
         "Tipo": "Web",
-        "URL": "https://sbx-mex.github.io/Boost_CN/",
-        "Notas": "Seguimiento a Impulso items Centro Norte",
-        "Inicio": "No",
+        "URL": "https://sbx-mex.github.io/ControlOps-360/",
+        "Notas": "Multiherramienta Operativa",
+        "Inicio": "Si",
         "Orden": 18
       },
       {

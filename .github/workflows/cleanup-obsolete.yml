@@ -11,6 +11,7 @@ on:
       - 'scripts/audit_cms.py'
       - 'scripts/audit_obsolete.py'
       - 'tests/validate_project.py'
+      - 'tests/test_stability.py'
       - 'app.js'
       - 'styles.css'
       - 'index.html'
@@ -86,6 +87,9 @@ jobs:
 
       - name: Validar CMS interfaz y PWA
         run: python tests/validate_project.py
+
+      - name: Probar fallos de orden, vínculos y escritura
+        run: python -m unittest discover -s tests -p 'test_*.py'
 
       - name: Guardar reportes Python
         if: always()
